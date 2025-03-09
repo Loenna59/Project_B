@@ -14,9 +14,16 @@ class PROJECT_B_API ALuggageHole : public AActor
 public:
 	ALuggageHole();
 
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* Box;
+
 protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION()
+	void OnBeginOverlapBind(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit);
+	UFUNCTION()
+	void OnEndOverlapBind(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 };

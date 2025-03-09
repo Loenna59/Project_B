@@ -3,24 +3,31 @@
 
 #include "LuggageHole.h"
 
+#include "Project_B/Utilities/LogMacro.h"
+#include "Components/BoxComponent.h"
 
-// Sets default values
+
 ALuggageHole::ALuggageHole()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
+	SetRootComponent(Box);
+	Box->SetBoxExtent(FVector(220.000000,175.000000,300.000000));
 }
 
-// Called when the game starts or when spawned
 void ALuggageHole::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Box->OnComponentBeginOverlap.AddDynamic(this,&ALuggageHole::OnBeginOverlapBind);
+	Box->OnComponentEndOverlap.AddDynamic(this,&ALuggageHole::OnEndOverlapBind);
 }
 
-// Called every frame
-void ALuggageHole::Tick(float DeltaTime)
+void ALuggageHole::OnBeginOverlapBind(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit)
 {
-	Super::Tick(DeltaTime);
+	LOG_SCREEN("오버랩 시작");
+}
+
+void ALuggageHole::OnEndOverlapBind(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	LOG_SCREEN("오버랩 엔드");
 }
 
