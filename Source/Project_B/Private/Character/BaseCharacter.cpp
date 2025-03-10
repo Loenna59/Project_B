@@ -4,12 +4,16 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Character/BaseCharacterMoveComponent.h"
+#include "Character/BaseCharacterPhysicsAnimComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
+
+	PhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("PhysicsAnimComp"));
+	PhysicsAnimComp->SetupAttachment(RootComponent);
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 

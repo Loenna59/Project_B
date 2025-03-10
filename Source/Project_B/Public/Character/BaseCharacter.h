@@ -28,4 +28,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterMoveComponent* MoveComp;
 
+	UPROPERTY(VisibleAnywhere)
+	class UBaseCharacterPhysicsAnimComponent* PhysicsAnimComp;
+
 };
