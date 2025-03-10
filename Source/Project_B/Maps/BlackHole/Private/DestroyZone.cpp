@@ -78,7 +78,7 @@ void ADestroyZone::BeginPlay()
 void ADestroyZone::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+		
 }
 
 void ADestroyZone::BladeRotate()
