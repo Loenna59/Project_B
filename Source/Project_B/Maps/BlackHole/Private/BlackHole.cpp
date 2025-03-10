@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BlackHole/BlackHole.h"
+#include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
@@ -23,23 +23,11 @@ ABlackHole::ABlackHole()
 	{
 		Sphere->SetStaticMesh(TempBlackHole.Object);
 	}
-	ConstructorHelpers::FObjectFinder<UMaterialInstance>TempBlackHoleMat(TEXT("/Script/Engine.MaterialInstanceConstant'/Game/SkyeMAP/Material/M_BlackHole_Inst.M_BlackHole_Inst'"));
+	ConstructorHelpers::FObjectFinder<UMaterialInstance>TempBlackHoleMat(TEXT("/Script/Engine.MaterialInstanceConstant'/Game/Maps/Blackhole/Material/M_BlackHole_Inst.M_BlackHole_Inst'"));
 	if (TempBlackHoleMat.Succeeded())
 	{
 		Sphere->SetMaterial(0, TempBlackHoleMat.Object);
 	}
-	FirstR_EffectZone = CreateDefaultSubobject<USphereComponent>("FirstR_EffectZone");
-	FirstR_EffectZone->SetupAttachment(RootComponent);
-	FirstR_EffectZone->SetRelativeScale3D(FVector(3.5f));
-	SecondR_OrbitZone = CreateDefaultSubobject<USphereComponent>("SecondR_OrbitZone");
-	SecondR_OrbitZone->SetupAttachment(RootComponent);
-	SecondR_OrbitZone->SetRelativeScale3D(FVector(3.f));
-	ThirdR_DeadZone = CreateDefaultSubobject<USphereComponent>("ThirdR_DeadZone");
-	ThirdR_DeadZone->SetupAttachment(RootComponent);
-	ThirdR_DeadZone->SetRelativeScale3D(FVector(2.5f));
-	FourthR_DistortZone = CreateDefaultSubobject<USphereComponent>("FourthR_DistortZone");
-	FourthR_DistortZone->SetupAttachment(RootComponent);
-	FourthR_DistortZone->SetRelativeScale3D(FVector(2.0f));
 	
 }
 

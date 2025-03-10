@@ -28,12 +28,5 @@ public:
 	class USceneComponent* Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Sphere;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USphereComponent* FirstR_EffectZone;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USphereComponent* SecondR_OrbitZone;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USphereComponent* ThirdR_DeadZone;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USphereComponent* FourthR_DistortZone;
+	
 };

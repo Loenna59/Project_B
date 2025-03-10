@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Project_B/Public/BlackHole/BoxAsset.h"
+#include "Project_B/Maps/BlackHole/Public/BoxAsset.h"
 
 
 // Sets default values
