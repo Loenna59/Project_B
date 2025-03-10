@@ -3,18 +3,60 @@
 
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 
+#include "Components/SphereComponent.h"
+#include "Project_B/Utilities/LogMacro.h"
+
 
 // Sets default values
 ADestroyZone::ADestroyZone()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	//외관
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	SetRootComponent(Root);
+	BottomBlade = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BottomBlade"));
+	BottomBlade->SetupAttachment(RootComponent);
+	BottomBlade->SetRelativeLocation(FVector(0, 0, 200));
+	BottomBlade->SetRelativeRotation(FRotator(0,0,-90));
+	BottomRotator = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BottomRotator"));
+	BottomRotator->SetupAttachment(RootComponent);
+	BottomRotator->SetRelativeRotation(FRotator(0,0,90));
+	DestroyZoneSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DestroyZoneSphere"));
+	DestroyZoneSphere->SetupAttachment(RootComponent);
+	DestroyZoneSphere->SetRelativeLocation(FVector(0, 0, 100));
+	DestroyZoneSphere->SetRelativeScale3D(FVector(10));
+
+	//외관 넣어주기
+	ConstructorHelpers::FObjectFinder<UStaticMesh>TempBlade(TEXT("/Script/Engine.StaticMesh'/Game/Assets/Blackhole/Blackhole_BottomBlade.Blackhole_BottomBlade'"));
+	if (TempBlade.Succeeded())
+	{
+		BottomBlade->SetStaticMesh(TempBlade.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UStaticMesh>TempRotator(TEXT("/Script/Engine.StaticMesh'/Game/Assets/Blackhole/Blackhole_BottomRotor.Blackhole_BottomRotor'"));
+	if (TempRotator.Succeeded())
+	{
+		BottomRotator->SetStaticMesh(TempRotator.Object);
+	}
+
+}
+
+void ADestroyZone::OnDestroyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	// 플레이어 죽음
+	LOG_PRINT(TEXT("플레이어 죽음!"));
 }
 
 // Called when the game starts or when spawned
 void ADestroyZone::BeginPlay()
 {
 	Super::BeginPlay();
+
+	DestroyZoneSphere->SetGenerateOverlapEvents(true);
+	DestroyZoneSphere->OnComponentBeginOverlap.AddDynamic(this,&ADestroyZone::OnDestroyBeginOverlap);
 	
 }
 
@@ -22,5 +64,15 @@ void ADestroyZone::BeginPlay()
 void ADestroyZone::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ADestroyZone::BladeRotate()
+{
+	if (!bIsOnBlackhole) return;
+	
+	if (bIsOnBlackhole)
+	{
+		// 회전 함수 구현
+	}
 }
 
