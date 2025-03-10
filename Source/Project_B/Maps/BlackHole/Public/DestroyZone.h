@@ -35,10 +35,16 @@ public:
 	class UStaticMeshComponent* BottomRotator;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class USphereComponent* DestroyZoneSphere;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	class URotatingMovementComponent* BladeRotateComp;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	class URotatingMovementComponent* RotateComp;
 
 	// 블랙홀이 가동되면, 움직이기 시작한다
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool bIsOnBlackhole = false;
 	void BladeRotate();
-	
+	// 회전 속도값 변수
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	float RotateSpeed = 180.f;
 };

@@ -3,7 +3,9 @@
 
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 
+#include "DataTableEditorUtils.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/RotatingMovementComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
@@ -13,7 +15,7 @@ ADestroyZone::ADestroyZone()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//외관
+	// 외관
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
 	BottomBlade = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BottomBlade"));
@@ -28,7 +30,19 @@ ADestroyZone::ADestroyZone()
 	DestroyZoneSphere->SetRelativeLocation(FVector(0, 0, 100));
 	DestroyZoneSphere->SetRelativeScale3D(FVector(10));
 
-	//외관 넣어주기
+	// 회전
+	BladeRotateComp = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("BladeRotateComp"));
+	BladeRotateComp->SetUpdatedComponent(BottomBlade);
+	BladeRotateComp->RotationRate = FRotator(RotateSpeed,0,0);
+	BladeRotateComp->SetAutoActivate(false);
+	
+	RotateComp = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("RotateComp"));
+	RotateComp->SetUpdatedComponent(BottomRotator);
+	RotateComp->SetAutoActivate(false);
+	RotateComp->RotationRate = FRotator(RotateSpeed,0,0);
+	RotateComp->PivotTranslation = FVector(0, -1, 0);
+	
+	// 외관 넣어주기
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TempBlade(TEXT("/Script/Engine.StaticMesh'/Game/Assets/Blackhole/Blackhole_BottomBlade.Blackhole_BottomBlade'"));
 	if (TempBlade.Succeeded())
 	{
@@ -64,15 +78,16 @@ void ADestroyZone::BeginPlay()
 void ADestroyZone::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 }
 
 void ADestroyZone::BladeRotate()
 {
-	if (!bIsOnBlackhole) return;
-	
 	if (bIsOnBlackhole)
 	{
-		// 회전 함수 구현
+		BladeRotateComp->SetAutoActivate(true);
+		RotateComp->SetAutoActivate(true);
+		// 회전 속도 조정
 	}
 }
 
