@@ -5,6 +5,8 @@
 
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -43,6 +45,22 @@ void ABlackHole::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
+	// box 전부 조사해서 배열에 저장하자
+	TArray<AActor*> BoxActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
+
+	//범위기반 for 루프, 저장된 액터를 하나씩 순회
+	for (AActor* BoxActor : BoxActors) 
+	{
+		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
+		// 메쉬 꺼내기
+		UStaticMeshComponent* BoxComp = BoxAsset->Box;
+		FVector StartLoc = BoxComp->GetComponentLocation();
+		FVector EndLoc = Sphere->GetComponentLocation();
+		FRotator InRot = UKismetMathLibrary::FindLookAtRotation(StartLoc, EndLoc);
+		FVector NewVel = UKismetMathLibrary::GetForwardVector(InRot)*200;
+		
+		BoxComp->SetPhysicsLinearVelocity(NewVel, false, "None");
+	}
 }
 
