@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BoxAsset.h"
 #include "GameFramework/Actor.h"
 #include "BlackHole.generated.h"
 
@@ -28,5 +29,4 @@ public:
 	class USceneComponent* Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Sphere;
-	
 };

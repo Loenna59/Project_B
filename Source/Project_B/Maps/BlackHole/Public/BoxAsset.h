@@ -25,4 +25,6 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UStaticMeshComponent* Box;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	class URotatingMovementComponent* RotateComp;
 };
