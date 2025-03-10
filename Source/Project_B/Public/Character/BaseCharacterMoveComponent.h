@@ -32,4 +32,7 @@ public:
 protected:
 	UFUNCTION()
 	void Move(const FInputActionValue& actionValue);
+
+	UFUNCTION()
+	void Rotate(const FInputActionValue& actionValue);
 };

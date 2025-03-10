@@ -3,12 +3,40 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
+#include "Camera/CameraComponent.h"
 #include "Character/BaseCharacterMoveComponent.h"
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	GetCapsuleComponent()->SetCapsuleRadius(30.f);
+	GetCapsuleComponent()->SetCapsuleHalfHeight(60.f);
+
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	GetMesh()->SetRelativeLocation(FVector(0, 0, -60.f));
+	GetMesh()->SetRelativeRotation(FRotator(0, -90.f, 0));
+
+	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArmComp->SetupAttachment(RootComponent);
+	SpringArmComp->TargetArmLength = 400.f;
+	SpringArmComp->SocketOffset = FVector(0, 0, 155.f);
+	SpringArmComp->bUsePawnControlRotation = true;
+
+	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	CameraComp->SetupAttachment(SpringArmComp);
+	CameraComp->SetRelativeRotation(FRotator(-25.f, 0, 0));
+	CameraComp->SetFieldOfView(70.f);
+	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
 

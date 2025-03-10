@@ -26,6 +26,12 @@ protected:
 
 public:
 	UPROPERTY(VisibleAnywhere)
+	class USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(VisibleAnywhere)
+	class UCameraComponent* CameraComp;
+	
+	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterMoveComponent* MoveComp;
 
 	UPROPERTY(VisibleAnywhere)

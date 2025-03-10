@@ -38,6 +38,16 @@ void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTi
 	{
 		TogglePhysicalAnimation();
 	}
+
+	if (Mesh && Mesh->IsSimulatingPhysics())
+	{
+		// 지정한 본의 up벡터 가져오기
+		FVector CurrentUpVector = Mesh->GetBoneQuaternion(SimulateBoneName).Vector();
+
+		// 회전을 보정하는 토크 적용 (외적)
+		FVector Torque = FVector::CrossProduct(CurrentUpVector, FVector::UpVector) * 1000000.f;
+		Mesh->AddTorqueInRadians(Torque, SimulateBoneName, true);
+	}
 }
 
 void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation()

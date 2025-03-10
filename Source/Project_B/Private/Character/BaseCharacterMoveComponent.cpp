@@ -35,6 +35,7 @@ void UBaseCharacterMoveComponent::SetupInputBiding(class UEnhancedInputComponent
 	Super::SetupInputBiding(input);
 
 	input->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &UBaseCharacterMoveComponent::Move);
+	input->BindAction(RotateInputAction, ETriggerEvent::Triggered, this, &UBaseCharacterMoveComponent::Rotate);
 }
 
 void UBaseCharacterMoveComponent::Move(const FInputActionValue& actionValue)
@@ -47,6 +48,17 @@ void UBaseCharacterMoveComponent::Move(const FInputActionValue& actionValue)
 		FTransform controlTransform(Character->GetControlRotation());
 		
 		Character->AddMovementInput(controlTransform.TransformVector(toVector));
+	}
+}
+
+void UBaseCharacterMoveComponent::Rotate(const FInputActionValue& actionValue)
+{
+	FVector2D LookAxisVector = actionValue.Get<FVector2D>();
+
+	if (Character)
+	{
+		Character->AddControllerYawInput(LookAxisVector.X);
+		Character->AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
 
