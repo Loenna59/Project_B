@@ -52,15 +52,15 @@ void ABoxAsset::Tick(float DeltaTime)
 			
 			// 블랙홀 주위를 회전하는 벡터 계산
 			// 공전을 하려면 현재위치에서 블랙홀중심향하는 벡터에 수직인 방향으로 이동해야함
-			// 블랙홀 방향 벡터를 Z축 기준 90도로 회전, 축 재설정 (원형 궤도 회전)
+			// 블랙홀 방향 벡터를 Z축 기준 90도로 회전, 축을 재설정 (원형 궤도 회전할 방향임)
 			FVector RotationAxis = FVector(0, 0, 1);
 			FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, RotationAxis);
 
-			// 새 위치 계산 (블랙홀 주위를 회전)
+			// 새 위치 계산 (회전방향으로 직진하지 않고 원형으로 회전할 수 있게 거리유지)
 			FVector NewPosition = BoxLocation + (OrbitDirection * RotateSpeed * DeltaTime);
             
-			// 블랙홀 중심과의 거리 유지
-			// 클로드 도움
+			// 블랙홀 중심과 거리 유지
+			// 새위치에서 블랙홀로 향하는 방향을 구하고 정규화, 새위치 업데이트
 			FVector DirectionFromBlackHole = NewPosition - BlackHoleCenter;
 			DirectionFromBlackHole.Normalize();
 			NewPosition = BlackHoleCenter + (DirectionFromBlackHole * Distance);

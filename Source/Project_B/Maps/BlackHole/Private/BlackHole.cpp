@@ -22,9 +22,6 @@ ABlackHole::ABlackHole()
 	SetRootComponent(Root);
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>("Sphere");
 	Sphere->SetupAttachment(RootComponent);
-	FirstR = CreateDefaultSubobject<USphereComponent>("FirstR");
-	FirstR->SetupAttachment(RootComponent);
-	FirstR->SetRelativeScale3D(FVector(4.f));
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TempBlackHole(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	if (TempBlackHole.Succeeded())
@@ -36,24 +33,12 @@ ABlackHole::ABlackHole()
 	{
 		Sphere->SetMaterial(0, TempBlackHoleMat.Object);
 	}
-	
-}
-
-void ABlackHole::OnBHBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	const FHitResult& SweepResult)
-{
-	// 1페이즈에서, 여기에 오버랩 되면 여기서 돌아야한다
 }
 
 // Called when the game starts or when spawned
 void ABlackHole::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 콜리전에 부딪히면 회전 시작하게 하자
-	FirstR->SetGenerateOverlapEvents(true);
-	FirstR->OnComponentBeginOverlap.AddDynamic(this, &ABlackHole::OnBHBeginOverlap);
 
 	// 처음에 생성될때 크기 0으로 설정했다가 점점 커지게 (4로커지면됨)
 	// Sphere->SetRelativeScale3D(FVector(0));
@@ -105,7 +90,6 @@ void ABlackHole::Tick(float DeltaTime)
 				HandleComp->SetPhysicsLinearVelocity(NewVel, false, "None");
 			}
 		}
-		
 	}
 }
 
