@@ -17,6 +17,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* Box;
 
+	/** RedTeam = false / BlueTeam = true */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Team")
+	bool Team = false;
+
 protected:
 	virtual void BeginPlay() override;
 

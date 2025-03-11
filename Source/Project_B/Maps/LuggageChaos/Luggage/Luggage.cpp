@@ -12,6 +12,8 @@ ALuggage::ALuggage()
 
 	LuggageMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LuggageMesh"));
 	LuggageMesh->SetupAttachment(Root);
+	LuggageMesh->SetCollisionObjectType(ECC_PhysicsBody);
+	LuggageMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	LuggageMesh->SetSimulatePhysics(true);
 }
 
