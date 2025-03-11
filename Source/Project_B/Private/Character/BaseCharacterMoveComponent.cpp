@@ -36,6 +36,9 @@ void UBaseCharacterMoveComponent::SetupInputBiding(class UEnhancedInputComponent
 
 	input->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &UBaseCharacterMoveComponent::Move);
 	input->BindAction(RotateInputAction, ETriggerEvent::Triggered, this, &UBaseCharacterMoveComponent::Rotate);
+
+	input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &UBaseCharacterMoveComponent::StartJump);
+	input->BindAction(JumpInputAction, ETriggerEvent::Completed, this, &UBaseCharacterMoveComponent::EndJump);
 }
 
 void UBaseCharacterMoveComponent::Move(const FInputActionValue& actionValue)
@@ -59,6 +62,22 @@ void UBaseCharacterMoveComponent::Rotate(const FInputActionValue& actionValue)
 	{
 		Character->AddControllerYawInput(LookAxisVector.X);
 		Character->AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void UBaseCharacterMoveComponent::StartJump()
+{
+	if (Character)
+	{
+		Character->Jump();
+	}
+}
+
+void UBaseCharacterMoveComponent::EndJump()
+{
+	if (Character)
+	{
+		Character->StopJumping();
 	}
 }
 

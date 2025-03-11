@@ -32,4 +32,5 @@ void UBaseCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	FVector Acceleration = MovementComponent->GetCurrentAcceleration();
 	
 	bShouldMove = Acceleration != FVector::ZeroVector && GroundSpeed > 3.f;
+	bIsFalling = MovementComponent->IsFalling();
 }

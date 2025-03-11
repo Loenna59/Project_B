@@ -67,6 +67,8 @@ void ABaseCharacter::BeginPlay()
 			subSystem->AddMappingContext(IMC, 0);
 		}
 	}
+
+	GetMesh()->SetAngularDamping(5.0f);
 	
 }
 

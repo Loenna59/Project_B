@@ -34,4 +34,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bShouldMove;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsFalling;
 };

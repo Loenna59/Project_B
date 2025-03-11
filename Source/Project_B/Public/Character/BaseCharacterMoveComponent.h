@@ -25,7 +25,7 @@ protected:
 
 	UPROPERTY()
 	class UInputAction* JumpInputAction = nullptr;
-	
+
 public:
 	virtual void SetupInputBiding(class UEnhancedInputComponent* input) override;
 
@@ -35,4 +35,10 @@ protected:
 
 	UFUNCTION()
 	void Rotate(const FInputActionValue& actionValue);
+
+	UFUNCTION()
+	void StartJump();
+
+	UFUNCTION()
+	void EndJump();
 };

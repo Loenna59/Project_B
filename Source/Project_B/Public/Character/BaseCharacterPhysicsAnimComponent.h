@@ -34,6 +34,10 @@ protected:
 	UPROPERTY()
 	class USkeletalMeshComponent* Mesh = nullptr;
 
+	FTimerHandle RecoveryTimerHandle;
+
+	bool bStartRecovery;
+
 public:
 	UPROPERTY()
 	class UPhysicalAnimationComponent* PhysicalAnimationComp = nullptr;
@@ -42,5 +46,5 @@ public:
 	FName SimulateBoneName = TEXT("CharacterPelvis");
 
 	UPROPERTY(EditAnywhere)
-	float SimulateStrengthMultiplier = 100.f;
+	float RecoveryDelay = 3.f;
 };
