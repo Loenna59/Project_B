@@ -3,6 +3,8 @@
 
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 
+#include "Character/BaseCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -53,7 +55,21 @@ void ABlackHole::Tick(float DeltaTime)
 	if (bIsActive)
 	{		
 		// TODO: 플레이어 조사해서 추가해주자
-
+		ABaseCharacter* Player = Cast<ABaseCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseCharacter::StaticClass()));
+		if (Player)
+		{
+			// 캡슐 컴포넌트
+			UCapsuleComponent* capsule = Player->GetCapsuleComponent();
+			capsule->SetSimulatePhysics(true);
+			
+			FVector StartLoc = Player->GetActorLocation();
+			FVector EndLoc = Sphere->GetComponentLocation();
+			FRotator InRot = UKismetMathLibrary::FindLookAtRotation(StartLoc, EndLoc);
+			FVector NewVel = UKismetMathLibrary::GetForwardVector(InRot)*200;
+			
+			capsule->SetPhysicsLinearVelocity(NewVel, false, "None");
+		}
+		
 		// box 전부 조사해서 배열에 저장하자
 		TArray<AActor*> BoxActors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
@@ -90,6 +106,13 @@ void ABlackHole::Tick(float DeltaTime)
 				HandleComp->SetPhysicsLinearVelocity(NewVel, false, "None");
 			}
 		}
+	}
+	else
+	{
+		// 캡슐 컴포넌트 물리 다시 끄기
+		ABaseCharacter* Player = Cast<ABaseCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseCharacter::StaticClass()));
+		UCapsuleComponent* capsule = Player->GetCapsuleComponent();
+		capsule->SetSimulatePhysics(false);
 	}
 }
 
