@@ -41,10 +41,13 @@ public:
 	class URotatingMovementComponent* RotateComp;
 
 	// 블랙홀이 가동되면, 움직이기 시작한다
+	// 블랙홀 델리게이트
+	UFUNCTION()
+	void HandleBlackholeStateChange(bool bNewState);
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool bIsOnBlackhole = false;
 	void BladeRotate();
-	// 회전 속도값 변수
+	// 회전 속도값 변수 (처음에는 0, 블랙홀 가동되면 180으로 바꿔주자)
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	float RotateSpeed = 180.f;
+	float RotateSpeed = 0.f;
 };

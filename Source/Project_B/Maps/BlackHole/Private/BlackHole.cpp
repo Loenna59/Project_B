@@ -3,14 +3,14 @@
 
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 
-#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Project_B/Maps/BlackHole/Public/BoxAsset.h"
 #include "Project_B/Maps/BlackHole/Public/Chain.h"
-#include "Project_B/Utilities/LogMacro.h"
 
 
+class ABoxAsset;
 // Sets default values
 ABlackHole::ABlackHole()
 {
@@ -22,6 +22,10 @@ ABlackHole::ABlackHole()
 	SetRootComponent(Root);
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>("Sphere");
 	Sphere->SetupAttachment(RootComponent);
+	FirstR = CreateDefaultSubobject<USphereComponent>("FirstR");
+	FirstR->SetupAttachment(RootComponent);
+	FirstR->SetRelativeScale3D(FVector(4.f));
+	
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TempBlackHole(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	if (TempBlackHole.Succeeded())
 	{
@@ -35,11 +39,24 @@ ABlackHole::ABlackHole()
 	
 }
 
+void ABlackHole::OnBHBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	// 1페이즈에서, 여기에 오버랩 되면 여기서 돌아야한다
+}
+
 // Called when the game starts or when spawned
 void ABlackHole::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	// 콜리전에 부딪히면 회전 시작하게 하자
+	FirstR->SetGenerateOverlapEvents(true);
+	FirstR->OnComponentBeginOverlap.AddDynamic(this, &ABlackHole::OnBHBeginOverlap);
+
+	// 처음에 생성될때 크기 0으로 설정했다가 점점 커지게 (4로커지면됨)
+	// Sphere->SetRelativeScale3D(FVector(0));
 }
 
 // Called every frame
@@ -47,41 +64,58 @@ void ABlackHole::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// box 전부 조사해서 배열에 저장하자
-	TArray<AActor*> BoxActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
+	// 활성화 되면 빨아들이기 시작
+	if (bIsActive)
+	{		
+		// TODO: 플레이어 조사해서 추가해주자
 
-	//범위기반 for 루프, 저장된 액터를 하나씩 순회
-	for (AActor* BoxActor : BoxActors) 
-	{
-		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
-		// 메쉬 꺼내기
-		UStaticMeshComponent* BoxComp = BoxAsset->Box;
-		FVector StartLoc = BoxComp->GetComponentLocation();
-		FVector EndLoc = Sphere->GetComponentLocation();
-		FRotator InRot = UKismetMathLibrary::FindLookAtRotation(StartLoc, EndLoc);
-		FVector NewVel = UKismetMathLibrary::GetForwardVector(InRot)*200;
-		
-		BoxComp->SetPhysicsLinearVelocity(NewVel, false, "None");
-	}
+		// box 전부 조사해서 배열에 저장하자
+		TArray<AActor*> BoxActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
 
-	// 똑같이, 체인도 조사해서 포함시키기
-	AChain* ChainCable = Cast<AChain>(UGameplayStatics::GetActorOfClass(GetWorld(), AChain::StaticClass()));
-	UStaticMeshComponent* HandleComp = nullptr;
-	
-	if (ChainCable)
-	{
-		TArray<UActorComponent*> ChainComponents = ChainCable->GetComponentsByTag(UStaticMeshComponent::StaticClass(), FName("Handle"));
-		if (ChainComponents.Num() > 0)
+		//범위기반 for 루프, 저장된 액터를 하나씩 순회
+		for (AActor* BoxActor : BoxActors) 
 		{
-			HandleComp = Cast<UStaticMeshComponent>(ChainComponents[0]);
-			FVector StartLoc = HandleComp->GetComponentLocation();
+			ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
+			// 메쉬 꺼내기
+			UStaticMeshComponent* BoxComp = BoxAsset->Box;
+			FVector StartLoc = BoxComp->GetComponentLocation();
 			FVector EndLoc = Sphere->GetComponentLocation();
 			FRotator InRot = UKismetMathLibrary::FindLookAtRotation(StartLoc, EndLoc);
 			FVector NewVel = UKismetMathLibrary::GetForwardVector(InRot)*200;
 			
-			HandleComp->SetPhysicsLinearVelocity(NewVel, false, "None");
+			BoxComp->SetPhysicsLinearVelocity(NewVel, false, "None");
 		}
+
+		// 똑같이, 체인도 조사해서 포함시키기
+		AChain* ChainCable = Cast<AChain>(UGameplayStatics::GetActorOfClass(GetWorld(), AChain::StaticClass()));
+		UStaticMeshComponent* HandleComp = nullptr;
+		
+		if (ChainCable)
+		{
+			TArray<UActorComponent*> ChainComponents = ChainCable->GetComponentsByTag(UStaticMeshComponent::StaticClass(), FName("Handle"));
+			if (ChainComponents.Num() > 0)
+			{
+				HandleComp = Cast<UStaticMeshComponent>(ChainComponents[0]);
+				FVector StartLoc = HandleComp->GetComponentLocation();
+				FVector EndLoc = Sphere->GetComponentLocation();
+				FRotator InRot = UKismetMathLibrary::FindLookAtRotation(StartLoc, EndLoc);
+				FVector NewVel = UKismetMathLibrary::GetForwardVector(InRot)*200;
+				
+				HandleComp->SetPhysicsLinearVelocity(NewVel, false, "None");
+			}
+		}
+		
+	}
+}
+
+
+void ABlackHole::SetBlackholeState(bool bNewState)
+{
+	if (bIsActive != bNewState)
+	{
+		bIsActive = bNewState;
+		OnBlackholeStateChanged.Broadcast(bIsActive); // 델리게이트 호출
 	}
 }
 
