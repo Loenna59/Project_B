@@ -7,6 +7,8 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Project_B/Maps/BlackHole/Public/Chain.h"
+#include "Project_B/Utilities/LogMacro.h"
 
 
 // Sets default values
@@ -61,6 +63,25 @@ void ABlackHole::Tick(float DeltaTime)
 		FVector NewVel = UKismetMathLibrary::GetForwardVector(InRot)*200;
 		
 		BoxComp->SetPhysicsLinearVelocity(NewVel, false, "None");
+	}
+
+	// 똑같이, 체인도 조사해서 포함시키기
+	AChain* ChainCable = Cast<AChain>(UGameplayStatics::GetActorOfClass(GetWorld(), AChain::StaticClass()));
+	UStaticMeshComponent* HandleComp = nullptr;
+	
+	if (ChainCable)
+	{
+		TArray<UActorComponent*> ChainComponents = ChainCable->GetComponentsByTag(UStaticMeshComponent::StaticClass(), FName("Handle"));
+		if (ChainComponents.Num() > 0)
+		{
+			HandleComp = Cast<UStaticMeshComponent>(ChainComponents[0]);
+			FVector StartLoc = HandleComp->GetComponentLocation();
+			FVector EndLoc = Sphere->GetComponentLocation();
+			FRotator InRot = UKismetMathLibrary::FindLookAtRotation(StartLoc, EndLoc);
+			FVector NewVel = UKismetMathLibrary::GetForwardVector(InRot)*200;
+			
+			HandleComp->SetPhysicsLinearVelocity(NewVel, false, "None");
+		}
 	}
 }
 
