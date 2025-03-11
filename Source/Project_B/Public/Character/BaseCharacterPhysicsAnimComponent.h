@@ -25,7 +25,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	void TogglePhysicalAnimation();
+	void TogglePhysicalAnimation(bool toggle);
 
 protected:
 	UPROPERTY()

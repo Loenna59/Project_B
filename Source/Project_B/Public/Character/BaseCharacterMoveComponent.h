@@ -26,7 +26,18 @@ protected:
 	UPROPERTY()
 	class UInputAction* JumpInputAction = nullptr;
 
+	UPROPERTY()
+	class UInputAction* RunInputAction = nullptr;
+
+	UPROPERTY(EditAnywhere, Category=Movement)
+	float WalkSpeed = 500.f;
+
+	UPROPERTY(EditAnywhere, Category=Movement)
+	float RunSpeed = 1000.f;
+
 public:
+	virtual void BeginPlay() override;
+
 	virtual void SetupInputBiding(class UEnhancedInputComponent* input) override;
 
 protected:
@@ -41,4 +52,10 @@ protected:
 
 	UFUNCTION()
 	void EndJump();
+
+	UFUNCTION()
+	void StartRun();
+
+	UFUNCTION()
+	void EndRun();
 };

@@ -3,6 +3,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
 #include "Character/BaseCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UBaseCharacterMoveComponent::UBaseCharacterMoveComponent()
 {
@@ -28,6 +29,23 @@ UBaseCharacterMoveComponent::UBaseCharacterMoveComponent()
 	{
 		JumpInputAction = tmp_ia_jump.Object;
 	}
+
+	ConstructorHelpers::FObjectFinder<UInputAction> tmp_ia_run(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Run.IA_Run'"));
+
+	if (tmp_ia_run.Succeeded())
+	{
+		RunInputAction = tmp_ia_run.Object;
+	}
+}
+
+void UBaseCharacterMoveComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	}
 }
 
 void UBaseCharacterMoveComponent::SetupInputBiding(class UEnhancedInputComponent* input)
@@ -39,6 +57,9 @@ void UBaseCharacterMoveComponent::SetupInputBiding(class UEnhancedInputComponent
 
 	input->BindAction(JumpInputAction, ETriggerEvent::Started, this, &UBaseCharacterMoveComponent::StartJump);
 	input->BindAction(JumpInputAction, ETriggerEvent::Completed, this, &UBaseCharacterMoveComponent::EndJump);
+
+	input->BindAction(RunInputAction, ETriggerEvent::Started, this, &UBaseCharacterMoveComponent::StartRun);
+	input->BindAction(RunInputAction, ETriggerEvent::Completed, this, &UBaseCharacterMoveComponent::EndRun);
 }
 
 void UBaseCharacterMoveComponent::Move(const FInputActionValue& actionValue)
@@ -78,6 +99,22 @@ void UBaseCharacterMoveComponent::EndJump()
 	if (Character)
 	{
 		Character->StopJumping();
+	}
+}
+
+void UBaseCharacterMoveComponent::StartRun()
+{
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	}
+}
+
+void UBaseCharacterMoveComponent::EndRun()
+{
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
 }
 
