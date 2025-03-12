@@ -55,6 +55,7 @@ void ABlackHole::Tick(float DeltaTime)
 	if (bIsActive)
 	{
 		ActivateBlackhole();
+		BlackholeRotation();
 	}
 	else
 	{
@@ -71,36 +72,54 @@ void ABlackHole::SetBlackholeState(bool bNewState)
 	}
 }
 
-void ABlackHole::FirstRotation()
+void ABlackHole::BlackholeRotation()
 {
-	// 첫 라운드에는, 최대 난간까지만 끌어올리고 블랙홀 주위를 회전하지도 않음
-	// 물체를 잡고 있다면 가장 바깥에서 돌고 있도록 하자
-	// 잡고 있지않다면 난간정도 위치까지 떠오르게 하자
+	// box 전부 조사해서 배열에 저장하자
+	TArray<AActor*> BoxActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
+
+	//범위기반 for 루프, 저장된 액터를 하나씩 순회
+	for (AActor* BoxActor : BoxActors) 
+	{
+		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
+		// 메쉬 꺼내기
+		UStaticMeshComponent* BoxComp = BoxAsset->Box;
+		FVector BoxLocation = BoxComp->GetComponentLocation();
+		FVector BlackHoleCenter = GetActorLocation();
+		
+		// 사이의 거리값
+		float Distance = FVector::Dist(BoxLocation,BlackHoleCenter);
+			
+		// 박스->블랙홀 방향으로 향하는 벡터 계산
+		FVector DirectionToBlackHole = BlackHoleCenter - BoxLocation;
+		DirectionToBlackHole.Normalize();
+		
+		// 블랙홀 주위를 회전하는 벡터 계산
+		// 공전을 하려면 현재위치에서 블랙홀중심향하는 벡터에 수직인 방향으로 이동해야함
+		// 블랙홀 방향 벡터를 Z축 기준 90도로 회전, 축을 재설정 (원형 궤도 회전할 방향임)
+		FVector RotationAxis = FVector(0, 0, 1);
+		FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, RotationAxis);
+		
+		// 새 위치 계산 (회전방향으로 직진하지 않고 원형으로 회전할 수 있게)
+		FVector NewPosition = BoxLocation + (OrbitDirection * RotateSpeed * GetWorld()->GetDeltaSeconds());
+		
+		// 새위치에서 블랙홀로 향하는 방향을 구하고 정규화, 새위치 업데이트
+		FVector DirectionFromBlackHole = NewPosition - BlackHoleCenter;
+		DirectionFromBlackHole.Normalize();
+		NewPosition = BlackHoleCenter + (DirectionFromBlackHole * Distance);
+        
+		// 새 위치로 이동
+		BoxComp->SetRelativeLocation(NewPosition);
+	}
 }
 
-void ABlackHole::SecondRotation()
-{
-	// 두번째에서는 물건을 들고 있다면 생존하고, 무조건 회전한다
-	// 1페이즈와 동일하지만 회전을 추가해주자
-	// 물건을 들고 있지 않다면 난간 안으로 들어가서 죽음
-}
-
-void ABlackHole::ThirdRotation()
-{
-	// 무거운 물체만 생존한다
-}
-
-void ABlackHole::FourthRotation()
-{
-	// 사슬만 생존한다
-}
 
 void ABlackHole::DeactivateBlackhole()
 {
 	// 플레이어의 캡슐 물리 일단 꺼주기
 	ABaseCharacter* Player = Cast<ABaseCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseCharacter::StaticClass()));
 	UCapsuleComponent* capsule = Player->GetCapsuleComponent();
-	capsule->SetSimulatePhysics(false);
+	capsule->SetSimulatePhysics(false);	
 }
 
 void ABlackHole::ActivateBlackhole()

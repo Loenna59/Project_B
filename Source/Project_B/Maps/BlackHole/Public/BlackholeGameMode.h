@@ -29,5 +29,5 @@ public:
 	FTimerHandle BlackholeSpawnTimerHandle;
 
 	// 블랙홀 소환 횟수
-	int32 BlackholeSpawnCount = 0.0f;
+	int32 BlackholeSpawnCount = 0;
 };

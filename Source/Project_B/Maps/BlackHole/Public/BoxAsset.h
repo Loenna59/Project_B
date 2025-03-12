@@ -25,10 +25,5 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UStaticMeshComponent* Box;
-	
-	// 박스마다 무게 변수를 설정해주어야함
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	float BoxMass = 0.0f;
-	
 
 };

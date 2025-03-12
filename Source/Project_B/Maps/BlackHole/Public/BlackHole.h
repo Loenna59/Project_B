@@ -47,14 +47,16 @@ public:
 	void ActivateBlackhole();
 	void DeactivateBlackhole();
 	// 페이즈별 블랙홀 주변 회전
-	void FirstRotation();
-	void SecondRotation();
-	void ThirdRotation();
-	void FourthRotation();
+	void BlackholeRotation();
+	
+	// 소환 횟수 카운트
+	int32 SpawnCount;
 	
 	// 회전 속도값 변수 (블랙홀 가동되면 박스 무게에 따라 설정해줄 값)
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float RotateSpeed = 500.f;
+
+	
 };
 
 
