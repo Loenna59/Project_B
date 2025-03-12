@@ -14,8 +14,7 @@ class PROJECT_B_API ALuggageSpawnPoint : public AActor
 
 public:
 	ALuggageSpawnPoint();
-
-	/**팀 스폰 위치라면, true로 변경*/
+	
 	UPROPERTY(EditAnywhere)
 	ETeamType Team = ETeamType::Blue;
 
