@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -43,6 +42,19 @@ public:
 	class USphereComponent* FirstR;
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
+
+	// 빨아들일 요소들을 조사하고 가동, 멈춤
+	void ActivateBlackhole();
+	void DeactivateBlackhole();
+	// 페이즈별 블랙홀 주변 회전
+	void FirstRotation();
+	void SecondRotation();
+	void ThirdRotation();
+	void FourthRotation();
 	
+	// 회전 속도값 변수 (블랙홀 가동되면 박스 무게에 따라 설정해줄 값)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	float RotateSpeed = 500.f;
 };
+
 
