@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BlackHole.h"
 #include "GameFramework/Actor.h"
 #include "BoxAsset.generated.h"
 
@@ -25,4 +26,14 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UStaticMeshComponent* Box;
+	
+	// 박스마다 무게 변수를 설정해주어야함
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	float BoxMass = 0.0f;
+	// 회전 속도값 변수 (블랙홀 가동되면 바꿔주자)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	float RotateSpeed = 500.f;
+
+	// 블랙홀 참조
+	TObjectPtr<ABlackHole> BlackHole;
 };
