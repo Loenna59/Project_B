@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Project_B/Project_BGameMode.h"
+#include "Project_B/Maps/TeamMatchType.h"
 #include "LuggageChaosGameMode.generated.h"
 
 /**
@@ -23,6 +24,8 @@ private:
 	uint8 BluePoint = 0;
 
 public:
-	void AddScoreRed(const uint8 point); // { RedPoint += point; }
-	void AddScoreBlue(const uint8 point); //{ BluePoint += point; }
+	void AddScore(ETeamType team ,const uint8 point);
+	
+private:
+	void Win(ETeamType team);
 };
