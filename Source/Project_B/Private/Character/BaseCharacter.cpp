@@ -4,6 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Camera/CameraComponent.h"
+#include "Character/BaseCharacterAttackComponent.h"
 #include "Character/BaseCharacterMoveComponent.h"
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -14,8 +15,8 @@ ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	GetCapsuleComponent()->SetCapsuleRadius(30.f);
-	GetCapsuleComponent()->SetCapsuleHalfHeight(60.f);
+	GetCapsuleComponent()->SetCapsuleRadius(60.f);
+	GetCapsuleComponent()->SetCapsuleHalfHeight(100.f);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -23,13 +24,13 @@ ABaseCharacter::ABaseCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
-	GetMesh()->SetRelativeLocation(FVector(0, 0, -60.f));
+	GetMesh()->SetRelativeLocation(FVector(0, 0, -102.f));
 	GetMesh()->SetRelativeRotation(FRotator(0, -90.f, 0));
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->SetupAttachment(RootComponent);
-	SpringArmComp->TargetArmLength = 400.f;
-	SpringArmComp->SocketOffset = FVector(0, 0, 155.f);
+	SpringArmComp->TargetArmLength = 600.f;
+	SpringArmComp->SocketOffset = FVector(0, 0, 205.f);
 	SpringArmComp->bUsePawnControlRotation = true;
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -39,9 +40,16 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
+	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
 
-	PhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("PhysicsAnimComp"));
-	PhysicsAnimComp->SetupAttachment(RootComponent);
+	HeadPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("PhysicsAnimComp"));
+	HeadPhysicsAnimComp->SetupAttachment(RootComponent);
+
+	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("LeftArmPhysicsAnimComp"));
+	LeftArmPhysicsAnimComp->SetupAttachment(RootComponent);
+
+	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightArmPhysicsAnimComp"));
+	RightArmPhysicsAnimComp->SetupAttachment(RootComponent);
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
@@ -68,7 +76,7 @@ void ABaseCharacter::BeginPlay()
 		}
 	}
 
-	GetMesh()->SetAngularDamping(5.0f);
+	GetMesh()->SetAngularDamping(2.0f);
 	
 }
 
@@ -87,6 +95,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	if (pi)
 	{
 		MoveComp->SetupInputBiding(pi);
+		AttackComp->SetupInputBiding(pi);
 	}
 
 }

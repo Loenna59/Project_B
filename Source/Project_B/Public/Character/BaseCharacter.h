@@ -35,6 +35,15 @@ public:
 	class UBaseCharacterMoveComponent* MoveComp;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterPhysicsAnimComponent* PhysicsAnimComp;
+	class UBaseCharacterPhysicsAnimComponent* HeadPhysicsAnimComp;
+
+	UPROPERTY(VisibleAnywhere)
+	class UBaseCharacterPhysicsAnimComponent* LeftArmPhysicsAnimComp;
+
+	UPROPERTY(VisibleAnywhere)
+	class UBaseCharacterPhysicsAnimComponent* RightArmPhysicsAnimComp;
+
+	UPROPERTY(VisibleAnywhere)
+	class UBaseCharacterAttackComponent* AttackComp;
 
 };

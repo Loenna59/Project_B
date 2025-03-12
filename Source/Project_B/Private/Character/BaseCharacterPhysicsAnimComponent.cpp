@@ -25,7 +25,8 @@ void UBaseCharacterPhysicsAnimComponent::BeginPlay()
 		Mesh = Character->GetMesh();
 		PhysicalAnimationComp->SetSkeletalMeshComponent(Mesh);
 	}
-	
+
+	TogglePhysicalAnimation(true);
 }
 
 
@@ -34,28 +35,32 @@ void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTi
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::R))
-	{
-		TogglePhysicalAnimation();
-	}
-
 	if (Mesh && Mesh->IsSimulatingPhysics())
 	{
 		// 지정한 본의 up벡터 가져오기
 		FVector CurrentUpVector = Mesh->GetBoneQuaternion(SimulateBoneName).Vector();
 
 		// 회전을 보정하는 토크 적용 (외적)
-		FVector Torque = FVector::CrossProduct(CurrentUpVector, FVector::UpVector) * 1000000.f;
+		FVector Torque = FVector::CrossProduct(CurrentUpVector, FVector::UpVector) * 100000.f;
 		Mesh->AddTorqueInRadians(Torque, SimulateBoneName, true);
 	}
 }
 
-void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation()
+void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 {
-	// LOG_SCREEN("Toggle");
-	Mesh->SetAllBodiesBelowSimulatePhysics(SimulateBoneName, true, false);
-	// PhysicalAnimationComp->ApplyPhysicalAnimationProfileBelow(SimulateBoneName, TEXT("HitReactionProfile"), false, false);
-	// PhysicalAnimationComp->SetStrengthMultiplyer(SimulateStrengthMultiplier);
-	Mesh->SetAllBodiesBelowPhysicsBlendWeight(SimulateBoneName, .5f, false, true);
+	if (toggle)
+	{
+		// LOG_SCREEN("Toggle");
+		Mesh->SetAllBodiesBelowSimulatePhysics(SimulateBoneName, true, false);
+		// PhysicalAnimationComp->ApplyPhysicalAnimationProfileBelow(SimulateBoneName, TEXT("HitReactionProfile"), false, false);
+		// PhysicalAnimationComp->SetStrengthMultiplyer(SimulateStrengthMultiplier);
+		Mesh->SetAllBodiesBelowPhysicsBlendWeight(SimulateBoneName, .5f, false, true);
+
+		return;
+	}
+
+	Mesh->SetAllBodiesBelowSimulatePhysics(SimulateBoneName, false, false);
 }
+
+
 
