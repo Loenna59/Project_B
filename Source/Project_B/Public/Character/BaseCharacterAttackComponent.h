@@ -27,11 +27,26 @@ protected:
 	class UInputAction* PunchInputAction = nullptr;
 
 	UPROPERTY()
+	class UInputAction* HeadButtInputAction = nullptr;
+
+	UPROPERTY()
+	class UInputAction* KickInputAction = nullptr;
+
+	UPROPERTY()
 	EArmDirection ArmDirection;
+
+	UPROPERTY(EditAnywhere, Category=Attack)
+	float ForceAmount = 1000.f;
 
 public:
 	UPROPERTY(EditAnywhere, Category=Attack)
 	class UAnimMontage* PunchAnimMontage;
+
+	UPROPERTY(EditAnywhere, Category=Attack)
+	class UAnimMontage* HeadButtAnimMontage;
+	
+	UPROPERTY(EditAnywhere, Category=Attack)
+	class UAnimMontage* KickAnimMontage;
 
 protected:
 	// Called when the game starts
@@ -42,4 +57,12 @@ public:
 
 	UFUNCTION()
 	void Punch();
+
+	UFUNCTION()
+	void HeadButt();
+
+	UFUNCTION()
+	void Kick();
+	
+	void AddForceForwardVector();
 };

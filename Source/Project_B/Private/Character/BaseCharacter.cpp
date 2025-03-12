@@ -7,6 +7,7 @@
 #include "Character/BaseCharacterAttackComponent.h"
 #include "Character/BaseCharacterMoveComponent.h"
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
+#include "Character/HeadPhysicsAnimComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -42,7 +43,7 @@ ABaseCharacter::ABaseCharacter()
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
 
-	HeadPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("PhysicsAnimComp"));
+	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
 	HeadPhysicsAnimComp->SetupAttachment(RootComponent);
 
 	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("LeftArmPhysicsAnimComp"));
