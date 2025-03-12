@@ -7,10 +7,12 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "PhysicsEngine/RadialForceComponent.h"
 #include "Project_B/Maps/BlackHole/Public/BoxAsset.h"
 #include "Project_B/Maps/BlackHole/Public/Chain.h"
 
 
+class URadialForceComponent;
 class ABoxAsset;
 // Sets default values
 ABlackHole::ABlackHole()
@@ -54,8 +56,14 @@ void ABlackHole::Tick(float DeltaTime)
 	// 활성화 되면 빨아들이기 시작
 	if (bIsActive)
 	{
+		// bIsActive가 처음으로 true가 될 때만 중력 필드 생성
+		if (!bGravityFieldCreated)
+		{
+			CreateGravityField();
+			bGravityFieldCreated = true; // 중력 필드가 생성되었음을 표시
+		}
 		ActivateBlackhole();
-		BlackholeRotation();
+		ApplyOrbitalForce();
 	}
 	else
 	{
@@ -72,7 +80,15 @@ void ABlackHole::SetBlackholeState(bool bNewState)
 	}
 }
 
-void ABlackHole::BlackholeRotation()
+void ABlackHole::CreateGravityField()
+{
+	URadialForceComponent* GravityField = NewObject<URadialForceComponent>(this);
+	GravityField->Radius = 1000.0f; // 중력 필드 반경
+	GravityField->ForceStrength = -1000.0f; // 중력 강도 (음수는 끌어당김)
+	GravityField->SetupAttachment(RootComponent);
+}
+
+void ABlackHole::ApplyOrbitalForce()
 {
 	// box 전부 조사해서 배열에 저장하자
 	TArray<AActor*> BoxActors;
@@ -84,32 +100,12 @@ void ABlackHole::BlackholeRotation()
 		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
 		// 메쉬 꺼내기
 		UStaticMeshComponent* BoxComp = BoxAsset->Box;
-		FVector BoxLocation = BoxComp->GetComponentLocation();
-		FVector BlackHoleCenter = GetActorLocation();
 		
-		// 사이의 거리값
-		float Distance = FVector::Dist(BoxLocation,BlackHoleCenter);
-			
-		// 박스->블랙홀 방향으로 향하는 벡터 계산
-		FVector DirectionToBlackHole = BlackHoleCenter - BoxLocation;
-		DirectionToBlackHole.Normalize();
-		
-		// 블랙홀 주위를 회전하는 벡터 계산
-		// 공전을 하려면 현재위치에서 블랙홀중심향하는 벡터에 수직인 방향으로 이동해야함
-		// 블랙홀 방향 벡터를 Z축 기준 90도로 회전, 축을 재설정 (원형 궤도 회전할 방향임)
-		FVector RotationAxis = FVector(0, 0, 1);
-		FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, RotationAxis);
-		
-		// 새 위치 계산 (회전방향으로 직진하지 않고 원형으로 회전할 수 있게)
-		FVector NewPosition = BoxLocation + (OrbitDirection * RotateSpeed * GetWorld()->GetDeltaSeconds());
-		
-		// 새위치에서 블랙홀로 향하는 방향을 구하고 정규화, 새위치 업데이트
-		FVector DirectionFromBlackHole = NewPosition - BlackHoleCenter;
-		DirectionFromBlackHole.Normalize();
-		NewPosition = BlackHoleCenter + (DirectionFromBlackHole * Distance);
-        
-		// 새 위치로 이동
-		BoxComp->SetRelativeLocation(NewPosition);
+		FVector ActorLocation = BoxComp->GetComponentLocation();
+		FVector BlackholeLocation = GetActorLocation();
+		FVector DirectionToBlackHole = (BlackholeLocation - ActorLocation).GetSafeNormal();
+		FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, FVector(0, 0, 1));
+		BoxComp->AddImpulse(OrbitDirection * RotateSpeed, NAME_None, true);
 	}
 }
 

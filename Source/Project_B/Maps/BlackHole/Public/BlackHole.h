@@ -28,8 +28,12 @@ public:
 	// 스폰되었니?
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsActive = false;
-	void SetBlackholeState(bool bNewState);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bGravityFieldCreated = false;
 	
+	void SetBlackholeState(bool bNewState);
+
+
 	UPROPERTY(BlueprintAssignable)
 	FOnBlackholeStateChanged OnBlackholeStateChanged;
 
@@ -43,11 +47,12 @@ public:
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
 
-	// 빨아들일 요소들을 조사하고 가동, 멈춤
+	// 빨아들일 요소들을 조사하고 가동 & 멈춤
 	void ActivateBlackhole();
 	void DeactivateBlackhole();
-	// 페이즈별 블랙홀 주변 회전
-	void BlackholeRotation();
+	// 중력필드를 형성하고 회전시킴
+	void CreateGravityField();
+	void ApplyOrbitalForce();
 	
 	// 소환 횟수 카운트
 	int32 SpawnCount;
