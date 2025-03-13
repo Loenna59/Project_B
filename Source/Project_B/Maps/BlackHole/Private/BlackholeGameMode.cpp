@@ -25,3 +25,10 @@ void ABlackholeGameMode::Tick(float DeltaTime)
 
 	CurrentGameTime += DeltaTime;
 }
+
+
+inline void ABlackholeGameMode::SpawnBlackhole()
+{
+	// 블랙홀 스폰 함수
+}
+
