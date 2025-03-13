@@ -27,16 +27,14 @@ public:
 
 	void TogglePhysicalAnimation(bool toggle);
 
+	void AddForceForwardVector();
+
 protected:
 	UPROPERTY()
 	class ABaseCharacter* Character = nullptr;
 
 	UPROPERTY()
 	class USkeletalMeshComponent* Mesh = nullptr;
-
-	FTimerHandle RecoveryTimerHandle;
-
-	bool bStartRecovery;
 
 public:
 	UPROPERTY()
@@ -46,5 +44,5 @@ public:
 	FName SimulateBoneName = TEXT("CharacterPelvis");
 
 	UPROPERTY(EditAnywhere)
-	float RecoveryDelay = 3.f;
+	float ForwardForceAmount = 1000.f;
 };
