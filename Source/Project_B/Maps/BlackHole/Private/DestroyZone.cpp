@@ -6,6 +6,8 @@
 #include "DataTableEditorUtils.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/RotatingMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
@@ -22,23 +24,23 @@ ADestroyZone::ADestroyZone()
 	BottomBlade->SetupAttachment(RootComponent);
 	BottomBlade->SetRelativeLocation(FVector(0, 0, 200));
 	BottomBlade->SetRelativeRotation(FRotator(0,0,-90));
+	
 	BottomRotator = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BottomRotator"));
 	BottomRotator->SetupAttachment(RootComponent);
 	BottomRotator->SetRelativeRotation(FRotator(0,0,90));
+	
 	DestroyZoneSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DestroyZoneSphere"));
 	DestroyZoneSphere->SetupAttachment(RootComponent);
-	DestroyZoneSphere->SetRelativeLocation(FVector(0, 0, 100));
-	DestroyZoneSphere->SetRelativeScale3D(FVector(10));
+	DestroyZoneSphere->SetRelativeLocation(FVector(0, 0, 0));
+	DestroyZoneSphere->SetRelativeScale3D(FVector(20));
 
 	// 회전
 	BladeRotateComp = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("BladeRotateComp"));
 	BladeRotateComp->SetUpdatedComponent(BottomBlade);
 	BladeRotateComp->RotationRate = FRotator(RotateSpeed,0,0);
-	BladeRotateComp->SetAutoActivate(false);
 	
 	RotateComp = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("RotateComp"));
 	RotateComp->SetUpdatedComponent(BottomRotator);
-	RotateComp->SetAutoActivate(false);
 	RotateComp->RotationRate = FRotator(RotateSpeed,0,0);
 	RotateComp->PivotTranslation = FVector(0, -1, 0);
 	
@@ -60,7 +62,7 @@ void ADestroyZone::OnDestroyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	// 플레이어 죽음
+	// TODO: 플레이어 죽음
 	LOG_PRINT(TEXT("플레이어 죽음!"));
 }
 
@@ -71,7 +73,16 @@ void ADestroyZone::BeginPlay()
 
 	DestroyZoneSphere->SetGenerateOverlapEvents(true);
 	DestroyZoneSphere->OnComponentBeginOverlap.AddDynamic(this,&ADestroyZone::OnDestroyBeginOverlap);
-	
+
+	// 블랙홀 찾기
+	ABlackHole* Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
+	if (Blackhole)
+	{
+		// 블랙홀의 상태 변화 델리게이트에 바인딩하자
+		Blackhole->OnBlackholeStateChanged.AddDynamic(this, &ADestroyZone::HandleBlackholeStateChange);
+		// 초기 값도 동기화 해주기
+		bIsOnBlackhole = Blackhole->bIsActive;
+	}
 }
 
 // Called every frame
@@ -81,13 +92,19 @@ void ADestroyZone::Tick(float DeltaTime)
 		
 }
 
+void ADestroyZone::HandleBlackholeStateChange(bool bNewState)
+{
+	bIsOnBlackhole = bNewState;
+}
+
 void ADestroyZone::BladeRotate()
 {
 	if (bIsOnBlackhole)
 	{
-		BladeRotateComp->SetAutoActivate(true);
-		RotateComp->SetAutoActivate(true);
-		// 회전 속도 조정
+		// TODO: 회전 속도 조정
+		RotateSpeed = 180.f;
 	}
+	else
+		RotateSpeed = 0.0f;
 }
 

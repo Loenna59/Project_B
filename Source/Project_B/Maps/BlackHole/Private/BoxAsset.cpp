@@ -26,5 +26,6 @@ void ABoxAsset::BeginPlay()
 void ABoxAsset::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 }
 
