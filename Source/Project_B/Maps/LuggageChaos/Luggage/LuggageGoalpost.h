@@ -4,22 +4,29 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "LuggageHole.generated.h"
+#include "Project_B/Maps/TeamMatchType.h"
+#include "LuggageGoalpost.generated.h"
+
+class ALuggageManager;
 
 UCLASS()
-class PROJECT_B_API ALuggageHole : public AActor
+class PROJECT_B_API ALuggageGoalpost : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	ALuggageHole();
+	ALuggageGoalpost();
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* Box;
 
 	/** RedTeam = false / BlueTeam = true */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Team")
-	bool Team = false;
+	ETeamType Team = ETeamType::Blue;
+
+private:
+	UPROPERTY()
+	class ALuggageManager* LuggageManager;
 
 protected:
 	virtual void BeginPlay() override;

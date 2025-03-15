@@ -5,14 +5,38 @@
 
 #include "Project_B/Utilities/LogMacro.h"
 
-void ALuggageChaosGameMode::AddScoreRed(const uint8 point)
+void ALuggageChaosGameMode::AddScore(ETeamType team, const uint8 point)
 {
-	RedPoint += point;
-	LOG_SCREEN("레드팀 스코어: %d", RedPoint);
+	if (team == ETeamType::Blue)
+	{
+		BluePoint += point;
+		LOG_SCREEN("블루팀 스코어: %d", BluePoint);
+		if (BluePoint >= MaxPoint)
+		{
+			Win(ETeamType::Blue);
+		}
+	}
+	else
+	{
+		RedPoint += point;
+		LOG_SCREEN("레드팀 스코어: %d", RedPoint);
+		if (RedPoint >= MaxPoint)
+		{
+			Win(ETeamType::Red);
+		}
+	}
 }
 
-void ALuggageChaosGameMode::AddScoreBlue(const uint8 point)
+void ALuggageChaosGameMode::Win(ETeamType team)
 {
-	BluePoint += point;
-	LOG_SCREEN("블루팀 스코어: %d", BluePoint);
+	if (team == ETeamType::Blue)
+	{
+		LOG_SCREEN("블루팀 승리");
+	}
+	else
+	{
+		LOG_SCREEN("레드팀 승리");
+	}
 }
+
+
