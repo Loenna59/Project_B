@@ -32,7 +32,7 @@ protected:
 	UPROPERTY()
 	class UInputAction* KickInputAction = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	EArmDirection ArmDirection;
 
 	UPROPERTY(EditAnywhere, Category=Attack)
@@ -42,18 +42,20 @@ protected:
 	float DropkickForceAmount = 10000.f;
 
 public:
-	UPROPERTY(EditAnywhere, Category=Attack)
+	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* PunchAnimMontage;
 
-	UPROPERTY(EditAnywhere, Category=Attack)
+	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* HeadButtAnimMontage;
 	
-	UPROPERTY(EditAnywhere, Category=Attack)
+	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* KickAnimMontage;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	virtual void SetupInputBiding(class UEnhancedInputComponent* input) override;
@@ -61,11 +63,30 @@ public:
 	UFUNCTION()
 	void Punch();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Punch(UAnimMontage* Montage, EArmDirection Direction);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Punch(UAnimMontage* Montage, EArmDirection Direction);
+	
+
 	UFUNCTION()
 	void HeadButt();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_HeadButt(UAnimMontage* Montage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HeadButt(UAnimMontage* Montage);
+
 	UFUNCTION()
 	void Kick();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Kick(UAnimMontage* Montage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Kick(UAnimMontage* Montage);
 	
 	void AddForceForwardVector();
 };

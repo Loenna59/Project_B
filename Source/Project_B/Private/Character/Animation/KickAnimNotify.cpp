@@ -2,6 +2,8 @@
 
 
 #include "Character/Animation/KickAnimNotify.h"
+
+#include "Character/BaseCharacterPhysicsAnimComponent.h"
 #include "GameFramework/Character.h"
 
 void UKickAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
@@ -12,10 +14,17 @@ void UKickAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	
 	if (Owner)
 	{
-		// if (ACharacter* Character = Cast<ACharacter>(Owner))
-		// {
-		// 	Character->LaunchCharacter(Character->GetActorForwardVector() * 1000.f, true, false);
-		// }
+		if (ACharacter* Character = Cast<ACharacter>(Owner))
+		{
+			Character->LaunchCharacter(Character->GetActorForwardVector() * 2500.f, true, false);
+		}
+		
+		UBaseCharacterPhysicsAnimComponent* RightFoot = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("RightFootPhysicsAnimComp")));
+		
+		if (RightFoot)
+		{
+			RightFoot->AddForceForwardVector();
+		}
 		
 	}
 }

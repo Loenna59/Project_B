@@ -41,19 +41,32 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
+	MoveComp->SetNetAddressable();
+	MoveComp->SetIsReplicated(true);
+	
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
-
+	AttackComp->SetNetAddressable();
+	AttackComp->SetIsReplicated(true);
+	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
 	HeadPhysicsAnimComp->SetupAttachment(RootComponent);
-
+	HeadPhysicsAnimComp->SetNetAddressable();
+	HeadPhysicsAnimComp->SetIsReplicated(true);
+	
 	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("LeftArmPhysicsAnimComp"));
 	LeftArmPhysicsAnimComp->SetupAttachment(RootComponent);
-
+	LeftArmPhysicsAnimComp->SetNetAddressable();
+	LeftArmPhysicsAnimComp->SetIsReplicated(true);
+	
 	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightArmPhysicsAnimComp"));
 	RightArmPhysicsAnimComp->SetupAttachment(RootComponent);
+	RightArmPhysicsAnimComp->SetNetAddressable();
+	RightArmPhysicsAnimComp->SetIsReplicated(true);
 
 	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
 	RightFootPhysicsAnimComp->SetupAttachment(RootComponent);
+	RightFootPhysicsAnimComp->SetNetAddressable();
+	RightFootPhysicsAnimComp->SetIsReplicated(true);
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 

@@ -17,9 +17,9 @@ void UPunchAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimS
 		{
 			Left->TogglePhysicalAnimation(false);
 		}
-	
+		
 		UBaseCharacterPhysicsAnimComponent* Right = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp")));
-	
+		
 		if (Right)
 		{
 			Right->TogglePhysicalAnimation(false);
@@ -41,9 +41,9 @@ void UPunchAnimNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeq
 		{
 			Left->TogglePhysicalAnimation(true);
 		}
-	
+		
 		UBaseCharacterPhysicsAnimComponent* Right = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp")));
-	
+		
 		if (Right)
 		{
 			Right->TogglePhysicalAnimation(true);

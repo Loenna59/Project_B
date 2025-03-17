@@ -35,6 +35,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category=Movement)
 	float RunSpeed = 1000.f;
 
+	UPROPERTY(EditAnywhere, Category=Movement)
+	float FallSpeed = 3000.f;
+
 public:
 	virtual void BeginPlay() override;
 

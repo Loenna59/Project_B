@@ -39,7 +39,7 @@ void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTi
 	{
 		// 지정한 본의 up벡터 가져오기
 		FVector CurrentUpVector = Mesh->GetBoneQuaternion(SimulateBoneName).Vector();
-
+	
 		// 회전을 보정하는 토크 적용 (외적)
 		FVector Torque = FVector::CrossProduct(CurrentUpVector, FVector::UpVector) * 500000.f;
 		Mesh->AddTorqueInRadians(Torque, SimulateBoneName, true);
@@ -60,6 +60,7 @@ void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 	}
 	
 	Mesh->SetAllBodiesBelowSimulatePhysics(SimulateBoneName, false, false);
+	
 }
 
 void UBaseCharacterPhysicsAnimComponent::AddForceForwardVector()
@@ -67,7 +68,7 @@ void UBaseCharacterPhysicsAnimComponent::AddForceForwardVector()
 	if (Character)
 	{
 		FVector ForceDirection = Character->GetActorForwardVector() * ForwardForceAmount; // 앞방향으로 500 단위의 힘
-		Mesh->AddImpulseToAllBodiesBelow(ForceDirection, NAME_None, false);
+		Mesh->AddImpulseToAllBodiesBelow(ForceDirection, SimulateBoneName, false);
 	}
 }
 

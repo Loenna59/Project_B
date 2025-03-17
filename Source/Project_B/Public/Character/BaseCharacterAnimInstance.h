@@ -37,4 +37,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsFalling;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector LeftFootLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector RightFootLocation;
 };
