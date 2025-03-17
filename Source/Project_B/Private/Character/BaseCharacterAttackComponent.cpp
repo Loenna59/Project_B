@@ -61,30 +61,42 @@ void UBaseCharacterAttackComponent::SetupInputBiding(class UEnhancedInputCompone
 
 void UBaseCharacterAttackComponent::Punch()
 {
-	if (Character && Character->HasAuthority())
+	if (Character->HasAuthority())
+	{
+		Multicast_Punch(PunchAnimMontage, ArmDirection);
+	}
+	else
 	{
 		Server_Punch(PunchAnimMontage, ArmDirection);
-		ArmDirection = ArmDirection == EArmDirection::LEFT? EArmDirection::RIGHT : EArmDirection::LEFT;
 	}
+	
+	ArmDirection = ArmDirection == EArmDirection::LEFT? EArmDirection::RIGHT : EArmDirection::LEFT;
 }
 
 void UBaseCharacterAttackComponent::HeadButt()
 {
-	if (Character && Character->HasAuthority())
+	if (Character->HasAuthority())
 	{
-		Server_HeadButt(HeadButtAnimMontage);
+		Multicast_HeadButt(HeadButtAnimMontage);
+		return;
 	}
+
+	Server_HeadButt(HeadButtAnimMontage);
 }
 
 void UBaseCharacterAttackComponent::Kick()
 {
-	if (Character && Character->HasAuthority())
+	if (Character->GetCharacterMovement()->IsFalling())
 	{
-		if (Character->GetCharacterMovement()->IsFalling())
+		if (Character->HasAuthority())
 		{
-			Server_Kick(KickAnimMontage);
+			Multicast_Kick(KickAnimMontage);
+			return;
 		}
+
+		Server_Kick(KickAnimMontage);
 	}
+	
 }
 
 void UBaseCharacterAttackComponent::AddForceForwardVector()

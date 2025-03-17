@@ -15,6 +15,7 @@
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	GetCapsuleComponent()->SetCapsuleRadius(60.f);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(100.f);
