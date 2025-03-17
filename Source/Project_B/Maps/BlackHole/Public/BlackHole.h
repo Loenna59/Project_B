@@ -31,10 +31,12 @@ public:
 	// 중력필드를 한번만 생성하기 위한 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bGravityFieldCreated = false;
-	// 블랙홀 궤도를 설정해줄 변수
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float OrbitRadius = 1000.f;
-	
+	float OrbitPower = 10000.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OrbitScale = 1.0f;
+
 	// 블랙홀 활성화 델리게이트?
 	void SetBlackholeState(bool bNewState);
 	UPROPERTY(BlueprintAssignable)

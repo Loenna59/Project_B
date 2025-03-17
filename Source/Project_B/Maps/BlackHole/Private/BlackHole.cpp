@@ -67,7 +67,7 @@ void ABlackHole::Tick(float DeltaTime)
 			CreateGravityField();
 			bGravityFieldCreated = true; // 중력 필드가 생성되었음을 표시
 		}
-		// ActivateBlackhole();
+		ActivateBlackhole();
 		ApplyOrbitalForce();
 	}
 	else
@@ -88,60 +88,46 @@ void ABlackHole::SetBlackholeState(bool bNewState)
 void ABlackHole::CreateGravityField()
 {
 	GravityField->Radius = 1500.0f; // 중력 필드 반경
-	GravityField->ForceStrength = 50000.0f; // 중력 강도
+	GravityField->ForceStrength = 2000.0f; // 중력 강도
 }
 
 void ABlackHole::ApplyOrbitalForce()
 {
-
+	// box 전부 조사해서 배열에 저장하자
 	TArray<AActor*> BoxActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
 
-	// 블랙홀
-	FVector BlackholeLocation = GetActorLocation();
-
-	for (AActor* BoxActor : BoxActors) 
+	//범위기반 for 루프, 저장된 액터를 하나씩 순회
+	for (AActor* BoxActor : BoxActors)
 	{
 		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
+		// 메쉬 꺼내기
 		UStaticMeshComponent* BoxComp = BoxAsset->Box;
+		FVector BoxLocation = BoxComp->GetComponentLocation();
+		FVector BlackHoleCenter = GetActorLocation();
 		BoxComp->SetEnableGravity(false);
+		
+		// 사이의 거리값
+		float Distance = FVector::Dist(BoxLocation,BlackHoleCenter);
+			
+		// 박스->블랙홀 방향으로 향하는 벡터 계산
+		FVector DirectionToBlackHole = BlackHoleCenter - BoxLocation;
+		DirectionToBlackHole.Normalize();
+		
+		// 블랙홀 주위를 회전하는 벡터 계산
+		// 공전을 하려면 현재위치에서 블랙홀중심향하는 벡터에 수직인 방향으로 이동해야함
+		// 블랙홀 방향 벡터를 Z축 기준 90도로 회전, 축을 재설정 (원형 궤도 회전할 방향임)
+		FVector RotationAxis = FVector(0, 0, 1);
+		FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, RotationAxis);
 
-		// 박스의 위치
-		FVector ActorLocation = BoxComp->GetComponentLocation();
-
-		// 블랙홀과 박스 사이의 거리 계산
-		FVector DirectionToBlackHole = (BlackholeLocation - ActorLocation).GetSafeNormal();
-		float Distance = FVector::Dist(ActorLocation, BlackholeLocation);
-
-		// 중력 계산 (거리의 제곱에 반비례)
-		float BoxMass = BoxComp->GetMass();
-		FVector GravityForce = DirectionToBlackHole * (GravityField->ForceStrength * BoxMass) / (Distance * Distance);
-
-		// 현재 속도 가져오기
-		FVector Velocity = BoxComp->GetPhysicsLinearVelocity();
-
-		// 궤도 반경에 도달했는지 확인
-		if (FMath::Abs(Distance - OrbitRadius) < 10.0f)
-		{
-			// 공전 속도 계산
-			FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, FVector(0, 0, 1));
-			FVector IdealVelocity = OrbitDirection * FMath::Sqrt(GravityField->ForceStrength / Distance) * 100;
-
-			// 속도 보정
-			float CorrectionStrength = 0.5f;
-			FVector VelocityCorrection = (IdealVelocity - Velocity) * CorrectionStrength;
-
-			// 최종 힘 적용 (반경에 도달했을때 중력 적용하지 말자)
-			BoxComp->AddForce(VelocityCorrection, NAME_None, true);
-		}
-		else
-		{
-			// 궤도 반경에 도달하지 않았을 경우, 중력만 적용
-			BoxComp->AddForce(GravityForce, NAME_None, true);
-		}
+		FVector Force = OrbitDirection * OrbitPower * OrbitScale;
+		// 이동할 방향으로 힘
+		BoxComp->AddForce(Force, NAME_None, true);
+		// 회전하면서 이동하자
+		FVector TorqueForce(50, 50, 0);
+		BoxComp->AddTorqueInDegrees(TorqueForce, NAME_None, true);
 	}
 }
-
 
 void ABlackHole::DeactivateBlackhole()
 {
