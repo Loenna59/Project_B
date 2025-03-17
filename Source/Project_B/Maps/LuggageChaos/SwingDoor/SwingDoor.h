@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "SwingDoor.generated.h"
 
+class USphereComponent;
 class UBoxComponent;
 class UPhysicsConstraintComponent;
 
@@ -39,9 +40,25 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SwingDoor")
 	UPhysicsConstraintComponent* RightConstraint;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UBoxComponent* BoxCollison;
+
+private:
+	bool bIsLugNear = false;
+	uint8 NearLugCount = 0;
+
 protected:
 	virtual void BeginPlay() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	UFUNCTION()
+	void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+private:
+	void DoorLocked();
+	void DoorUnlocked();
 };
