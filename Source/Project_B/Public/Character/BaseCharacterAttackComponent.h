@@ -78,6 +78,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_HeadButt(UAnimMontage* Montage);
+	
 
 	UFUNCTION()
 	void Kick();
@@ -87,6 +88,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Kick(UAnimMontage* Montage);
+	
 	
 	void AddForceForwardVector();
 };

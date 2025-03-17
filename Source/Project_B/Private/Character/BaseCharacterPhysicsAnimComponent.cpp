@@ -8,6 +8,8 @@
 UBaseCharacterPhysicsAnimComponent::UBaseCharacterPhysicsAnimComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	
+	SetIsReplicatedByDefault(true);
 }
 
 
@@ -29,6 +31,11 @@ void UBaseCharacterPhysicsAnimComponent::BeginPlay()
 	TogglePhysicalAnimation(bAwakePhysics);
 }
 
+void UBaseCharacterPhysicsAnimComponent::GetLifetimeReplicatedProps(
+	TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
 
 void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                                        FActorComponentTickFunction* ThisTickFunction)
@@ -48,19 +55,40 @@ void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTi
 
 void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 {
-	if (toggle)
+	if (Character->HasAuthority())
+	{
+		Multicast_TogglePhysicalAnimation(SimulateBoneName, toggle);
+		return;
+	}
+
+	Server_TogglePhysicalAnimation(SimulateBoneName, toggle);
+}
+
+void UBaseCharacterPhysicsAnimComponent::Server_TogglePhysicalAnimation_Implementation(FName BoneName, bool bSimulate)
+{
+	Multicast_TogglePhysicalAnimation(BoneName, bSimulate);
+}
+
+bool UBaseCharacterPhysicsAnimComponent::Server_TogglePhysicalAnimation_Validate(FName BoneName, bool bSimulate)
+{
+	return true;
+}
+
+void UBaseCharacterPhysicsAnimComponent::Multicast_TogglePhysicalAnimation_Implementation(FName BoneName,
+	bool bSimulate)
+{
+	if (bSimulate)
 	{
 		// LOG_SCREEN("Toggle");
-		Mesh->SetAllBodiesBelowSimulatePhysics(SimulateBoneName, true, false);
-		// PhysicalAnimationComp->ApplyPhysicalAnimationProfileBelow(SimulateBoneName, TEXT("HitReactionProfile"), false, false);
+		Mesh->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);
+		// PhysicalAnimationComp->ApplyPhysicalAnimationProfileBelow(BoneName, TEXT("HitReactionProfile"), false, false);
 		// PhysicalAnimationComp->SetStrengthMultiplyer(SimulateStrengthMultiplier);
-		Mesh->SetAllBodiesBelowPhysicsBlendWeight(SimulateBoneName, 0.5f, false, true);
+		Mesh->SetAllBodiesBelowPhysicsBlendWeight(BoneName, 0.5f, false, true);
 	
 		return;
 	}
 	
-	Mesh->SetAllBodiesBelowSimulatePhysics(SimulateBoneName, false, false);
-	
+	Mesh->SetAllBodiesBelowSimulatePhysics(BoneName, false, false);
 }
 
 void UBaseCharacterPhysicsAnimComponent::AddForceForwardVector()

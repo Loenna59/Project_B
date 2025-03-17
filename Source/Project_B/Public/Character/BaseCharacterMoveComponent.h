@@ -16,6 +16,8 @@ class PROJECT_B_API UBaseCharacterMoveComponent : public UBaseCharacterInputComp
 public:
 	UBaseCharacterMoveComponent();
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	UPROPERTY()
 	class UInputAction* MoveInputAction = nullptr;
@@ -35,8 +37,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category=Movement)
 	float RunSpeed = 1000.f;
 
-	UPROPERTY(EditAnywhere, Category=Movement)
-	float FallSpeed = 3000.f;
+	UPROPERTY(Replicated)
+	float ReplicatedSpeed;
 
 public:
 	virtual void BeginPlay() override;
@@ -61,4 +63,12 @@ protected:
 
 	UFUNCTION()
 	void EndRun();
+
+	UFUNCTION(Server, Reliable)
+	void Server_UpdateSpeed(float Speed);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateSpeed(float Speed);
+
+	void UpdateSpeed(float Speed);
 };

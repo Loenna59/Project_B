@@ -4,10 +4,12 @@
 #include "InputAction.h"
 #include "Character/BaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 UBaseCharacterMoveComponent::UBaseCharacterMoveComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
 
 	ConstructorHelpers::FObjectFinder<UInputAction> tmp_ia_move(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Move.IA_Move'"));
 
@@ -36,6 +38,13 @@ UBaseCharacterMoveComponent::UBaseCharacterMoveComponent()
 	{
 		RunInputAction = tmp_ia_run.Object;
 	}
+}
+
+void UBaseCharacterMoveComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UBaseCharacterMoveComponent, ReplicatedSpeed);
 }
 
 void UBaseCharacterMoveComponent::BeginPlay()
@@ -104,17 +113,32 @@ void UBaseCharacterMoveComponent::EndJump()
 
 void UBaseCharacterMoveComponent::StartRun()
 {
-	if (Character)
-	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-	}
+	UpdateSpeed(RunSpeed);
 }
 
 void UBaseCharacterMoveComponent::EndRun()
 {
-	if (Character)
+	UpdateSpeed(WalkSpeed);
+}
+
+void UBaseCharacterMoveComponent::Server_UpdateSpeed_Implementation(float Speed)
+{
+	Multicast_UpdateSpeed(Speed);
+}
+
+void UBaseCharacterMoveComponent::Multicast_UpdateSpeed_Implementation(float Speed)
+{
+	Character->GetCharacterMovement()->MaxWalkSpeed = Speed;
+}
+
+void UBaseCharacterMoveComponent::UpdateSpeed(float Speed)
+{
+	if (Character->HasAuthority())
 	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		Multicast_UpdateSpeed(Speed);
+		return;
 	}
+
+	Server_UpdateSpeed(Speed);
 }
 

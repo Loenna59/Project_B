@@ -20,12 +20,20 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	void TogglePhysicalAnimation(bool toggle);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_TogglePhysicalAnimation(FName BoneName, bool bSimulate);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_TogglePhysicalAnimation(FName BoneName, bool bSimulate);
 
 	void AddForceForwardVector();
 
