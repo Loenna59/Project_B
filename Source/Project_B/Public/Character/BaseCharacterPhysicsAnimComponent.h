@@ -45,4 +45,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float ForwardForceAmount = 1000.f;
+
+	UPROPERTY(EditAnywhere)
+	bool bAwakePhysics = true;
 };

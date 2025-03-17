@@ -3,7 +3,7 @@
 
 #include "Character/Animation/HeadButtAnimNotify.h"
 
-#include "Character/BaseCharacterPhysicsAnimComponent.h"
+#include "GameFramework/Character.h"
 
 void UHeadButtAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
@@ -13,11 +13,12 @@ void UHeadButtAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 	
 	if (Owner)
 	{
-		UBaseCharacterPhysicsAnimComponent* Comp = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("HeadPhysicsAnimComp")));
-	
-		if (Comp)
+		if (Owner)
 		{
-			Comp->AddForceForwardVector();
+			// if (ACharacter* Character = Cast<ACharacter>(Owner))
+			// {
+			// 	Character->LaunchCharacter(Character->GetActorForwardVector() * 100.f, true, false);
+			// }
 		}
 		
 	}

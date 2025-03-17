@@ -26,7 +26,7 @@ void UBaseCharacterPhysicsAnimComponent::BeginPlay()
 		PhysicalAnimationComp->SetSkeletalMeshComponent(Mesh);
 	}
 
-	TogglePhysicalAnimation(true);
+	TogglePhysicalAnimation(bAwakePhysics);
 }
 
 
@@ -67,7 +67,7 @@ void UBaseCharacterPhysicsAnimComponent::AddForceForwardVector()
 	if (Character)
 	{
 		FVector ForceDirection = Character->GetActorForwardVector() * ForwardForceAmount; // 앞방향으로 500 단위의 힘
-		Mesh->AddImpulse(ForceDirection, SimulateBoneName);
+		Mesh->AddImpulseToAllBodiesBelow(ForceDirection, NAME_None, false);
 	}
 }
 

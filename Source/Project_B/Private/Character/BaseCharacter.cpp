@@ -52,6 +52,9 @@ ABaseCharacter::ABaseCharacter()
 	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightArmPhysicsAnimComp"));
 	RightArmPhysicsAnimComp->SetupAttachment(RootComponent);
 
+	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
+	RightFootPhysicsAnimComp->SetupAttachment(RootComponent);
+
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
 	if (tmp_imc.Succeeded())
@@ -78,7 +81,6 @@ void ABaseCharacter::BeginPlay()
 	}
 
 	GetMesh()->SetAngularDamping(2.0f);
-	
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
