@@ -81,11 +81,6 @@ void ABaseCharacter::BeginPlay()
 	}
 
 	GetMesh()->SetAngularDamping(2.0f);
-
-	HeadPhysicsAnimComp->TogglePhysicalAnimation(true);
-	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(true);
-	RightArmPhysicsAnimComp->TogglePhysicalAnimation(true);
-	RightFootPhysicsAnimComp->TogglePhysicalAnimation(false);
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
