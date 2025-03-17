@@ -12,10 +12,10 @@ void UKickAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	
 	if (Owner)
 	{
-		if (ACharacter* Character = Cast<ACharacter>(Owner))
-		{
-			Character->LaunchCharacter(Character->GetActorForwardVector() * 1000.f, true, false);
-		}
+		// if (ACharacter* Character = Cast<ACharacter>(Owner))
+		// {
+		// 	Character->LaunchCharacter(Character->GetActorForwardVector() * 1000.f, true, false);
+		// }
 		
 	}
 }

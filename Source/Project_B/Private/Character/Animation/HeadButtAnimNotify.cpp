@@ -15,10 +15,10 @@ void UHeadButtAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 	{
 		if (Owner)
 		{
-			if (ACharacter* Character = Cast<ACharacter>(Owner))
-			{
-				Character->LaunchCharacter(Character->GetActorForwardVector() * 100.f, true, false);
-			}
+			// if (ACharacter* Character = Cast<ACharacter>(Owner))
+			// {
+			// 	Character->LaunchCharacter(Character->GetActorForwardVector() * 100.f, true, false);
+			// }
 		}
 		
 	}

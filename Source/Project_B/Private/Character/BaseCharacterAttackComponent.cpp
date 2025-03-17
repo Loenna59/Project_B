@@ -63,7 +63,7 @@ void UBaseCharacterAttackComponent::HeadButt()
 {
 	if (Character)
 	{
-		Character->PlayAnimMontage(HeadButtAnimMontage, 1.f);
+		Character->PlayAnimMontage(HeadButtAnimMontage, 1.5f);
 	}
 }
 
