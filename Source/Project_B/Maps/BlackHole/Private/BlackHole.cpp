@@ -25,6 +25,11 @@ ABlackHole::ABlackHole()
 	SetRootComponent(Root);
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>("Sphere");
 	Sphere->SetupAttachment(RootComponent);
+	// 중력필드
+	GravityField = CreateDefaultSubobject<URadialForceComponent>("GravityField");
+	GravityField->SetupAttachment(RootComponent);
+	GravityField->Radius = 0.f; // 중력 필드 반경
+	GravityField->ForceStrength = 0.f; // 중력 강도 (음수는 끌어당김)
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TempBlackHole(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	if (TempBlackHole.Succeeded())
@@ -62,7 +67,7 @@ void ABlackHole::Tick(float DeltaTime)
 			CreateGravityField();
 			bGravityFieldCreated = true; // 중력 필드가 생성되었음을 표시
 		}
-		ActivateBlackhole();
+		// ActivateBlackhole();
 		ApplyOrbitalForce();
 	}
 	else
@@ -82,30 +87,58 @@ void ABlackHole::SetBlackholeState(bool bNewState)
 
 void ABlackHole::CreateGravityField()
 {
-	URadialForceComponent* GravityField = NewObject<URadialForceComponent>(this);
-	GravityField->Radius = 1000.0f; // 중력 필드 반경
-	GravityField->ForceStrength = -1000.0f; // 중력 강도 (음수는 끌어당김)
-	GravityField->SetupAttachment(RootComponent);
+	GravityField->Radius = 1500.0f; // 중력 필드 반경
+	GravityField->ForceStrength = 50000.0f; // 중력 강도
 }
 
 void ABlackHole::ApplyOrbitalForce()
 {
-	// box 전부 조사해서 배열에 저장하자
+
 	TArray<AActor*> BoxActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
 
-	//범위기반 for 루프, 저장된 액터를 하나씩 순회
+	// 블랙홀
+	FVector BlackholeLocation = GetActorLocation();
+
 	for (AActor* BoxActor : BoxActors) 
 	{
 		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
-		// 메쉬 꺼내기
 		UStaticMeshComponent* BoxComp = BoxAsset->Box;
-		
+		BoxComp->SetEnableGravity(false);
+
+		// 박스의 위치
 		FVector ActorLocation = BoxComp->GetComponentLocation();
-		FVector BlackholeLocation = GetActorLocation();
+
+		// 블랙홀과 박스 사이의 거리 계산
 		FVector DirectionToBlackHole = (BlackholeLocation - ActorLocation).GetSafeNormal();
-		FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, FVector(0, 0, 1));
-		BoxComp->AddImpulse(OrbitDirection * RotateSpeed, NAME_None, true);
+		float Distance = FVector::Dist(ActorLocation, BlackholeLocation);
+
+		// 중력 계산 (거리의 제곱에 반비례)
+		float BoxMass = BoxComp->GetMass();
+		FVector GravityForce = DirectionToBlackHole * (GravityField->ForceStrength * BoxMass) / (Distance * Distance);
+
+		// 현재 속도 가져오기
+		FVector Velocity = BoxComp->GetPhysicsLinearVelocity();
+
+		// 궤도 반경에 도달했는지 확인
+		if (FMath::Abs(Distance - OrbitRadius) < 10.0f)
+		{
+			// 공전 속도 계산
+			FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, FVector(0, 0, 1));
+			FVector IdealVelocity = OrbitDirection * FMath::Sqrt(GravityField->ForceStrength / Distance) * 100;
+
+			// 속도 보정
+			float CorrectionStrength = 0.5f;
+			FVector VelocityCorrection = (IdealVelocity - Velocity) * CorrectionStrength;
+
+			// 최종 힘 적용 (반경에 도달했을때 중력 적용하지 말자)
+			BoxComp->AddForce(VelocityCorrection, NAME_None, true);
+		}
+		else
+		{
+			// 궤도 반경에 도달하지 않았을 경우, 중력만 적용
+			BoxComp->AddForce(GravityForce, NAME_None, true);
+		}
 	}
 }
 
@@ -115,7 +148,22 @@ void ABlackHole::DeactivateBlackhole()
 	// 플레이어의 캡슐 물리 일단 꺼주기
 	ABaseCharacter* Player = Cast<ABaseCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseCharacter::StaticClass()));
 	UCapsuleComponent* capsule = Player->GetCapsuleComponent();
-	capsule->SetSimulatePhysics(false);	
+	capsule->SetSimulatePhysics(false);
+
+	// box 전부 조사해서 배열에 저장하자
+	TArray<AActor*> BoxActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
+
+	for (AActor* BoxActor : BoxActors)
+	{
+		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
+		// 메쉬 꺼내기
+		UStaticMeshComponent* BoxComp = BoxAsset->Box;
+		BoxComp->SetEnableGravity(true);
+	}
+	// 중력필드 초기화
+	GravityField->Radius = 0.f; 
+	GravityField->ForceStrength = 0.f;
 }
 
 void ABlackHole::ActivateBlackhole()
