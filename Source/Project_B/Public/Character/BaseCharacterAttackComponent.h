@@ -38,6 +38,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category=Attack)
 	float ForceAmount = 1000.f;
 
+	UPROPERTY(EditAnywhere, Category=Attack)
+	float DropkickForceAmount = 10000.f;
+
 public:
 	UPROPERTY(EditAnywhere, Category=Attack)
 	class UAnimMontage* PunchAnimMontage;

@@ -25,8 +25,6 @@ void UBaseCharacterPhysicsAnimComponent::BeginPlay()
 		Mesh = Character->GetMesh();
 		PhysicalAnimationComp->SetSkeletalMeshComponent(Mesh);
 	}
-
-	TogglePhysicalAnimation(true);
 }
 
 

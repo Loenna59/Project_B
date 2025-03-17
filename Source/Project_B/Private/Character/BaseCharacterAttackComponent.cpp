@@ -73,7 +73,7 @@ void UBaseCharacterAttackComponent::Kick()
 	{
 		if (Character->GetCharacterMovement()->IsFalling())
 		{
-			Character->PlayAnimMontage(KickAnimMontage, 1.f);
+			Character->PlayAnimMontage(KickAnimMontage, 2.f);
 		}
 	}
 }

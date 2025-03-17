@@ -44,6 +44,9 @@ public:
 	class UBaseCharacterPhysicsAnimComponent* RightArmPhysicsAnimComp;
 
 	UPROPERTY(VisibleAnywhere)
+	class UBaseCharacterPhysicsAnimComponent* RightFootPhysicsAnimComp;
+
+	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterAttackComponent* AttackComp;
 
 };
