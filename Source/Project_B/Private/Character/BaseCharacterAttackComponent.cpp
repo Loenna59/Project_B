@@ -3,12 +3,14 @@
 #include "EnhancedInputComponent.h"
 #include "Character/BaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
 UBaseCharacterAttackComponent::UBaseCharacterAttackComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
 
 	ConstructorHelpers::FObjectFinder<UInputAction> tmp_ia_punch(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Punch.IA_Punch'"));
 
@@ -32,11 +34,20 @@ UBaseCharacterAttackComponent::UBaseCharacterAttackComponent()
 	}
 }
 
-
 void UBaseCharacterAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void UBaseCharacterAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UBaseCharacterAttackComponent, ArmDirection);
+	DOREPLIFETIME(UBaseCharacterAttackComponent, PunchAnimMontage);
+	DOREPLIFETIME(UBaseCharacterAttackComponent, HeadButtAnimMontage);
+	DOREPLIFETIME(UBaseCharacterAttackComponent, KickAnimMontage);
 }
 
 void UBaseCharacterAttackComponent::SetupInputBiding(class UEnhancedInputComponent* input)
@@ -50,31 +61,73 @@ void UBaseCharacterAttackComponent::SetupInputBiding(class UEnhancedInputCompone
 
 void UBaseCharacterAttackComponent::Punch()
 {
-	if (Character)
+	if (!Character)
 	{
-		FString BoneName = ArmDirection == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
-		Character->PlayAnimMontage(PunchAnimMontage, 1.f, *BoneName);
-		
-		ArmDirection = ArmDirection == EArmDirection::LEFT? EArmDirection::RIGHT : EArmDirection::LEFT;
+		return;
 	}
+	
+	FString BoneName = ArmDirection == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
+	
+	if (Character->HasAuthority())
+	{
+		Multicast_PlayAnimMontage(PunchAnimMontage, 1.f, *BoneName);
+	}
+	else
+	{
+		Server_PlayAnimMontage(PunchAnimMontage, 1.f, *BoneName);
+	}
+	
+	ArmDirection = ArmDirection == EArmDirection::LEFT? EArmDirection::RIGHT : EArmDirection::LEFT;
 }
 
 void UBaseCharacterAttackComponent::HeadButt()
 {
-	if (Character)
+	if (!Character)
 	{
-		Character->PlayAnimMontage(HeadButtAnimMontage, 1.5f);
+		return;
 	}
+	
+	if (Character->HasAuthority())
+	{
+		Multicast_PlayAnimMontage(HeadButtAnimMontage, 1.5f);
+		return;
+	}
+
+	Server_PlayAnimMontage(HeadButtAnimMontage, 1.5f);
 }
 
 void UBaseCharacterAttackComponent::Kick()
 {
-	if (Character)
+	if (!Character)
 	{
-		if (Character->GetCharacterMovement()->IsFalling())
+		return;
+	}
+	
+	if (Character->GetCharacterMovement()->IsFalling())
+	{
+		if (Character->HasAuthority())
 		{
-			Character->PlayAnimMontage(KickAnimMontage, 2.f);
+			Multicast_PlayAnimMontage(KickAnimMontage, 1.5f);
+			return;
 		}
+
+		Server_PlayAnimMontage(KickAnimMontage, 1.5f);
+	}
+	
+}
+
+void UBaseCharacterAttackComponent::Server_PlayAnimMontage_Implementation(UAnimMontage* Montage, float PlayRate,
+                                                                          FName SectionName)
+{
+	Multicast_PlayAnimMontage(Montage, PlayRate, SectionName);
+}
+
+void UBaseCharacterAttackComponent::Multicast_PlayAnimMontage_Implementation(UAnimMontage* Montage, float PlayRate,
+                                                                             FName SectionName)
+{
+	if (Montage && Character)
+	{
+		Character->PlayAnimMontage(Montage, PlayRate, SectionName);
 	}
 }
 
@@ -85,4 +138,3 @@ void UBaseCharacterAttackComponent::AddForceForwardVector()
 	FVector ForceDirection = Character->GetActorForwardVector() * ForceAmount;
 	Character->GetMesh()->AddImpulseToAllBodiesBelow(ForceDirection, *BoneName, true);
 }
-

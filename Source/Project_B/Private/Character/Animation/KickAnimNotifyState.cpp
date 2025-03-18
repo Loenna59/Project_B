@@ -16,7 +16,7 @@ void UKickAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSe
 		if (RightFoot)
 		{
 			RightFoot->TogglePhysicalAnimation(true);
-			RightFoot->AddForceForwardVector();
+			// RightFoot->AddForceForwardVector();
 		}
 	}
 }

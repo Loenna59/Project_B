@@ -32,7 +32,7 @@ protected:
 	UPROPERTY()
 	class UInputAction* KickInputAction = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	EArmDirection ArmDirection;
 
 	UPROPERTY(EditAnywhere, Category=Attack)
@@ -42,18 +42,20 @@ protected:
 	float DropkickForceAmount = 10000.f;
 
 public:
-	UPROPERTY(EditAnywhere, Category=Attack)
+	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* PunchAnimMontage;
 
-	UPROPERTY(EditAnywhere, Category=Attack)
+	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* HeadButtAnimMontage;
 	
-	UPROPERTY(EditAnywhere, Category=Attack)
+	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* KickAnimMontage;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	virtual void SetupInputBiding(class UEnhancedInputComponent* input) override;
@@ -66,6 +68,14 @@ public:
 
 	UFUNCTION()
 	void Kick();
+
+
+	UFUNCTION(Server, Reliable)
+	void Server_PlayAnimMontage(UAnimMontage* Montage, float PlayRate = 1.f, FName SectionName = NAME_None);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayAnimMontage(UAnimMontage* Montage, float PlayRate = 1.f, FName SectionName = NAME_None);
+	
 	
 	void AddForceForwardVector();
 };

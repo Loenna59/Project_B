@@ -13,9 +13,9 @@ void UPunchAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 	
 	if (Owner)
 	{
-		// if (ACharacter* Character = Cast<ACharacter>(Owner))
-		// {
-		// 	Character->LaunchCharacter(Character->GetActorForwardVector() * 100.f, false, false);
-		// }
+		if (ACharacter* Character = Cast<ACharacter>(Owner))
+		{
+			Character->LaunchCharacter(Character->GetActorForwardVector() * 100.f, false, false);
+		}
 	}
 }

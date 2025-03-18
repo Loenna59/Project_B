@@ -6,6 +6,7 @@
 UHeadPhysicsAnimComponent::UHeadPhysicsAnimComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
 }
 
 void UHeadPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTick TickType,
