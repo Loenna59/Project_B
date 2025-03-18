@@ -54,9 +54,9 @@ public:
 	// 중력필드를 형성하고 회전시킴
 	void CreateGravityField();
 	void ApplyOrbitalForce();
-
+	
 	// 공전궤도 값
-	float R=1000.f;
+	float R = 0.f;
 	// 공전 속도 값
 	float OrbitSpeed = 30.0f;
 	

@@ -120,7 +120,7 @@ void ABlackHole::ApplyOrbitalForce()
 		BoxComp->AddForce(Force, NAME_None, true);
 		// 회전하면서 이동하자
 		// TODO:변수로 빼기?
-		FVector TorqueForce(20, 15, 0);
+		FVector TorqueForce(12, 8, 0);
 		BoxComp->AddTorqueInDegrees(TorqueForce, NAME_None, true);
 	}
 }

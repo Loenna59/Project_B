@@ -30,7 +30,7 @@ void ABlackholeGameMode::BeginPlay()
 	// 블랙홀 생성 타이머 설정
 	// 게임 시작 30초후 첫번째 블랙홀을 소환한다
 	// TODO: 실제 시연때는 30초로 변경하기
-	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 10.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 5.0f, false);
 }
 
 void ABlackholeGameMode::Tick(float DeltaTime)
@@ -51,10 +51,35 @@ inline void ABlackholeGameMode::SpawnBlackhole()
 	// 4페이즈까지만 있다
 	if(BlackholeSpawnCount >=4) return;
 
-	FTransform SpawnTransform(FVector(0,0,700));
+	FTransform SpawnTransform(FVector(0,0,600));
 	Blackhole = GetWorld()->SpawnActorDeferred<ABlackHole>(ABlackHole::StaticClass(), SpawnTransform);
 	if (Blackhole)
 	{
+		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
+		switch (BlackholeSpawnCount)
+		{
+		case 0:
+			Blackhole->R = 1100.f;
+			Blackhole->OrbitScale = 1.0f;
+			Blackhole->OrbitSpeed = 20.f;
+			break;
+		case 1:
+			Blackhole->R = 850.f;
+			Blackhole->OrbitScale = 1.5f;
+			Blackhole->OrbitSpeed = 40.f;
+			break;
+		case 2:
+			Blackhole->R = 600.f;
+			Blackhole->OrbitScale = 2.0f;
+			Blackhole->OrbitSpeed = 60.f;
+			break;
+		default:
+			Blackhole->R = 550.f;
+			Blackhole->OrbitScale = 2.5f;
+			Blackhole->OrbitSpeed = 80.f;
+			break;
+		}
+		
 		Blackhole->FinishSpawning(SpawnTransform);
 		Blackhole->bIsActive = true;
 	}
@@ -98,6 +123,6 @@ void ABlackholeGameMode::DestroyBalckhole()
 	// 재소환 예약
 	if (BlackholeSpawnCount < 4)
 	{
-		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 30.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 10.0f, false);
 	}
 }
