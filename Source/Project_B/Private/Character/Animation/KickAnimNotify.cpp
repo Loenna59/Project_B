@@ -16,15 +16,7 @@ void UKickAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	{
 		if (ACharacter* Character = Cast<ACharacter>(Owner))
 		{
-			Character->LaunchCharacter(Character->GetActorForwardVector() * 2500.f, true, false);
+			Character->LaunchCharacter(Character->GetActorForwardVector() * 1500.f, false, false);
 		}
-		
-		UBaseCharacterPhysicsAnimComponent* RightFoot = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("RightFootPhysicsAnimComp")));
-		
-		if (RightFoot)
-		{
-			RightFoot->AddForceForwardVector();
-		}
-		
 	}
 }

@@ -63,31 +63,18 @@ public:
 	UFUNCTION()
 	void Punch();
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Punch(UAnimMontage* Montage, EArmDirection Direction);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Punch(UAnimMontage* Montage, EArmDirection Direction);
-	
-
 	UFUNCTION()
 	void HeadButt();
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_HeadButt(UAnimMontage* Montage);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HeadButt(UAnimMontage* Montage);
-	
 
 	UFUNCTION()
 	void Kick();
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Kick(UAnimMontage* Montage);
 
+	UFUNCTION(Server, Reliable)
+	void Server_PlayAnimMontage(UAnimMontage* Montage, float PlayRate = 1.f, FName SectionName = NAME_None);
+	
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Kick(UAnimMontage* Montage);
+	void Multicast_PlayAnimMontage(UAnimMontage* Montage, float PlayRate = 1.f, FName SectionName = NAME_None);
 	
 	
 	void AddForceForwardVector();

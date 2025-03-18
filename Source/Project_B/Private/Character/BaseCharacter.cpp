@@ -82,6 +82,8 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetReplicateMovement(true);
+
 	APlayerController* pc = Cast<APlayerController>(Controller);
 
 	if (pc)

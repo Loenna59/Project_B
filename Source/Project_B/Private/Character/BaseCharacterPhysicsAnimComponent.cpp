@@ -1,6 +1,7 @@
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
 
 #include "Character/BaseCharacter.h"
+#include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
 
@@ -35,6 +36,8 @@ void UBaseCharacterPhysicsAnimComponent::GetLifetimeReplicatedProps(
 	TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UBaseCharacterPhysicsAnimComponent, SimulateBoneName);
 }
 
 void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -55,6 +58,11 @@ void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTi
 
 void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 {
+	if (!Character)
+	{
+		return;
+	}
+	
 	if (Character->HasAuthority())
 	{
 		Multicast_TogglePhysicalAnimation(SimulateBoneName, toggle);
@@ -69,14 +77,14 @@ void UBaseCharacterPhysicsAnimComponent::Server_TogglePhysicalAnimation_Implemen
 	Multicast_TogglePhysicalAnimation(BoneName, bSimulate);
 }
 
-bool UBaseCharacterPhysicsAnimComponent::Server_TogglePhysicalAnimation_Validate(FName BoneName, bool bSimulate)
-{
-	return true;
-}
-
 void UBaseCharacterPhysicsAnimComponent::Multicast_TogglePhysicalAnimation_Implementation(FName BoneName,
 	bool bSimulate)
 {
+	if (!Mesh)
+	{
+		return;
+	}
+	
 	if (bSimulate)
 	{
 		// LOG_SCREEN("Toggle");

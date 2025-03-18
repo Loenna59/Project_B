@@ -29,7 +29,7 @@ public:
 
 	void TogglePhysicalAnimation(bool toggle);
 
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Reliable)
 	void Server_TogglePhysicalAnimation(FName BoneName, bool bSimulate);
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -48,7 +48,7 @@ public:
 	UPROPERTY()
 	class UPhysicalAnimationComponent* PhysicalAnimationComp = nullptr;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Replicated)
 	FName SimulateBoneName = TEXT("CharacterPelvis");
 
 	UPROPERTY(EditAnywhere)

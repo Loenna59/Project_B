@@ -61,13 +61,20 @@ void UBaseCharacterAttackComponent::SetupInputBiding(class UEnhancedInputCompone
 
 void UBaseCharacterAttackComponent::Punch()
 {
+	if (!Character)
+	{
+		return;
+	}
+	
+	FString BoneName = ArmDirection == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
+	
 	if (Character->HasAuthority())
 	{
-		Multicast_Punch(PunchAnimMontage, ArmDirection);
+		Multicast_PlayAnimMontage(PunchAnimMontage, 1.f, *BoneName);
 	}
 	else
 	{
-		Server_Punch(PunchAnimMontage, ArmDirection);
+		Server_PlayAnimMontage(PunchAnimMontage, 1.f, *BoneName);
 	}
 	
 	ArmDirection = ArmDirection == EArmDirection::LEFT? EArmDirection::RIGHT : EArmDirection::LEFT;
@@ -75,28 +82,53 @@ void UBaseCharacterAttackComponent::Punch()
 
 void UBaseCharacterAttackComponent::HeadButt()
 {
+	if (!Character)
+	{
+		return;
+	}
+	
 	if (Character->HasAuthority())
 	{
-		Multicast_HeadButt(HeadButtAnimMontage);
+		Multicast_PlayAnimMontage(HeadButtAnimMontage, 1.5f);
 		return;
 	}
 
-	Server_HeadButt(HeadButtAnimMontage);
+	Server_PlayAnimMontage(HeadButtAnimMontage, 1.5f);
 }
 
 void UBaseCharacterAttackComponent::Kick()
 {
+	if (!Character)
+	{
+		return;
+	}
+	
 	if (Character->GetCharacterMovement()->IsFalling())
 	{
 		if (Character->HasAuthority())
 		{
-			Multicast_Kick(KickAnimMontage);
+			Multicast_PlayAnimMontage(KickAnimMontage, 1.5f);
 			return;
 		}
 
-		Server_Kick(KickAnimMontage);
+		Server_PlayAnimMontage(KickAnimMontage, 1.5f);
 	}
 	
+}
+
+void UBaseCharacterAttackComponent::Server_PlayAnimMontage_Implementation(UAnimMontage* Montage, float PlayRate,
+                                                                          FName SectionName)
+{
+	Multicast_PlayAnimMontage(Montage, PlayRate, SectionName);
+}
+
+void UBaseCharacterAttackComponent::Multicast_PlayAnimMontage_Implementation(UAnimMontage* Montage, float PlayRate,
+                                                                             FName SectionName)
+{
+	if (Montage && Character)
+	{
+		Character->PlayAnimMontage(Montage, PlayRate, SectionName);
+	}
 }
 
 void UBaseCharacterAttackComponent::AddForceForwardVector()
@@ -106,59 +138,3 @@ void UBaseCharacterAttackComponent::AddForceForwardVector()
 	FVector ForceDirection = Character->GetActorForwardVector() * ForceAmount;
 	Character->GetMesh()->AddImpulseToAllBodiesBelow(ForceDirection, *BoneName, true);
 }
-
-void UBaseCharacterAttackComponent::Server_Punch_Implementation(UAnimMontage* Montage, EArmDirection Direction)
-{
-	Multicast_Punch(Montage, Direction);
-}
-
-bool UBaseCharacterAttackComponent::Server_Punch_Validate(UAnimMontage* Montage, EArmDirection Direction)
-{
-	return true;
-}
-
-void UBaseCharacterAttackComponent::Multicast_Punch_Implementation(UAnimMontage* Montage, EArmDirection Direction)
-{
-	if (Montage && Character)
-	{
-		FString BoneName = Direction == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
-		Character->PlayAnimMontage(Montage, 1.f, *BoneName);
-	}
-}
-
-void UBaseCharacterAttackComponent::Server_HeadButt_Implementation(UAnimMontage* Montage)
-{
-	Multicast_HeadButt(Montage);
-}
-
-bool UBaseCharacterAttackComponent::Server_HeadButt_Validate(UAnimMontage* Montage)
-{
-	return true;
-}
-
-void UBaseCharacterAttackComponent::Multicast_HeadButt_Implementation(UAnimMontage* Montage)
-{
-	if (Montage && Character)
-	{
-		Character->PlayAnimMontage(HeadButtAnimMontage, 1.5f);
-	}
-}
-
-void UBaseCharacterAttackComponent::Server_Kick_Implementation(UAnimMontage* Montage)
-{
-	Multicast_Kick(Montage);
-}
-
-bool UBaseCharacterAttackComponent::Server_Kick_Validate(UAnimMontage* Montage)
-{
-	return true;
-}
-
-void UBaseCharacterAttackComponent::Multicast_Kick_Implementation(UAnimMontage* Montage)
-{
-	if (Montage && Character)
-	{
-		Character->PlayAnimMontage(KickAnimMontage, 2.f);
-	}
-}
-
