@@ -4,6 +4,7 @@
 
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/Character.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
@@ -21,6 +22,11 @@ AConveyorBelt::AConveyorBelt()
 	EndBox->SetupAttachment(Root);
 	EndBox->SetRelativeRotation(FRotator(0.0f,-90.0f,0.0f));
 	EndBox->SetRelativeScale3D(FVector(3.500000,1.250000,2.500000));
+
+	ForceBox = CreateDefaultSubobject<UBoxComponent>("ForceBox");
+	ForceBox->SetupAttachment(Root);
+	ForceBox->SetCollisionResponseToAllChannels(ECR_Ignore);
+	ForceBox->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
 	
 	Plates.SetNum(PlateCount);
 	for (int i = 0; i < PlateCount; i++)
@@ -42,11 +48,9 @@ void AConveyorBelt::BeginPlay()
 		Plates[i]->OnComponentEndOverlap.AddDynamic(this, &AConveyorBelt::OnCollisionEndOverlap);
 	}
 	
-	//EndBox->OnComponentBeginOverlap.AddDynamic(this, &AConveyorBelt::OnCollisionBeginOverlap);
-	//EndBox->OnComponentEndOverlap.AddDynamic(this, &AConveyorBelt::OnCollisionEndOverlap);
+	ForceBox->OnComponentBeginOverlap.AddDynamic(this, &AConveyorBelt::OnCharacterStepOverlap);
 
 	MoveDir = StartArrow->GetComponentLocation().ForwardVector;
-	LOG_SCREEN("%s", *MoveDir.ToString());
 }
 
 void AConveyorBelt::Tick(float DeltaTime)
@@ -58,11 +62,6 @@ void AConveyorBelt::Tick(float DeltaTime)
 	}
 }
 
-void AConveyorBelt::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-}
-
 void AConveyorBelt::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
@@ -70,4 +69,19 @@ void AConveyorBelt::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedCompone
 	{
 		OverlappedComponent->SetRelativeLocation(StartArrow->GetRelativeLocation());
 	}
+}
+
+void AConveyorBelt::OnCharacterStepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ACharacter* OverlappingCharacter = Cast<ACharacter>(OtherActor);
+	if (OverlappingCharacter)
+	{
+		LOG_SCREEN("스텝");
+	}
+}
+
+void AConveyorBelt::OnCharacterStepEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
 }

@@ -20,6 +20,11 @@ AConveyorBeltLong::AConveyorBeltLong()
 	EndBox->SetupAttachment(Root);
 	EndBox->SetRelativeRotation(FRotator(0.0f,-90.0f,0.0f));
 	EndBox->SetRelativeScale3D(FVector(3.500000,1.250000,2.500000));
+
+	ForceBox = CreateDefaultSubobject<UBoxComponent>("ForceBox");
+	ForceBox->SetupAttachment(Root);
+	ForceBox->SetCollisionResponseToAllChannels(ECR_Ignore);
+	ForceBox->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
 	
 	Plates.SetNum(PlateCount);
 	for (int i = 0; i < PlateCount; i++)
@@ -42,7 +47,6 @@ void AConveyorBeltLong::BeginPlay()
 	}
 
 	MoveDir = StartArrow->GetComponentLocation().ForwardVector;
-	LOG_SCREEN("%s", *MoveDir.ToString());
 }
 
 void AConveyorBeltLong::Tick(float DeltaTime)
@@ -61,4 +65,14 @@ void AConveyorBeltLong::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedCom
 	{
 		OverlappedComponent->SetRelativeLocation(StartArrow->GetRelativeLocation());
 	}
+}
+
+void AConveyorBeltLong::OnCharacterStepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+}
+
+void AConveyorBeltLong::OnCharacterStepEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
 }

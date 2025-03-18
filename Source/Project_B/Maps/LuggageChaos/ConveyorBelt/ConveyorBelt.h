@@ -15,9 +15,6 @@ public:
 	AConveyorBelt();
 	
 	UPROPERTY(EditAnywhere)
-	USceneComponent* Root;
-
-	UPROPERTY(EditAnywhere)
 	class UBoxComponent* EndBox;
 
 	UPROPERTY(EditAnywhere)
@@ -32,6 +29,16 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Conveyor Belt")
 	float Speed = 100.0f;
 
+	UPROPERTY(EditAnywhere, Category = "Conveyor Belt")
+	float ForceScale = 200.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Conveyor Belt")
+	UBoxComponent* ForceBox;
+	
+private:
+	UPROPERTY()
+	USceneComponent* Root;
+
 	FVector MoveDir;
 
 protected:
@@ -42,7 +49,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	void OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-	UFUNCTION()
 	void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+	void OnCharacterStepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	UFUNCTION()
+	void OnCharacterStepEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };
