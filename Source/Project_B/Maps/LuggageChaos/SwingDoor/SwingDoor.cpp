@@ -80,7 +80,7 @@ void ASwingDoor::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	{
 		++NearLugCount;
 		DoorLocked();
-		LOG_SCREEN("캐리어 근처");
+		//LOG_SCREEN("캐리어 근처");
 	}
 }
 
@@ -94,7 +94,7 @@ void ASwingDoor::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (NearLugCount <= 0)
 	{
 		DoorUnlocked();
-		LOG_SCREEN("캐리어 근처 아님");
+		//LOG_SCREEN("캐리어 근처 아님");
 	}
 }
 

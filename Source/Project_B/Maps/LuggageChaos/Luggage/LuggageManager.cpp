@@ -123,7 +123,7 @@ void ALuggageManager::DeactiveLuggage(ALuggage* lug, ETeamType team)
 
 		GetWorldTimerManager().SetTimer(GoldTimerHandle,this,&ALuggageManager::ActiveGoldLuggage,GoldCoolTime);
 	
-		LOG_SCREEN("황금 러기지 퇴장... ε=ε=ε=┏(ﾟロﾟ;)┛");
+		//LOG_SCREEN("황금 러기지 퇴장... ε=ε=ε=┏(ﾟロﾟ;)┛");
 		return;
 	}
 	
@@ -144,7 +144,7 @@ void ALuggageManager::DeactiveLuggage(ALuggage* lug, ETeamType team)
 void ALuggageManager::ActiveGoldLuggage()
 {
 	ActiveLuggage(GoldLuggage);
-	LOG_SCREEN("황금 러기지 등장  (*ﾟuﾟ )/\"");
+	//LOG_SCREEN("황금 러기지 등장  (*ﾟuﾟ )/\"");
 }
 
 ALuggage* ALuggageManager::SpawnLuggage(FVector pos)
