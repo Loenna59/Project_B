@@ -5,7 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "BlackHole.generated.h"
 
-// 블랙홀이 활성화 되었는지 판단하는 변수
+// 블랙홀이 활성화 되었는지 판단하는 델리게이트
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBlackholeStateChanged, bool, bNewState);
 
 UCLASS()
@@ -25,15 +25,20 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// 스폰되었니?
+	// 스폰되었니? 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsActive = false;
+	// 중력필드를 한번만 생성하기 위한 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bGravityFieldCreated = false;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OrbitPower = 10000.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OrbitScale = 1.0f;
+
+	// 블랙홀 활성화 델리게이트?
 	void SetBlackholeState(bool bNewState);
-
-
 	UPROPERTY(BlueprintAssignable)
 	FOnBlackholeStateChanged OnBlackholeStateChanged;
 
@@ -44,6 +49,9 @@ public:
 	class UStaticMeshComponent* Sphere;
 	UPROPERTY(editAnywhere, BlueprintReadWrite)
 	class USphereComponent* FirstR;
+	// 중력 필드 (ON/OFF)
+	UPROPERTY(editAnywhere, BlueprintReadWrite)
+	class URadialForceComponent* GravityField;
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
 
@@ -56,11 +64,6 @@ public:
 	
 	// 소환 횟수 카운트
 	int32 SpawnCount;
-	
-	// 회전 속도값 변수 (블랙홀 가동되면 박스 무게에 따라 설정해줄 값)
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	float RotateSpeed = 500.f;
-
 	
 };
 
