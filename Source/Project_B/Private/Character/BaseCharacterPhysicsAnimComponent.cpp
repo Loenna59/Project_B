@@ -18,15 +18,12 @@ void UBaseCharacterPhysicsAnimComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UActorComponent* Comp = GetOwner()->AddComponentByClass(UPhysicalAnimationComponent::StaticClass(), true, FTransform::Identity, true);
-	PhysicalAnimationComp = Cast<UPhysicalAnimationComponent>(Comp);
-
 	Character = Cast<ABaseCharacter>(GetOwner());
 
 	if (Character)
 	{
 		Mesh = Character->GetMesh();
-		PhysicalAnimationComp->SetSkeletalMeshComponent(Mesh);
+		PhysicalAnimationComp = Character->PhysicalAnimationComp;
 	}
 
 	TogglePhysicalAnimation(bAwakePhysics);
@@ -87,12 +84,8 @@ void UBaseCharacterPhysicsAnimComponent::Multicast_TogglePhysicalAnimation_Imple
 	
 	if (bSimulate)
 	{
-		// LOG_SCREEN("Toggle");
 		Mesh->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);
-		// PhysicalAnimationComp->ApplyPhysicalAnimationProfileBelow(BoneName, TEXT("HitReactionProfile"), false, false);
-		// PhysicalAnimationComp->SetStrengthMultiplyer(SimulateStrengthMultiplier);
 		Mesh->SetAllBodiesBelowPhysicsBlendWeight(BoneName, 0.5f, false, true);
-	
 		return;
 	}
 	

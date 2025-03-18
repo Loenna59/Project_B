@@ -11,6 +11,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "PhysicsEngine/PhysicalAnimationComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -38,7 +39,7 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->SetupAttachment(SpringArmComp);
 	CameraComp->SetRelativeRotation(FRotator(-25.f, 0, 0));
-	CameraComp->SetFieldOfView(70.f);
+	// CameraComp->SetFieldOfView(70.f);
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
@@ -48,24 +49,26 @@ ABaseCharacter::ABaseCharacter()
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
 	AttackComp->SetNetAddressable();
 	AttackComp->SetIsReplicated(true);
+
+	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
-	HeadPhysicsAnimComp->SetupAttachment(RootComponent);
+	HeadPhysicsAnimComp->RegisterComponent();
 	HeadPhysicsAnimComp->SetNetAddressable();
 	HeadPhysicsAnimComp->SetIsReplicated(true);
 	
 	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("LeftArmPhysicsAnimComp"));
-	LeftArmPhysicsAnimComp->SetupAttachment(RootComponent);
+	LeftArmPhysicsAnimComp->RegisterComponent();
 	LeftArmPhysicsAnimComp->SetNetAddressable();
 	LeftArmPhysicsAnimComp->SetIsReplicated(true);
 	
 	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightArmPhysicsAnimComp"));
-	RightArmPhysicsAnimComp->SetupAttachment(RootComponent);
+	RightArmPhysicsAnimComp->RegisterComponent();
 	RightArmPhysicsAnimComp->SetNetAddressable();
 	RightArmPhysicsAnimComp->SetIsReplicated(true);
 
 	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
-	RightFootPhysicsAnimComp->SetupAttachment(RootComponent);
+	RightFootPhysicsAnimComp->RegisterComponent();
 	RightFootPhysicsAnimComp->SetNetAddressable();
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
 
@@ -81,9 +84,11 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	SetReplicateMovement(true);
 
+	PhysicalAnimationComp->SetSkeletalMeshComponent(GetMesh());
+	
 	APlayerController* pc = Cast<APlayerController>(Controller);
 
 	if (pc)

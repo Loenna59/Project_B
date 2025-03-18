@@ -8,7 +8,7 @@
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class PROJECT_B_API UBaseCharacterPhysicsAnimComponent : public USceneComponent
+class PROJECT_B_API UBaseCharacterPhysicsAnimComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -43,17 +43,17 @@ protected:
 
 	UPROPERTY()
 	class USkeletalMeshComponent* Mesh = nullptr;
-
-public:
+	
 	UPROPERTY()
 	class UPhysicalAnimationComponent* PhysicalAnimationComp = nullptr;
 
-	UPROPERTY(EditAnywhere, Replicated)
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FName SimulateBoneName = TEXT("CharacterPelvis");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ForwardForceAmount = 1000.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAwakePhysics = true;
 };
