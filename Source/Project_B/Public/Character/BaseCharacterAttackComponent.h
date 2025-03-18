@@ -78,4 +78,12 @@ public:
 	
 	
 	void AddForceForwardVector();
+	
+	void OnPunchTraceChannel();
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnPunchTraceChannel();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnPunchTraceChannel(bool bHit, FHitResult HitResult);
 };

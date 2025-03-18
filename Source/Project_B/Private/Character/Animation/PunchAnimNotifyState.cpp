@@ -1,5 +1,6 @@
 #include "Character/Animation/PunchAnimNotifyState.h"
 
+#include "Character/BaseCharacterAttackComponent.h"
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
 
 void UPunchAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
@@ -26,6 +27,25 @@ void UPunchAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimS
 		}
 	}
 }
+
+void UPunchAnimNotifyState::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
+	float FrameDeltaTime)
+{
+	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime);
+
+	AActor* Owner = MeshComp->GetOwner();
+	
+	if (Owner)
+	{
+		UBaseCharacterAttackComponent* AttackComp = Cast<UBaseCharacterAttackComponent>(Owner->GetDefaultSubobjectByName(TEXT("AttackComp")));
+	
+		if (AttackComp)
+		{
+			AttackComp->OnPunchTraceChannel();
+		}
+	}
+}
+
 
 void UPunchAnimNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {

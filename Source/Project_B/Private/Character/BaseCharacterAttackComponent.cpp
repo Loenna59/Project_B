@@ -3,6 +3,7 @@
 #include "EnhancedInputComponent.h"
 #include "Character/BaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Project_B/Utilities/LogMacro.h"
 
@@ -137,4 +138,47 @@ void UBaseCharacterAttackComponent::AddForceForwardVector()
 	
 	FVector ForceDirection = Character->GetActorForwardVector() * ForceAmount;
 	Character->GetMesh()->AddImpulseToAllBodiesBelow(ForceDirection, *BoneName, true);
+}
+
+void UBaseCharacterAttackComponent::OnPunchTraceChannel()
+{
+	Server_OnPunchTraceChannel();
+}
+
+void UBaseCharacterAttackComponent::Server_OnPunchTraceChannel_Implementation()
+{
+	FHitResult HitResult;
+
+	FName BoneName = ArmDirection == EArmDirection::LEFT? TEXT("Hand_R") : TEXT("Hand_L");
+
+	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
+
+	bool bHit = UKismetSystemLibrary::SphereTraceSingle
+	(
+		GetWorld(),
+		Location,
+		Location,
+		20,
+		UEngineTypes::ConvertToTraceType(ECC_Camera),
+		false,
+		{ Character },
+		EDrawDebugTrace::ForDuration,
+		HitResult,
+		true
+	);
+
+	Multicast_OnPunchTraceChannel(bHit, HitResult);
+}
+
+void UBaseCharacterAttackComponent::Multicast_OnPunchTraceChannel_Implementation(bool bHit, FHitResult HitResult)
+{
+	if (bHit)
+	{
+		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitResult.GetActor()))
+		{
+			// Other->GetMesh()->SetAllBodiesBelowSimulatePhysics(TEXT("Hips"), true, true);
+			// Other->GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(TEXT("Hips"), 0.5f, false, true);
+			// Other->GetMesh()->AddImpulseAtLocation(HitResult.ImpactNormal.ForwardVector * 50000, HitResult.ImpactPoint, TEXT("Spine"));
+		}
+	}
 }

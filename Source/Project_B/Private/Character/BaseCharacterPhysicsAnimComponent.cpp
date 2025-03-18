@@ -60,12 +60,6 @@ void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 		return;
 	}
 	
-	if (Character->HasAuthority())
-	{
-		Multicast_TogglePhysicalAnimation(SimulateBoneName, toggle);
-		return;
-	}
-
 	Server_TogglePhysicalAnimation(SimulateBoneName, toggle);
 }
 
