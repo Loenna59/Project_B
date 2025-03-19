@@ -76,25 +76,19 @@ void ADestroyZone::BeginPlay()
 
 	// 블랙홀 찾기
 	ABlackHole* Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
-	if (Blackhole)
-	{
-		// 블랙홀의 상태 변화 델리게이트에 바인딩하자
-		Blackhole->OnBlackholeStateChanged.AddDynamic(this, &ADestroyZone::HandleBlackholeStateChange);
-		// 초기 값도 동기화 해주기
-		bIsOnBlackhole = Blackhole->bIsActive;
-	}
 }
 
 // Called every frame
 void ADestroyZone::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	if (!bIsRotate)
+	{
+		BladeRotate();
+		bIsRotate = true;
+	}
 		
-}
-
-void ADestroyZone::HandleBlackholeStateChange(bool bNewState)
-{
-	bIsOnBlackhole = bNewState;
 }
 
 void ADestroyZone::BladeRotate()
@@ -102,7 +96,7 @@ void ADestroyZone::BladeRotate()
 	if (bIsOnBlackhole)
 	{
 		// TODO: 회전 속도 조정
-		RotateSpeed = 180.f;
+		RotateSpeed = 90.f;
 	}
 	else
 		RotateSpeed = 0.0f;

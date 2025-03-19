@@ -5,9 +5,6 @@
 #include "GameFramework/Actor.h"
 #include "BlackHole.generated.h"
 
-// 블랙홀이 활성화 되었는지 판단하는 변수
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBlackholeStateChanged, bool, bNewState);
-
 UCLASS()
 class PROJECT_B_API ABlackHole : public AActor
 {
@@ -25,17 +22,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// 스폰되었니?
+	// 스폰되었니? 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsActive = false;
+	// 중력필드를 한번만 생성하기 위한 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bGravityFieldCreated = false;
-	
-	void SetBlackholeState(bool bNewState);
 
-
-	UPROPERTY(BlueprintAssignable)
-	FOnBlackholeStateChanged OnBlackholeStateChanged;
+	// 블랙홀 힘
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OrbitPower = 10000.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OrbitScale = 1.0f;
 
 	// 외관
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -44,24 +42,26 @@ public:
 	class UStaticMeshComponent* Sphere;
 	UPROPERTY(editAnywhere, BlueprintReadWrite)
 	class USphereComponent* FirstR;
+	// 중력 필드 (ON/OFF)
+	UPROPERTY(editAnywhere, BlueprintReadWrite)
+	class URadialForceComponent* GravityField;
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
 
-	// 빨아들일 요소들을 조사하고 가동 & 멈춤
+	// 빨아들일 요소들을 조사하고 가동
+	// 멈추는건 Gamemode -> 왜냐하면 블랙홀이 삭제되면 여기 내부 함수를 실행할 수 없기 때문
 	void ActivateBlackhole();
-	void DeactivateBlackhole();
 	// 중력필드를 형성하고 회전시킴
 	void CreateGravityField();
 	void ApplyOrbitalForce();
 	
+	// 공전궤도 값
+	float R = 0.f;
+	// 공전 속도 값
+	float OrbitSpeed = 30.0f;
+	
 	// 소환 횟수 카운트
 	int32 SpawnCount;
-	
-	// 회전 속도값 변수 (블랙홀 가동되면 박스 무게에 따라 설정해줄 값)
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	float RotateSpeed = 500.f;
-
-	
 };
 
 
