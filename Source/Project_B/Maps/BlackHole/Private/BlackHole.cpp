@@ -71,101 +71,123 @@ void ABlackHole::Tick(float DeltaTime)
 		{
 			CreateGravityField();
 			bGravityFieldCreated = true; // 중력 필드가 생성되었음을 표시
-			SpawnCount++;
 		}
-		ActivateBlackhole();
 		ActivateGravity();
-		ApplyOrbitalForce();
+		// ActivateBlackhole();
+		// ApplyOrbitalForce();
 	}
 	else
 		Sphere->SetVisibility(false);
-		DeactiveBlackhole();
+		// DeactiveBlackhole();
 }
 
 void ABlackHole::CreateGravityField()
 {
 	GravityField->Radius = 2500.0f; // 중력 필드 반경
-	GravityField->ForceStrength = -8000.f; // 중력 강도
+	GravityField->ForceStrength = -50000.f; // 중력 강도
 }
 
 void ABlackHole::ActivateGravity()
 {
-	if (Player)
-	{
-		FVector GravityForce = (GetActorLocation() - Player->GetActorLocation())*500;
-		Player->GetCharacterMovement()->AddForce(GravityForce);
-	}
+    if (Player)
+    {
+        // 블랙홀 중심 -> 플레이어 사이 거리 계산
+        FVector BlackholeLocation = GetActorLocation();
+        FVector PlayerLocation = Player->GetActorLocation();
+        float Distance = FVector::Dist(PlayerLocation, BlackholeLocation);
+
+        // 중력 (구심력)
+        float GM = FMath::Abs(GravityField->ForceStrength);
+        float m = (Player->GetMesh()->GetMass()); // 플레이어의 질량
+        float GravityForce = (GM * m) / (Distance * Distance);
+		float ForceClamp = FMath::Clamp(GravityForce, 0, 1.0f);
+
+        // 원심력 
+        float v = 10; //플레이어 속도값(임의)
+        float CentrifugalForce = (m * v * v) / Distance;
+
+        // 힘 작용 방향 (플레이어 -> 블랙홀로 향하는 방향)
+        FVector GravityDirection = (BlackholeLocation - PlayerLocation).GetSafeNormal();
+    	
+    	// 높이 700 미만인 경우: 나선 운동
+    	if (PlayerLocation.Z < 600.0f)
+    	{
+    		// 700까지는 플레이어를 위로 띄우자
+    		Player->GetCharacterMovement()->AddForce(GravityDirection * ForceClamp * 130000 * 2);
+
+    		// 접선 방향으로 힘 적용 (나선 운동)
+    		FVector OrbitalDirection = FVector(-GravityDirection.Y, GravityDirection.X, 0).GetSafeNormal(); // 접선 방향
+    		float SpiralForce = 500.0f; // 나선 운동을 위한 힘 (조정 가능)
+    		Player->GetCharacterMovement()->AddForce(OrbitalDirection * SpiralForce * 5000);
+
+    		DrawDebugLine(GetWorld(), PlayerLocation, PlayerLocation + GravityDirection * 200.0f, FColor::Red, false, -1, 0, 2.0f);
+    		DrawDebugLine(GetWorld(), PlayerLocation, PlayerLocation + OrbitalDirection * 200.0f, FColor::Blue, false, -1, 0, 2.0f);
+    	}
+    	// 높이 700 이상인 경우: 궤도 운동
+    	else 
+    	{
+    		/*// Z축 높이 고정
+    		PlayerLocation.Z = 600.0f;
+    		Player->SetActorLocation(PlayerLocation);*/
+
+    		// 궤도 반지름(R)을 기준으로 힘 조정
+    		FVector HorizontalDirection = GravityDirection;
+    		HorizontalDirection.Z = 0; // Z축 힘 제거
+
+    		if (Distance > R)
+    		{
+    			// 플레이어를 블랙홀 쪽으로 당김
+    			Player->GetCharacterMovement()->AddForce(HorizontalDirection * ForceClamp * 8000000 * 2);
+    			UE_LOG(LogTemp, Warning, TEXT("블랙홀쪽으로 당김:%f"), ForceClamp);
+    		}
+    		else if (Distance < R)
+    		{
+    			// 플레이어를 밀어냄
+    			Player->GetCharacterMovement()->AddForce(-HorizontalDirection * ForceClamp * 8000);
+    			UE_LOG(LogTemp, Warning, TEXT("플레이어를 밀어냄:%f"), ForceClamp);
+    		}
+
+    		// 궤도 속도(원심력=구심력일때 궤도를 돌기 위한 속도) 계산 및 적용
+    		float OrbitalVelocity = FMath::Sqrt(GM / R);
+    		
+    		FVector OrbitalDirection = GravityDirection.RotateAngleAxis(90.0f, FVector(0, 0, 1));
+    		FVector DesiredVelocity = OrbitalDirection * OrbitalVelocity;
+    		DrawDebugLine(GetWorld(), PlayerLocation, PlayerLocation + OrbitalDirection * 800.0f, FColor::Red, false, 5, 0, 2.0f);
+
+    		// 속도 조정
+    		FVector VelocityAdjustment = (DesiredVelocity) * m * 0.01;
+    		Player->GetCharacterMovement()->AddForce(VelocityAdjustment);
+    		UE_LOG(LogTemp, Warning, TEXT("궤도속도조정:%f"), OrbitalVelocity);
+    	}
+    }
 }
 
-void ABlackHole::ApplyOrbitalForce()
+void ABlackHole::ActivateOrbital()
 {
-	// 플레이어
 	if (Player)
 	{
+		// 블랙홀 중심 -> 플레이어 사이 거리 계산
+		FVector BlackholeLocation = GetActorLocation();
 		FVector PlayerLocation = Player->GetActorLocation();
-		FVector BlackHoleCenter = GetActorLocation();
-		
-		// 사이의 거리값
-		float Distance = FVector::Dist(PlayerLocation,BlackHoleCenter);
-		
-		FVector DirectionToBlackHole = BlackHoleCenter - PlayerLocation;
-		DirectionToBlackHole.Normalize();
-		
-		// 블랙홀 주위를 회전하는 벡터 계산
-		// 공전을 하려면 현재위치에서 블랙홀중심향하는 벡터에 수직인 방향으로 이동해야함
-		// 블랙홀 방향 벡터를 Z축 기준 90도로 회전, 축을 재설정 (원형 궤도 회전할 방향임)
-		FVector RotationAxis = FVector(0, 0, 1);
-		FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, RotationAxis);
+		float Distance = FVector::Dist(PlayerLocation, BlackholeLocation);
 
-		// 새 위치 계산 (회전방향으로 직진하지 않고 원형으로 회전할 수 있게)
-		FVector NewPosition = PlayerLocation + (OrbitDirection * 500 * OrbitScale * GetWorld()->GetDeltaSeconds());
-		
-		FVector Force = OrbitDirection * OrbitPower * OrbitScale;
-		// 이동할 방향으로 힘
-		Player->GetCharacterMovement()->AddForce(Force);
-		// 회전하면서 이동하자
-		// TODO:변수로 빼기?
-		FVector TorqueForce(12, 8, 0);
-		Player->GetMesh()->AddTorqueInDegrees(TorqueForce, NAME_None, true);
-	}
-	
-	// box 전부 조사해서 배열에 저장하자
-	TArray<AActor*> BoxActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
+		// 힘 작용 방향 (플레이어 -> 블랙홀로 향하는 방향)
+		FVector GravityDirection = (BlackholeLocation - PlayerLocation).GetSafeNormal();
 
-	//범위기반 for 루프, 저장된 액터를 하나씩 순회
-	for (AActor* BoxActor : BoxActors)
-	{
-		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
-		// 메쉬 꺼내기
-		UStaticMeshComponent* BoxComp = BoxAsset->Box;
-		FVector BoxLocation = BoxComp->GetComponentLocation();
-		FVector BlackHoleCenter = GetActorLocation();
-		BoxComp->SetEnableGravity(false);
-		
-		// 사이의 거리값
-		float Distance = FVector::Dist(BoxLocation,BlackHoleCenter);
-			
-		// 박스->블랙홀 방향으로 향하는 벡터 계산
-		FVector DirectionToBlackHole = BlackHoleCenter - BoxLocation;
-		DirectionToBlackHole.Normalize();
-		
-		// 블랙홀 주위를 회전하는 벡터 계산
-		// 공전을 하려면 현재위치에서 블랙홀중심향하는 벡터에 수직인 방향으로 이동해야함
-		// 블랙홀 방향 벡터를 Z축 기준 90도로 회전, 축을 재설정 (원형 궤도 회전할 방향임)
-		FVector RotationAxis = FVector(0, 0, 1);
-		FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, RotationAxis);
+		// 높이 700 미만인 경우: 나선 운동
+		if (PlayerLocation.Z < 700.0f)
+		{
+			// 접선 방향으로 힘 적용 (나선 운동)
+			FVector OrbitalDirection = FVector(-GravityDirection.Y, GravityDirection.X, 0).GetSafeNormal(); // 접선 방향
+			float SpiralForce = 500.0f; // 나선 운동을 위한 힘 (조정 가능)
+			Player->GetCharacterMovement()->AddForce(OrbitalDirection * SpiralForce);
 
-		FVector Force = OrbitDirection * OrbitPower * OrbitScale;
-		// 이동할 방향으로 힘
-		BoxComp->AddForce(Force, NAME_None, true);
-		// 회전하면서 이동하자
-		// TODO:변수로 빼기?
-		FVector TorqueForce(12, 8, 0);
-		BoxComp->AddTorqueInDegrees(TorqueForce, NAME_None, true);
+			DrawDebugLine(GetWorld(), PlayerLocation, PlayerLocation + GravityDirection * 100.0f, FColor::Red, false, -1, 0, 2.0f);
+			DrawDebugLine(GetWorld(), PlayerLocation, PlayerLocation + OrbitalDirection * 100.0f, FColor::Blue, false, -1, 0, 2.0f);
+		}
 	}
 }
-
+	
 void ABlackHole::ActivateBlackhole()
 {
 	FVector BlackHoleCenter = GetActorLocation();

@@ -32,9 +32,10 @@ public:
 
 	// 블랙홀 힘
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float OrbitPower = 10000.0f;
+	float OrbitPower = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitScale = 1.0f;
+	bool bOrbitalVelocityApplied = false;
 
 	// 외관
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -58,7 +59,7 @@ public:
 	// 중력필드를 형성하고, 액터들 회전시킴
 	void CreateGravityField();
 	void ActivateGravity();
-	void ApplyOrbitalForce();
+	void ActivateOrbital();
 	
 	// 공전궤도 값
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -67,9 +68,6 @@ public:
 	// 공전 속도 값
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitSpeed = 30.0f;
-	
-	// 소환 횟수 카운트
-	int32 SpawnCount;
 };
 
 

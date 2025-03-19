@@ -56,24 +56,16 @@ inline void ABlackholeGameMode::SpawnBlackhole()
 		switch (BlackholeSpawnCount)
 		{
 		case 0:
-			Blackhole->R = 900.f;
-			Blackhole->OrbitScale = 1.0f;
-			Blackhole->OrbitSpeed = 50.f;
+			Blackhole->R = 950.f;
 			break;
 		case 1:
 			Blackhole->R = 750.f;
-			Blackhole->OrbitScale = 1.5f;
-			Blackhole->OrbitSpeed = 50.f;
 			break;
 		case 2:
 			Blackhole->R = 600.f;
-			Blackhole->OrbitScale = 2.0f;
-			Blackhole->OrbitSpeed = 50.f;
 			break;
 		default:
 			Blackhole->R = 550.f;
-			Blackhole->OrbitScale = 2.5f;
-			Blackhole->OrbitSpeed = 50.f;
 			break;
 		}
 	}
