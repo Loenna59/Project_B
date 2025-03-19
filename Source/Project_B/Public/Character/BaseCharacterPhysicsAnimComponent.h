@@ -8,7 +8,7 @@
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class PROJECT_B_API UBaseCharacterPhysicsAnimComponent : public USceneComponent
+class PROJECT_B_API UBaseCharacterPhysicsAnimComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -20,6 +20,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
@@ -27,24 +29,31 @@ public:
 
 	void TogglePhysicalAnimation(bool toggle);
 
+	UFUNCTION(Server, Reliable)
+	void Server_TogglePhysicalAnimation(FName BoneName, bool bSimulate);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_TogglePhysicalAnimation(FName BoneName, bool bSimulate);
+
+	void AddForceForwardVector();
+
 protected:
 	UPROPERTY()
 	class ABaseCharacter* Character = nullptr;
 
 	UPROPERTY()
 	class USkeletalMeshComponent* Mesh = nullptr;
-
-	FTimerHandle RecoveryTimerHandle;
-
-	bool bStartRecovery;
-
-public:
+	
 	UPROPERTY()
 	class UPhysicalAnimationComponent* PhysicalAnimationComp = nullptr;
 
-	UPROPERTY(EditAnywhere)
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FName SimulateBoneName = TEXT("CharacterPelvis");
 
-	UPROPERTY(EditAnywhere)
-	float RecoveryDelay = 3.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ForwardForceAmount = 1000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bAwakePhysics = true;
 };

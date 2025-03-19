@@ -1,5 +1,6 @@
 #include "Character/Animation/PunchAnimNotifyState.h"
 
+#include "Character/BaseCharacterAttackComponent.h"
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
 
 void UPunchAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
@@ -8,18 +9,18 @@ void UPunchAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimS
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration);
 
 	AActor* Owner = MeshComp->GetOwner();
-
+	
 	if (Owner)
 	{
 		UBaseCharacterPhysicsAnimComponent* Left = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("LeftArmPhysicsAnimComp")));
-
+	
 		if (Left)
 		{
 			Left->TogglePhysicalAnimation(false);
 		}
-
+		
 		UBaseCharacterPhysicsAnimComponent* Right = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp")));
-
+		
 		if (Right)
 		{
 			Right->TogglePhysicalAnimation(false);
@@ -27,23 +28,42 @@ void UPunchAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimS
 	}
 }
 
+void UPunchAnimNotifyState::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
+	float FrameDeltaTime)
+{
+	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime);
+
+	AActor* Owner = MeshComp->GetOwner();
+	
+	if (Owner)
+	{
+		UBaseCharacterAttackComponent* AttackComp = Cast<UBaseCharacterAttackComponent>(Owner->GetDefaultSubobjectByName(TEXT("AttackComp")));
+	
+		if (AttackComp)
+		{
+			AttackComp->OnPunchTraceChannel();
+		}
+	}
+}
+
+
 void UPunchAnimNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	Super::NotifyEnd(MeshComp, Animation);
 	
 	AActor* Owner = MeshComp->GetOwner();
-
+	
 	if (Owner)
 	{
 		UBaseCharacterPhysicsAnimComponent* Left = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("LeftArmPhysicsAnimComp")));
-
+	
 		if (Left)
 		{
 			Left->TogglePhysicalAnimation(true);
 		}
-
+		
 		UBaseCharacterPhysicsAnimComponent* Right = Cast<UBaseCharacterPhysicsAnimComponent>(Owner->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp")));
-
+		
 		if (Right)
 		{
 			Right->TogglePhysicalAnimation(true);

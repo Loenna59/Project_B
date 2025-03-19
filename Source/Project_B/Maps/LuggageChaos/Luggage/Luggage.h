@@ -13,16 +13,25 @@ class PROJECT_B_API ALuggage : public AActor
 
 public:
 	ALuggage();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	USceneComponent* Root;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UStaticMeshComponent* LuggageMesh;
-	
+
+	/**일반 러기지 1점, 황금 러기지 4점*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Luggage")
 	uint8 Point = 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Luggage")
+	float Weight;
+	
+protected:
+	
+
+private:
+	
+	
 protected:
 	virtual void BeginPlay() override;
 

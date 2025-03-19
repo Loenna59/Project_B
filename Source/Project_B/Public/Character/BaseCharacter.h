@@ -30,6 +30,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* CameraComp;
+
+	UPROPERTY()
+	class UPhysicalAnimationComponent* PhysicalAnimationComp;
 	
 	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterMoveComponent* MoveComp;
@@ -42,6 +45,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterPhysicsAnimComponent* RightArmPhysicsAnimComp;
+
+	UPROPERTY(VisibleAnywhere)
+	class UBaseCharacterPhysicsAnimComponent* RightFootPhysicsAnimComp;
 
 	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterAttackComponent* AttackComp;
