@@ -5,9 +5,6 @@
 #include "GameFramework/Actor.h"
 #include "BlackHole.generated.h"
 
-// 블랙홀이 활성화 되었는지 판단하는 델리게이트
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBlackholeStateChanged, bool, bNewState);
-
 UCLASS()
 class PROJECT_B_API ABlackHole : public AActor
 {
@@ -32,15 +29,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bGravityFieldCreated = false;
 
+	// 블랙홀 힘
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitPower = 10000.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitScale = 1.0f;
-
-	// 블랙홀 활성화 델리게이트?
-	void SetBlackholeState(bool bNewState);
-	UPROPERTY(BlueprintAssignable)
-	FOnBlackholeStateChanged OnBlackholeStateChanged;
 
 	// 외관
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -55,16 +48,20 @@ public:
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
 
-	// 빨아들일 요소들을 조사하고 가동 & 멈춤
+	// 빨아들일 요소들을 조사하고 가동
+	// 멈추는건 Gamemode -> 왜냐하면 블랙홀이 삭제되면 여기 내부 함수를 실행할 수 없기 때문
 	void ActivateBlackhole();
-	void DeactivateBlackhole();
 	// 중력필드를 형성하고 회전시킴
 	void CreateGravityField();
 	void ApplyOrbitalForce();
 	
+	// 공전궤도 값
+	float R = 0.f;
+	// 공전 속도 값
+	float OrbitSpeed = 30.0f;
+	
 	// 소환 횟수 카운트
 	int32 SpawnCount;
-	
 };
 
 

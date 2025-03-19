@@ -5,6 +5,7 @@
 
 #include "Character/BaseCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PhysicsEngine/RadialForceComponent.h"
@@ -25,11 +26,18 @@ ABlackHole::ABlackHole()
 	SetRootComponent(Root);
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>("Sphere");
 	Sphere->SetupAttachment(RootComponent);
+	Sphere->SetRelativeScale3D(FVector(4.5f));
+	
 	// 중력필드
 	GravityField = CreateDefaultSubobject<URadialForceComponent>("GravityField");
 	GravityField->SetupAttachment(RootComponent);
 	GravityField->Radius = 0.f; // 중력 필드 반경
 	GravityField->ForceStrength = 0.f; // 중력 강도 (음수는 끌어당김)
+
+	// 작용 궤도
+	FirstR = CreateDefaultSubobject<USphereComponent>("FirstR");
+	FirstR->SetupAttachment(RootComponent);
+	FirstR->SetSphereRadius(500.f);
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TempBlackHole(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	if (TempBlackHole.Succeeded())
@@ -48,7 +56,7 @@ void ABlackHole::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 처음에 생성될때 크기 0으로 설정했다가 점점 커지게 (4로커지면됨)
+	// 처음에 생성될때 크기 0으로 설정했다가 점점 커지게 (4.5로커지면됨)
 	// Sphere->SetRelativeScale3D(FVector(0));
 
 }
@@ -69,19 +77,6 @@ void ABlackHole::Tick(float DeltaTime)
 		}
 		ActivateBlackhole();
 		ApplyOrbitalForce();
-	}
-	else
-	{
-		DeactivateBlackhole();
-	}
-}
-
-void ABlackHole::SetBlackholeState(bool bNewState)
-{
-	if (bIsActive != bNewState)
-	{
-		bIsActive = bNewState;
-		OnBlackholeStateChanged.Broadcast(bIsActive); // 델리게이트 호출
 	}
 }
 
@@ -124,32 +119,10 @@ void ABlackHole::ApplyOrbitalForce()
 		// 이동할 방향으로 힘
 		BoxComp->AddForce(Force, NAME_None, true);
 		// 회전하면서 이동하자
-		FVector TorqueForce(50, 50, 0);
+		// TODO:변수로 빼기?
+		FVector TorqueForce(12, 8, 0);
 		BoxComp->AddTorqueInDegrees(TorqueForce, NAME_None, true);
 	}
-}
-
-void ABlackHole::DeactivateBlackhole()
-{
-	// 플레이어의 캡슐 물리 일단 꺼주기
-	ABaseCharacter* Player = Cast<ABaseCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseCharacter::StaticClass()));
-	UCapsuleComponent* capsule = Player->GetCapsuleComponent();
-	capsule->SetSimulatePhysics(false);
-
-	// box 전부 조사해서 배열에 저장하자
-	TArray<AActor*> BoxActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
-
-	for (AActor* BoxActor : BoxActors)
-	{
-		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
-		// 메쉬 꺼내기
-		UStaticMeshComponent* BoxComp = BoxAsset->Box;
-		BoxComp->SetEnableGravity(true);
-	}
-	// 중력필드 초기화
-	GravityField->Radius = 0.f; 
-	GravityField->ForceStrength = 0.f;
 }
 
 void ABlackHole::ActivateBlackhole()
@@ -180,12 +153,21 @@ void ABlackHole::ActivateBlackhole()
 		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
 		// 메쉬 꺼내기
 		UStaticMeshComponent* BoxComp = BoxAsset->Box;
-		FVector StartLoc = BoxComp->GetComponentLocation();
-		FVector EndLoc = Sphere->GetComponentLocation();
-		FRotator InRot = UKismetMathLibrary::FindLookAtRotation(StartLoc, EndLoc);
-		FVector NewVel = UKismetMathLibrary::GetForwardVector(InRot)*200;
-		
-		BoxComp->SetPhysicsLinearVelocity(NewVel, false, "None");
+		FVector BlackHoleCenter = GetActorLocation();
+    
+		// 각도를 시간에 따라 증가
+		BoxAsset->CurrentAngle += OrbitSpeed * GetWorld()->GetDeltaSeconds();
+
+		// 새로운 위치 계산
+		// TODO: 페이즈별 R값 계산
+		FVector OrbitPosition = BlackHoleCenter + FVector(
+			FMath::Cos(FMath::DegreesToRadians(BoxAsset->CurrentAngle)),
+			FMath::Sin(FMath::DegreesToRadians(BoxAsset->CurrentAngle)),
+			0) * R;
+
+		// 박스를 해당 위치로 이동
+		FVector Direction = OrbitPosition - BoxComp->GetComponentLocation();
+		BoxComp->SetPhysicsLinearVelocity(Direction.GetSafeNormal() * OrbitSpeed,false,"None");
 	}
 
 	// 3. 똑같이, 체인도 조사해서 포함시키기
