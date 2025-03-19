@@ -92,10 +92,10 @@ void ABlackHole::ApplyOrbitalForce()
 	// 플레이어
 	if (Player)
 	{
+		Player->GetMesh()->SetEnableGravity(false);
 		FVector PlayerLocation = Player->GetActorLocation();
 		FVector BlackHoleCenter = GetActorLocation();
 		
-
 		// 사이의 거리값
 		float Distance = FVector::Dist(PlayerLocation,BlackHoleCenter);
 		
@@ -162,10 +162,8 @@ void ABlackHole::ActivateBlackhole()
 	if (Player)
 	{
 		// 캡슐 컴포넌트
-		UCapsuleComponent* capsule = Player->GetCapsuleComponent();
-		capsule->SetSimulatePhysics(true);
 		Player->GetMesh()->SetSimulatePhysics(true);
-		Player->GetMesh()->SetEnableGravity(false);
+		
 		
 		// 새로운 위치 계산
 		// TODO: 페이즈별 R값 계산 -> gamemode 에서 일단 하고있다
@@ -176,7 +174,7 @@ void ABlackHole::ActivateBlackhole()
 
 		// 해당 위치로 이동
 		FVector Direction = OrbitPosition - Player->GetActorLocation();
-		capsule->SetPhysicsLinearVelocity(Direction.GetSafeNormal() * OrbitSpeed,false,"None");
+		Player->GetMesh()->SetPhysicsLinearVelocity(Direction.GetSafeNormal() * OrbitSpeed,false,"None");
 	}
 	
 	// 2. box 전부 조사해서 배열에 저장하자
@@ -225,11 +223,10 @@ void ABlackHole::DeactiveBlackhole()
 {
 	if (!bIsActive)
 	{
-		// 플레이어의 캡슐 물리 일단 꺼주기
-		UCapsuleComponent* capsule = Player->GetCapsuleComponent();
-		capsule->SetSimulatePhysics(false);
+		// 플레이어의 설정 원래대로 돌려주기
 		Player->GetMesh()->SetSimulatePhysics(false);
 		Player->GetMesh()->SetEnableGravity(true);
+		Player->GetCharacterMovement()->SetGravityDirection(FVector(0,0,-1));
 	}
 
 	// box 전부 조사해서 배열에 저장하자
