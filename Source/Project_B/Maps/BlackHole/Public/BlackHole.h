@@ -55,8 +55,9 @@ public:
 	// 요소
 	ABaseCharacter* Player;
 	
-	// 중력필드를 형성하고 회전시킴
+	// 중력필드를 형성하고, 액터들 회전시킴
 	void CreateGravityField();
+	void ActivateGravity();
 	void ApplyOrbitalForce();
 	
 	// 공전궤도 값

@@ -34,6 +34,8 @@ ABlackHole::ABlackHole()
 	GravityField->SetupAttachment(RootComponent);
 	GravityField->Radius = 0.f; // 중력 필드 반경
 	GravityField->ForceStrength = 0.f; // 중력 강도 (음수는 끌어당김)
+	GravityField->bImpulseVelChange = false;
+	GravityField->bIgnoreOwningActor = true;
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TempBlackHole(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	if (TempBlackHole.Succeeded())
@@ -72,8 +74,10 @@ void ABlackHole::Tick(float DeltaTime)
 		{
 			CreateGravityField();
 			bGravityFieldCreated = true; // 중력 필드가 생성되었음을 표시
+			SpawnCount++;
 		}
 		ActivateBlackhole();
+		ActivateGravity();
 		ApplyOrbitalForce();
 	}
 	else
@@ -84,7 +88,16 @@ void ABlackHole::Tick(float DeltaTime)
 void ABlackHole::CreateGravityField()
 {
 	GravityField->Radius = 2500.0f; // 중력 필드 반경
-	GravityField->ForceStrength = 2000.f; // 중력 강도
+	GravityField->ForceStrength = -8000.f; // 중력 강도
+}
+
+void ABlackHole::ActivateGravity()
+{
+	if (Player)
+	{
+		FVector GravityForce = (GetActorLocation() - Player->GetActorLocation())*500;
+		Player->GetCharacterMovement()->AddForce(GravityForce);
+	}
 }
 
 void ABlackHole::ApplyOrbitalForce()
@@ -92,7 +105,6 @@ void ABlackHole::ApplyOrbitalForce()
 	// 플레이어
 	if (Player)
 	{
-		Player->GetMesh()->SetEnableGravity(false);
 		FVector PlayerLocation = Player->GetActorLocation();
 		FVector BlackHoleCenter = GetActorLocation();
 		
@@ -108,11 +120,16 @@ void ABlackHole::ApplyOrbitalForce()
 		FVector RotationAxis = FVector(0, 0, 1);
 		FVector OrbitDirection = DirectionToBlackHole.RotateAngleAxis(90.0f, RotationAxis);
 
+		// 새 위치 계산 (회전방향으로 직진하지 않고 원형으로 회전할 수 있게)
+		FVector NewPosition = PlayerLocation + (OrbitDirection * 500 * OrbitScale * GetWorld()->GetDeltaSeconds());
+		
 		FVector Force = OrbitDirection * OrbitPower * OrbitScale;
 		// 이동할 방향으로 힘
-		// Player->GetCharacterMovement()->SetGravityDirection(BlackHoleCenter);
 		Player->GetCharacterMovement()->AddForce(Force);
-
+		// 회전하면서 이동하자
+		// TODO:변수로 빼기?
+		FVector TorqueForce(12, 8, 0);
+		Player->GetMesh()->AddTorqueInDegrees(TorqueForce, NAME_None, true);
 	}
 	
 	// box 전부 조사해서 배열에 저장하자
@@ -161,18 +178,17 @@ void ABlackHole::ActivateBlackhole()
 	// 1. 플레이어 데려오기
 	if (Player)
 	{
-		// 캡슐 컴포넌트
 		Player->GetMesh()->SetSimulatePhysics(true);
-		
-		
 		// 새로운 위치 계산
 		// TODO: 페이즈별 R값 계산 -> gamemode 에서 일단 하고있다
 		FVector OrbitPosition = BlackHoleCenter + FVector(
 			FMath::Cos(FMath::DegreesToRadians(CurrentAngle)),
 			FMath::Sin(FMath::DegreesToRadians(CurrentAngle)),
 			0) * R;
-
-		// 해당 위치로 이동
+		
+		// 부드럽게 이동 (Lerp 활용)
+		//FVector NewLocation = FMath::Lerp(Player->GetActorLocation(), OrbitPosition+FVector(0,0,100), 1.0f);
+        // Player->SetActorLocation(NewLocation);
 		FVector Direction = OrbitPosition - Player->GetActorLocation();
 		Player->GetMesh()->SetPhysicsLinearVelocity(Direction.GetSafeNormal() * OrbitSpeed,false,"None");
 	}
@@ -221,13 +237,7 @@ void ABlackHole::ActivateBlackhole()
 
 void ABlackHole::DeactiveBlackhole()
 {
-	if (!bIsActive)
-	{
-		// 플레이어의 설정 원래대로 돌려주기
-		Player->GetMesh()->SetSimulatePhysics(false);
-		Player->GetMesh()->SetEnableGravity(true);
-		Player->GetCharacterMovement()->SetGravityDirection(FVector(0,0,-1));
-	}
+	Player->GetMesh()->SetSimulatePhysics(false);
 
 	// box 전부 조사해서 배열에 저장하자
 	TArray<AActor*> BoxActors;
@@ -240,8 +250,7 @@ void ABlackHole::DeactiveBlackhole()
 		UStaticMeshComponent* BoxComp = BoxAsset->Box;
 		BoxComp->SetEnableGravity(true);
 	}
-	
+
 	// 중력필드 초기화
 	GravityField->Radius = 0.f;
-	GravityField->ForceStrength = 0.f;
 }
