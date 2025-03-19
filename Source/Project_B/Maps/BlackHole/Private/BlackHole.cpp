@@ -27,6 +27,7 @@ ABlackHole::ABlackHole()
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>("Sphere");
 	Sphere->SetupAttachment(RootComponent);
 	Sphere->SetRelativeScale3D(FVector(4.5f));
+	Sphere->SetVisibility(false);
 	
 	// 중력필드
 	GravityField = CreateDefaultSubobject<URadialForceComponent>("GravityField");
@@ -55,7 +56,7 @@ ABlackHole::ABlackHole()
 void ABlackHole::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	// 처음에 생성될때 크기 0으로 설정했다가 점점 커지게 (4.5로커지면됨)
 	// Sphere->SetRelativeScale3D(FVector(0));
 
@@ -69,6 +70,7 @@ void ABlackHole::Tick(float DeltaTime)
 	// 활성화 되면 빨아들이기 시작
 	if (bIsActive)
 	{
+		Sphere->SetVisibility(true);
 		// bIsActive가 처음으로 true가 될 때만 중력 필드 생성
 		if (!bGravityFieldCreated)
 		{
@@ -78,6 +80,9 @@ void ABlackHole::Tick(float DeltaTime)
 		ActivateBlackhole();
 		ApplyOrbitalForce();
 	}
+	else
+		Sphere->SetVisibility(false);
+		DeactiveBlackhole();
 }
 
 void ABlackHole::CreateGravityField()
@@ -188,4 +193,28 @@ void ABlackHole::ActivateBlackhole()
 			HandleComp->SetPhysicsLinearVelocity(NewVel, false, "None");
 		}
 	}	
+}
+
+void ABlackHole::DeactiveBlackhole()
+{
+	// 플레이어의 캡슐 물리 일단 꺼주기
+	ABaseCharacter* Player = Cast<ABaseCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseCharacter::StaticClass()));
+	UCapsuleComponent* capsule = Player->GetCapsuleComponent();
+	capsule->SetSimulatePhysics(false);
+
+	// box 전부 조사해서 배열에 저장하자
+	TArray<AActor*> BoxActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
+
+	for (AActor* BoxActor : BoxActors)
+	{
+		ABoxAsset* BoxAsset = Cast<ABoxAsset>(BoxActor);
+		// 메쉬 꺼내기
+		UStaticMeshComponent* BoxComp = BoxAsset->Box;
+		BoxComp->SetEnableGravity(true);
+	}
+	
+	// 중력필드 초기화
+	GravityField->Radius = 0.f;
+	GravityField->ForceStrength = 0.f;
 }

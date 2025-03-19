@@ -48,9 +48,9 @@ public:
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
 
-	// 빨아들일 요소들을 조사하고 가동
-	// 멈추는건 Gamemode -> 왜냐하면 블랙홀이 삭제되면 여기 내부 함수를 실행할 수 없기 때문
+	// 빨아들일 요소들을 조사하고 가동 / 소멸
 	void ActivateBlackhole();
+	void DeactiveBlackhole();
 	// 중력필드를 형성하고 회전시킴
 	void CreateGravityField();
 	void ApplyOrbitalForce();
