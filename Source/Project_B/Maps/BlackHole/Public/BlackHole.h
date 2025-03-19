@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/BaseCharacter.h"
 #include "GameFramework/Actor.h"
 #include "BlackHole.generated.h"
 
@@ -31,37 +32,42 @@ public:
 
 	// 블랙홀 힘
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float OrbitPower = 10000.0f;
+	float OrbitPower = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitScale = 1.0f;
+	bool bOrbitalVelocityApplied = false;
 
 	// 외관
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USceneComponent* Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Sphere;
-	UPROPERTY(editAnywhere, BlueprintReadWrite)
-	class USphereComponent* FirstR;
+
 	// 중력 필드 (ON/OFF)
 	UPROPERTY(editAnywhere, BlueprintReadWrite)
 	class URadialForceComponent* GravityField;
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
 
-	// 빨아들일 요소들을 조사하고 가동
-	// 멈추는건 Gamemode -> 왜냐하면 블랙홀이 삭제되면 여기 내부 함수를 실행할 수 없기 때문
+	// 빨아들일 요소들을 조사하고 가동 / 소멸
 	void ActivateBlackhole();
-	// 중력필드를 형성하고 회전시킴
+	void DeactiveBlackhole();
+
+	// 요소
+	ABaseCharacter* Player;
+	
+	// 중력필드를 형성하고, 액터들 회전시킴
 	void CreateGravityField();
-	void ApplyOrbitalForce();
+	void ActivateGravity();
+	void ActivateOrbital();
 	
 	// 공전궤도 값
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float R = 0.f;
+	float CurrentAngle = 0.f;
 	// 공전 속도 값
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitSpeed = 30.0f;
-	
-	// 소환 횟수 카운트
-	int32 SpawnCount;
 };
 
 
