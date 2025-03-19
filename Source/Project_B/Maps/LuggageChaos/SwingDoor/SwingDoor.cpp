@@ -2,7 +2,11 @@
 
 
 #include "SwingDoor.h"
+
+#include "Components/BoxComponent.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include "Project_B/Maps/LuggageChaos/Luggage/Luggage.h"
+#include "Project_B/Utilities/LogMacro.h"
 
 
 ASwingDoor::ASwingDoor()
@@ -51,11 +55,16 @@ ASwingDoor::ASwingDoor()
 	RightConstraint->SetAngularDriveMode(EAngularDriveMode::TwistAndSwing);
 	RightConstraint->SetOrientationDriveTwistAndSwing(false,true);
 	RightConstraint->SetAngularDriveParams(200.f, 1.f, 0.f);
+
+	BoxCollison = CreateDefaultSubobject<UBoxComponent>(TEXT("SphereCollison"));
+	BoxCollison->SetupAttachment(Root);
 }
 
 void ASwingDoor::BeginPlay()
 {
 	Super::BeginPlay();
+	BoxCollison->OnComponentBeginOverlap.AddDynamic(this,&ASwingDoor::OnCollisionBeginOverlap);
+	BoxCollison->OnComponentEndOverlap.AddDynamic(this,&ASwingDoor::OnCollisionEndOverlap);
 	
 }
 
@@ -64,3 +73,39 @@ void ASwingDoor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ASwingDoor::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor->IsA(ALuggage::StaticClass()))
+	{
+		++NearLugCount;
+		DoorLocked();
+		//LOG_SCREEN("캐리어 근처");
+	}
+}
+
+void ASwingDoor::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor->IsA(ALuggage::StaticClass()))
+	{
+		--NearLugCount;
+	}
+	
+	if (NearLugCount <= 0)
+	{
+		DoorUnlocked();
+		//LOG_SCREEN("캐리어 근처 아님");
+	}
+}
+
+void ASwingDoor::DoorLocked()
+{
+	LeftConstraint->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 1.f);
+	RightConstraint->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 1.f);
+}
+
+void ASwingDoor::DoorUnlocked()
+{
+	LeftConstraint->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Limited, 75.f);
+	RightConstraint->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Limited, 75.f);
+}
