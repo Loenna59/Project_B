@@ -55,9 +55,6 @@ void ABlackHole::BeginPlay()
 	Super::BeginPlay();
 
 	Player = Cast<ABaseCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	// 처음에 생성될때 크기 0으로 설정했다가 점점 커지게 (4.5로커지면됨)
-	// Sphere->SetRelativeScale3D(FVector(0));
-
 }
 
 // Called every frame
@@ -175,25 +172,7 @@ void ABlackHole::ActivateBlackhole()
 	// 시간에 따른 각도 증가
 	CurrentAngle += OrbitSpeed * GetWorld()->GetDeltaSeconds();
 	
-	// 1. 플레이어 데려오기
-	if (Player)
-	{
-		Player->GetMesh()->SetSimulatePhysics(true);
-		// 새로운 위치 계산
-		// TODO: 페이즈별 R값 계산 -> gamemode 에서 일단 하고있다
-		FVector OrbitPosition = BlackHoleCenter + FVector(
-			FMath::Cos(FMath::DegreesToRadians(CurrentAngle)),
-			FMath::Sin(FMath::DegreesToRadians(CurrentAngle)),
-			0) * R;
-		
-		// 부드럽게 이동 (Lerp 활용)
-		//FVector NewLocation = FMath::Lerp(Player->GetActorLocation(), OrbitPosition+FVector(0,0,100), 1.0f);
-        // Player->SetActorLocation(NewLocation);
-		FVector Direction = OrbitPosition - Player->GetActorLocation();
-		Player->GetMesh()->SetPhysicsLinearVelocity(Direction.GetSafeNormal() * OrbitSpeed,false,"None");
-	}
-	
-	// 2. box 전부 조사해서 배열에 저장하자
+	// box 전부 조사해서 배열에 저장하자
 	TArray<AActor*> BoxActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoxAsset::StaticClass(), BoxActors);
 
@@ -215,7 +194,7 @@ void ABlackHole::ActivateBlackhole()
 		BoxComp->SetPhysicsLinearVelocity(Direction.GetSafeNormal() * OrbitSpeed,false,"None");
 	}
 
-	// 3. 똑같이, 체인도 조사해서 포함시키기
+	// 똑같이, 체인도 조사해서 포함시키기
 	AChain* ChainCable = Cast<AChain>(UGameplayStatics::GetActorOfClass(GetWorld(), AChain::StaticClass()));
 	UStaticMeshComponent* HandleComp = nullptr;
 	
