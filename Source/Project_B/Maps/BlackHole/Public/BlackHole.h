@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/BaseCharacter.h"
 #include "GameFramework/Actor.h"
 #include "BlackHole.generated.h"
 
@@ -40,8 +41,7 @@ public:
 	class USceneComponent* Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Sphere;
-	UPROPERTY(editAnywhere, BlueprintReadWrite)
-	class USphereComponent* FirstR;
+
 	// 중력 필드 (ON/OFF)
 	UPROPERTY(editAnywhere, BlueprintReadWrite)
 	class URadialForceComponent* GravityField;
@@ -51,13 +51,20 @@ public:
 	// 빨아들일 요소들을 조사하고 가동 / 소멸
 	void ActivateBlackhole();
 	void DeactiveBlackhole();
+
+	// 요소
+	ABaseCharacter* Player;
+	
 	// 중력필드를 형성하고 회전시킴
 	void CreateGravityField();
 	void ApplyOrbitalForce();
 	
 	// 공전궤도 값
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float R = 0.f;
+	float CurrentAngle = 0.f;
 	// 공전 속도 값
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitSpeed = 30.0f;
 	
 	// 소환 횟수 카운트

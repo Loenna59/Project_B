@@ -17,7 +17,6 @@ class ABaseCharacter;
 ABlackholeGameMode::ABlackholeGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	
 }
 
 void ABlackholeGameMode::BeginPlay()
@@ -57,24 +56,24 @@ inline void ABlackholeGameMode::SpawnBlackhole()
 		switch (BlackholeSpawnCount)
 		{
 		case 0:
-			Blackhole->R = 950.f;
+			Blackhole->R = 900.f;
 			Blackhole->OrbitScale = 1.0f;
-			Blackhole->OrbitSpeed = 20.f;
+			Blackhole->OrbitSpeed = 50.f;
 			break;
 		case 1:
-			Blackhole->R = 850.f;
+			Blackhole->R = 750.f;
 			Blackhole->OrbitScale = 1.5f;
-			Blackhole->OrbitSpeed = 40.f;
+			Blackhole->OrbitSpeed = 50.f;
 			break;
 		case 2:
 			Blackhole->R = 600.f;
 			Blackhole->OrbitScale = 2.0f;
-			Blackhole->OrbitSpeed = 60.f;
+			Blackhole->OrbitSpeed = 50.f;
 			break;
 		default:
 			Blackhole->R = 550.f;
 			Blackhole->OrbitScale = 2.5f;
-			Blackhole->OrbitSpeed = 80.f;
+			Blackhole->OrbitSpeed = 50.f;
 			break;
 		}
 	}
@@ -86,12 +85,11 @@ inline void ABlackholeGameMode::SpawnBlackhole()
 void ABlackholeGameMode::DestroyBalckhole()
 {
 	Blackhole->bIsActive = false;
-	
 	BlackholeSpawnCount++;
 
 	// 재소환 예약
 	if (BlackholeSpawnCount < 4)
 	{
-		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 10.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 30.0f, false);
 	}
 }
