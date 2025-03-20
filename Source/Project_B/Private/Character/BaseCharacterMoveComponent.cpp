@@ -128,7 +128,10 @@ void UBaseCharacterMoveComponent::Server_UpdateSpeed_Implementation(float Speed)
 
 void UBaseCharacterMoveComponent::Multicast_UpdateSpeed_Implementation(float Speed)
 {
-	Character->GetCharacterMovement()->MaxWalkSpeed = Speed;
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = Speed;
+	}
 }
 
 void UBaseCharacterMoveComponent::UpdateSpeed(float Speed)

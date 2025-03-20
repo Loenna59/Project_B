@@ -2,6 +2,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "Character/BaseCharacter.h"
+#include "Character/BaseCharacterAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -66,6 +67,13 @@ void UBaseCharacterAttackComponent::Punch()
 	{
 		return;
 	}
+
+	if (bIsAttacking)
+	{
+		return;
+	}
+
+	bIsAttacking = true;
 	
 	FString BoneName = ArmDirection == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
 	
@@ -87,6 +95,13 @@ void UBaseCharacterAttackComponent::HeadButt()
 	{
 		return;
 	}
+
+	if (bIsAttacking)
+	{
+		return;
+	}
+
+	bIsAttacking = true;
 	
 	if (Character->HasAuthority())
 	{
@@ -106,6 +121,13 @@ void UBaseCharacterAttackComponent::Kick()
 	
 	if (Character->GetCharacterMovement()->IsFalling())
 	{
+		if (bIsAttacking)
+		{
+			return;
+		}
+
+		bIsAttacking = true;
+		
 		if (Character->HasAuthority())
 		{
 			Multicast_PlayAnimMontage(KickAnimMontage, 1.5f);
@@ -176,9 +198,16 @@ void UBaseCharacterAttackComponent::Multicast_OnPunchTraceChannel_Implementation
 	{
 		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitResult.GetActor()))
 		{
-			// Other->GetMesh()->SetAllBodiesBelowSimulatePhysics(TEXT("Hips"), true, true);
-			// Other->GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(TEXT("Hips"), 0.5f, false, true);
-			// Other->GetMesh()->AddImpulseAtLocation(HitResult.ImpactNormal.ForwardVector * 50000, HitResult.ImpactPoint, TEXT("Spine"));
+			if (UBaseCharacterAnimInstance* Anim = Cast<UBaseCharacterAnimInstance>(Other->GetMesh()->GetAnimInstance()))
+			{
+
+				float Dot = FVector::DotProduct(Other->GetActorForwardVector(), HitResult.ImpactNormal);
+				FVector DotVector = Other->GetActorForwardVector() * Dot;
+				
+				Anim->StartHitProcess(FVector2D(DotVector));
+
+				
+			}
 		}
 	}
 }
