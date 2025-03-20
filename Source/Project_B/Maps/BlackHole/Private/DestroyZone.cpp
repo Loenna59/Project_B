@@ -75,30 +75,27 @@ void ADestroyZone::BeginPlay()
 	DestroyZoneSphere->OnComponentBeginOverlap.AddDynamic(this,&ADestroyZone::OnDestroyBeginOverlap);
 
 	// 블랙홀 찾기
-	ABlackHole* Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
+	Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
+
+	Rotate(false);
 }
 
 // Called every frame
 void ADestroyZone::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	if (!bIsRotate)
-	{
-		BladeRotate();
-		bIsRotate = true;
-	}
-		
 }
 
-void ADestroyZone::BladeRotate()
+void ADestroyZone::Rotate(bool bIsRotate)
 {
-	if (bIsOnBlackhole)
+	if (bIsRotate)
 	{
-		// TODO: 회전 속도 조정
 		RotateSpeed = 90.f;
 	}
 	else
-		RotateSpeed = 0.0f;
+	{
+		RotateSpeed = 0.f;
+	}
+	BladeRotateComp->RotationRate = FRotator(RotateSpeed,0,0);
+	RotateComp->RotationRate = FRotator(RotateSpeed,0,0);
 }
-

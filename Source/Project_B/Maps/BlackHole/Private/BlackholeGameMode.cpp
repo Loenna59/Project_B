@@ -9,6 +9,7 @@
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 #include "Project_B/Maps/BlackHole/Public/BoxAsset.h"
+#include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 
 
 class UCapsuleComponent;
@@ -27,6 +28,7 @@ void ABlackholeGameMode::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(GameTimerHandle, this, &ABlackholeGameMode::EndGame, 180.0f, false);
 
 	Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
+	Rotator = Cast<ADestroyZone>(UGameplayStatics::GetActorOfClass(GetWorld(), ADestroyZone::StaticClass()));
 	// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다
 	// TODO: 실제 시연때는 30초로 변경하기
 	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 5.0f, false);
@@ -48,6 +50,7 @@ inline void ABlackholeGameMode::SpawnBlackhole()
 {
 	// 블랙홀 스폰 함수
 	Blackhole->bIsActive = true;
+	Rotator->Rotate(true);
 	// 4페이즈까지만 있다
 	if(BlackholeSpawnCount >=4) return;
 	if (Blackhole)
@@ -56,10 +59,10 @@ inline void ABlackholeGameMode::SpawnBlackhole()
 		switch (BlackholeSpawnCount)
 		{
 		case 0:
-			Blackhole->R = 950.f;
+			Blackhole->R = 1000.f;
 			break;
 		case 1:
-			Blackhole->R = 750.f;
+			Blackhole->R = 800.f;
 			break;
 		case 2:
 			Blackhole->R = 600.f;
@@ -78,6 +81,7 @@ void ABlackholeGameMode::DestroyBalckhole()
 {
 	Blackhole->bIsActive = false;
 	BlackholeSpawnCount++;
+	Rotator->Rotate(false);
 
 	// 재소환 예약
 	if (BlackholeSpawnCount < 4)

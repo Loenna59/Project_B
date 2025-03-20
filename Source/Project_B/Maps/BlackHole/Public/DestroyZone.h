@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "DestroyZone.generated.h"
 
+class ABlackHole;
+
 UCLASS()
 class PROJECT_B_API ADestroyZone : public AActor
 {
@@ -41,10 +43,8 @@ public:
 	class URotatingMovementComponent* RotateComp;
 
 	// 블랙홀이 가동되면, 움직이기 시작한다
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	bool bIsOnBlackhole = false;
-	bool bIsRotate = false;
-	void BladeRotate();
+	ABlackHole* Blackhole;
+	void Rotate(bool bIsRotate);
 	
 	// 회전 속도값 변수 (처음에는 0, 블랙홀 가동되면 180으로 바꿔주자)
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
