@@ -4,6 +4,7 @@
 #include "Lever.h"
 
 #include "Components/SphereComponent.h"
+#include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
@@ -28,6 +29,9 @@ ALever::ALever()
 	SphereCollision->SetupAttachment(LeverMesh);
 	SphereCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	SphereCollision->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
+
+	bReplicates = true;
+	SetReplicateMovement(true);
 }
 
 void ALever::BeginPlay()
@@ -61,15 +65,29 @@ void ALever::SetLeverValue(float value)
 void ALever::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//LOG_SCREEN("레버 오버랩 BEGIN");
-	Server_IsInteracting(true);
+	if (OtherActor->IsA(ACharacter::StaticClass()))
+	{
+		SetOwner(OtherActor);
+		
+		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+		{
+			Server_IsInteracting(true);
+		}
+	}
 }
 
 void ALever::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	//LOG_SCREEN("레버 오버랩 END");
-	Server_IsInteracting(false);
+	if (OtherActor->IsA(ACharacter::StaticClass()))
+	{
+		SetOwner(OtherActor);
+		
+		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+		{
+			Server_IsInteracting(false);
+		}
+	}
 }
 
 void ALever::Server_IsInteracting_Implementation(bool isInteract)

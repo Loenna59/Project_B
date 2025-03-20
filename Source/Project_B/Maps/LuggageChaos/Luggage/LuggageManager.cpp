@@ -23,7 +23,7 @@ ALuggageManager::ALuggageManager()
 		BP_LuggageNormal = luggageN.Class;
 	}
 	
-	ConstructorHelpers::FClassFinder<ALuggage>luggageG(TEXT("'/Game/Maps/LuggageChaos/Luggage/BP_LuggageG.BP_LuggageG_C'"));
+	ConstructorHelpers::FClassFinder<ALuggage>luggageG(TEXT("'/Game/Maps/LuggageChaos/Luggage/BP_LuggegeG.BP_LuggegeG_C'"));
 	if (luggageG.Succeeded())
 	{
 		BP_LuggageGold = luggageG.Class;
