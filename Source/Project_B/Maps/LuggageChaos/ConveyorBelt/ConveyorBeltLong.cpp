@@ -3,7 +3,7 @@
 #include "ConveyorBeltLong.h"
 
 #include "Components/ArrowComponent.h"
-#include "Components/BoxComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 AConveyorBeltLong::AConveyorBeltLong()
@@ -15,18 +15,10 @@ AConveyorBeltLong::AConveyorBeltLong()
 
 	StartArrow = CreateDefaultSubobject<UArrowComponent>("StartArrow");
 	StartArrow->SetupAttachment(Root);
-
-	EndBox = CreateDefaultSubobject<UBoxComponent>("EndBox");
-	EndBox->SetupAttachment(Root);
-	EndBox->SetRelativeRotation(FRotator(0.0f,-90.0f,0.0f));
-	EndBox->SetRelativeScale3D(FVector(3.500000,1.250000,2.500000));
-
-	ForceBox = CreateDefaultSubobject<UBoxComponent>("ForceBox");
-	ForceBox->SetupAttachment(Root);
-	ForceBox->SetCollisionResponseToAllChannels(ECR_Ignore);
-	ForceBox->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
 	
 	Plates.SetNum(PlateCount);
+	PlateInitPositions.SetNum(PlateCount);
+	
 	for (int i = 0; i < PlateCount; i++)
 	{
 		FName PlateName = FName(*FString::Printf(TEXT("Plate_%d"), i));
@@ -35,6 +27,9 @@ AConveyorBeltLong::AConveyorBeltLong()
 		Plates[i]->SetRelativeLocation(FVector(i*100.0f, 0, 0));
 		Plates[i]->SetRelativeRotation(FRotator(0.0f,-90.0f,0.0f));
 	}
+
+	bReplicates = true;
+	Super::SetReplicateMovement(true);
 }
 
 void AConveyorBeltLong::BeginPlay()
@@ -43,36 +38,18 @@ void AConveyorBeltLong::BeginPlay()
 	
 	for (int i = 0; i < PlateCount; i++)
 	{
-		Plates[i]->OnComponentEndOverlap.AddDynamic(this, &AConveyorBeltLong::OnCollisionEndOverlap);
+		PlateInitPositions[i] = Plates[i]->GetComponentLocation();
 	}
 
-	MoveDir = StartArrow->GetComponentLocation().ForwardVector;
-}
+	MoveDir = StartArrow->GetForwardVector();
+	
+	StarLoc = Plates[0]->GetComponentLocation();
+	EndLoc = Plates[PlateCount -1]->GetComponentLocation();
+	
+	MaxDist = FVector::DotProduct(EndLoc - StarLoc, MoveDir);
 
-void AConveyorBeltLong::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	for (int i = 0; i < PlateCount; i++)
-	{
-		Plates[i]->SetRelativeLocation(Plates[i]->GetRelativeLocation() + MoveDir * DeltaTime*Speed);
-	}
-}
-
-void AConveyorBeltLong::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (OtherComp == EndBox)
-	{
-		OverlappedComponent->SetRelativeLocation(StartArrow->GetRelativeLocation());
-	}
-}
-
-void AConveyorBeltLong::OnCharacterStepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-}
-
-void AConveyorBeltLong::OnCharacterStepEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
+	//LOG_PRINT(TEXT("앞방향: %s"), *MoveDir.ToString());
+	//LOG_PRINT(TEXT("시작위치: %s"), *StarLoc.ToString());
+	//LOG_PRINT(TEXT("끝위치: %s"), *EndLoc.ToString());
+	//LOG_PRINT(TEXT("이동 가능한 거리: %f"), MaxDist);
 }
