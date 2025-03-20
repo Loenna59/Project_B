@@ -6,12 +6,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
-#include "Project_B/Utilities/LogMacro.h"
-
 
 UBaseCharacterAttackComponent::UBaseCharacterAttackComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
 
 	ConstructorHelpers::FObjectFinder<UInputAction> tmp_ia_punch(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Punch.IA_Punch'"));
@@ -42,6 +40,22 @@ void UBaseCharacterAttackComponent::BeginPlay()
 	
 }
 
+void UBaseCharacterAttackComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (bBeginPunchInput)
+	{
+		if (PunchPressingTime > PunchExecuteThreshold)
+		{
+			return;
+		}
+		
+		PunchPressingTime += DeltaTime;
+	}
+}
+
 void UBaseCharacterAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -56,13 +70,32 @@ void UBaseCharacterAttackComponent::SetupInputBiding(class UEnhancedInputCompone
 {
 	Super::SetupInputBiding(input);
 
-	input->BindAction(PunchInputAction, ETriggerEvent::Started, this, &UBaseCharacterAttackComponent::Punch);
+	input->BindAction(PunchInputAction, ETriggerEvent::Started, this, &UBaseCharacterAttackComponent::BeginPunch);
+	input->BindAction(PunchInputAction, ETriggerEvent::Completed, this, &UBaseCharacterAttackComponent::Punch);
 	input->BindAction(HeadButtInputAction, ETriggerEvent::Started, this, &UBaseCharacterAttackComponent::HeadButt);
 	input->BindAction(KickInputAction, ETriggerEvent::Started, this, &UBaseCharacterAttackComponent::Kick);
 }
 
+void UBaseCharacterAttackComponent::BeginPunch()
+{
+	if (bBeginPunchInput)
+	{
+		return;
+	}
+
+	PunchPressingTime = 0;
+	bBeginPunchInput = true;
+}
+
 void UBaseCharacterAttackComponent::Punch()
 {
+	bBeginPunchInput = false;
+	
+	if (PunchPressingTime > PunchExecuteThreshold)
+	{
+		return;
+	}
+	
 	if (!Character)
 	{
 		return;
@@ -205,8 +238,6 @@ void UBaseCharacterAttackComponent::Multicast_OnPunchTraceChannel_Implementation
 				FVector DotVector = Other->GetActorForwardVector() * Dot;
 				
 				Anim->StartHitProcess(FVector2D(DotVector));
-
-				
 			}
 		}
 	}

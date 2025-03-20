@@ -41,6 +41,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category=Attack)
 	float DropkickForceAmount = 10000.f;
 
+	UPROPERTY()
+	bool bBeginPunchInput = false;
+
+	UPROPERTY()
+	float PunchPressingTime = 0;
+
+	const float PunchExecuteThreshold = 0.5f;
+
 public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* PunchAnimMontage;
@@ -58,10 +66,15 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	virtual void SetupInputBiding(class UEnhancedInputComponent* input) override;
+
+	UFUNCTION()
+	void BeginPunch();
 
 	UFUNCTION()
 	void Punch();

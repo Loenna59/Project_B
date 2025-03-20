@@ -7,11 +7,11 @@
 #include "Character/BaseCharacterAttackComponent.h"
 #include "Character/BaseCharacterMoveComponent.h"
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
+#include "Character/BaseCharacterPickComponent.h"
 #include "Character/HeadPhysicsAnimComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 
 ABaseCharacter::ABaseCharacter()
@@ -40,7 +40,7 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->SetupAttachment(SpringArmComp);
 	CameraComp->SetRelativeRotation(FRotator(-25.f, 0, 0));
-	// CameraComp->SetFieldOfView(70.f);
+	CameraComp->SetFieldOfView(90.f);
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
@@ -50,6 +50,10 @@ ABaseCharacter::ABaseCharacter()
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
 	AttackComp->SetNetAddressable();
 	AttackComp->SetIsReplicated(true);
+
+	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
+	PickComp->SetNetAddressable();
+	PickComp->SetIsReplicated(true);
 
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
 	
@@ -121,6 +125,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		MoveComp->SetupInputBiding(pi);
 		AttackComp->SetupInputBiding(pi);
+		PickComp->SetupInputBiding(pi);
 	}
 
 }
