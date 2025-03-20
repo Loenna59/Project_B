@@ -27,6 +27,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Luggage | Gold")
 	float GoldCoolTime = 5.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Respawn")
+	float RespawnForce = 500.0f;
 	
 	//이벤트 델리게이트
 	FOnReturnPooledObject OnReturnPooledObject;
@@ -43,14 +46,15 @@ private:
 	UPROPERTY()
 	ALuggageSpawnPoint* BlueSpawnPoint;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<ALuggage*> LuggagePool;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	ALuggage* GoldLuggage;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -60,10 +64,11 @@ private:
 	void InitTeamSpawnPoints();
 	
 	void InitLuggagePool();
+
+	void ActiveLuggage(ALuggage* lug, FVector dir);
 	
-	void ActiveLuggage(ALuggage* lug);
 	void ActiveGoldLuggage();
-	
+
 	UFUNCTION()
 	void DeactiveLuggage(ALuggage* lug, ETeamType team);
 
