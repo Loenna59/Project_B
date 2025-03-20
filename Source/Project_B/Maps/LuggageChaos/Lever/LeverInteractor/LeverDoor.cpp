@@ -23,9 +23,6 @@ void ALeverDoor::Tick(float DeltaTime)
 
 void ALeverDoor::LeverValueInteract(float value)
 {
-	Super::LeverValueInteract(value);
-	
-	//LOG_SCREEN("%f", value);
 	StaticMesh->SetRelativeRotation(FRotator(value*(-90.0f), 0,0));
 }
 
