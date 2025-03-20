@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BlackHole.h"
+#include "DestroyZone.h"
 #include "GameFramework/GameModeBase.h"
 #include "BlackholeGameMode.generated.h"
 
@@ -25,7 +26,9 @@ public:
 	
 	// 게임 진행 타이머 (3분)
 	FTimerHandle GameTimerHandle;
-	
+
+	// 회전
+	ADestroyZone* Rotator = nullptr;
 	// 블랙홀
 	ABlackHole* Blackhole = nullptr;
 	void SpawnBlackhole();

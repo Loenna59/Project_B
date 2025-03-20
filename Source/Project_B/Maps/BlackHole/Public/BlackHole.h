@@ -16,6 +16,9 @@ public:
 	ABlackHole();
 
 protected:
+	UFUNCTION()
+	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	               const FHitResult& SweepResult);
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -42,25 +45,11 @@ public:
 	class USceneComponent* Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Sphere;
-
-	// 중력 필드 (ON/OFF)
-	UPROPERTY(editAnywhere, BlueprintReadWrite)
-	class URadialForceComponent* GravityField;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USphereComponent* SphereComp;
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
 
-	// 빨아들일 요소들을 조사하고 가동 / 소멸
-	void ActivateBlackhole();
-	void DeactiveBlackhole();
-
-	// 요소
-	ABaseCharacter* Player;
-	
-	// 중력필드를 형성하고, 액터들 회전시킴
-	void CreateGravityField();
-	void ActivateGravity();
-	void ActivateOrbital();
-	
 	// 공전궤도 값
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float R = 0.f;
@@ -68,6 +57,7 @@ public:
 	// 공전 속도 값
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitSpeed = 30.0f;
+	
 };
 
 
