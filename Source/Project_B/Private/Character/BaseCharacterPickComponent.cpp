@@ -117,7 +117,7 @@ void UBaseCharacterPickComponent::DetectNearby(bool bHit, AActor* Actor)
 				AnimInstance->IKTargetLocation = FMath::VInterpTo(
 					AnimInstance->IKTargetLocation,
 					TargetLocation, GetWorld()->DeltaTimeSeconds,
-					5.f
+					2.5f
 				);
 
 				// LOG_SCREEN("DetectNearby %s", *Actor->GetActorNameOrLabel());
