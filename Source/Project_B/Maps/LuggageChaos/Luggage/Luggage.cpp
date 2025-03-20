@@ -7,14 +7,17 @@ ALuggage::ALuggage()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	SetRootComponent(Root);
-
 	LuggageMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LuggageMesh"));
-	LuggageMesh->SetupAttachment(Root);
+	SetRootComponent(LuggageMesh);
+	
 	LuggageMesh->SetCollisionObjectType(ECC_WorldDynamic);
 	LuggageMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	LuggageMesh->SetSimulatePhysics(true);
+	
+	LuggageMesh->SetUseCCD(true);
+
+	bReplicates = true;
+	SetReplicateMovement(true);
 }
 
 void ALuggage::BeginPlay()

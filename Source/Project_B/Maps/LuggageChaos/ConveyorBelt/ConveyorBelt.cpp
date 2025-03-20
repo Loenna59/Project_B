@@ -10,25 +10,16 @@
 
 AConveyorBelt::AConveyorBelt()
 {
-	PrimaryActorTick.bCanEverTick = true;
 
 	Root = CreateDefaultSubobject<USceneComponent>("Root");
 	SetRootComponent(Root);
 
 	StartArrow = CreateDefaultSubobject<UArrowComponent>("StartArrow");
 	StartArrow->SetupAttachment(Root);
-
-	EndBox = CreateDefaultSubobject<UBoxComponent>("EndBox");
-	EndBox->SetupAttachment(Root);
-	EndBox->SetRelativeRotation(FRotator(0.0f,-90.0f,0.0f));
-	EndBox->SetRelativeScale3D(FVector(3.500000,1.250000,2.500000));
-
-	ForceBox = CreateDefaultSubobject<UBoxComponent>("ForceBox");
-	ForceBox->SetupAttachment(Root);
-	ForceBox->SetCollisionResponseToAllChannels(ECR_Ignore);
-	ForceBox->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
 	
 	Plates.SetNum(PlateCount);
+	PlateInitPositions.SetNum(PlateCount);
+	
 	for (int i = 0; i < PlateCount; i++)
 	{
 		FName PlateName = FName(*FString::Printf(TEXT("Plate_%d"), i));
@@ -37,6 +28,9 @@ AConveyorBelt::AConveyorBelt()
 		Plates[i]->SetRelativeLocation(FVector(i*100.0f, 0, 0));
 		Plates[i]->SetRelativeRotation(FRotator(0.0f,-90.0f,0.0f));
 	}
+
+	bReplicates = true;
+	Super::SetReplicateMovement(true);
 }
 
 void AConveyorBelt::BeginPlay()
@@ -45,43 +39,16 @@ void AConveyorBelt::BeginPlay()
 	
 	for (int i = 0; i < PlateCount; i++)
 	{
-		Plates[i]->OnComponentEndOverlap.AddDynamic(this, &AConveyorBelt::OnCollisionEndOverlap);
+		PlateInitPositions[i] = Plates[i]->GetComponentLocation();
 	}
+
+	MoveDir = StartArrow->GetForwardVector();
 	
-	ForceBox->OnComponentBeginOverlap.AddDynamic(this, &AConveyorBelt::OnCharacterStepOverlap);
-
-	MoveDir = StartArrow->GetComponentLocation().ForwardVector;
+	StarLoc = Plates[0]->GetComponentLocation();
+	EndLoc = Plates[PlateCount -1]->GetComponentLocation();
+	
+	MaxDist = FVector::DotProduct(EndLoc - StarLoc, MoveDir);
 }
 
-void AConveyorBelt::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	for (int i = 0; i < PlateCount; i++)
-	{
-		Plates[i]->SetRelativeLocation(Plates[i]->GetRelativeLocation() + MoveDir * DeltaTime*Speed);
-	}
-}
 
-void AConveyorBelt::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (OtherComp == EndBox)
-	{
-		OverlappedComponent->SetRelativeLocation(StartArrow->GetRelativeLocation());
-	}
-}
 
-void AConveyorBelt::OnCharacterStepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	ACharacter* OverlappingCharacter = Cast<ACharacter>(OtherActor);
-	if (OverlappingCharacter)
-	{
-		LOG_SCREEN("스텝");
-	}
-}
-
-void AConveyorBelt::OnCharacterStepEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-}

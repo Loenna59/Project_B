@@ -58,6 +58,8 @@ ASwingDoor::ASwingDoor()
 
 	BoxCollison = CreateDefaultSubobject<UBoxComponent>(TEXT("SphereCollison"));
 	BoxCollison->SetupAttachment(Root);
+
+	bReplicates = true;
 }
 
 void ASwingDoor::BeginPlay()

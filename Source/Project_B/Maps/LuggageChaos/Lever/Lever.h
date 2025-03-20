@@ -30,20 +30,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USphereComponent* SphereCollision;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interactor)
-	//ALeverInteractor* InteractorObject;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ToZeroSpeed = 1.5f;
 	
 private:
 	UPROPERTY()
 	USceneComponent* Root;
-	
+
+	UPROPERTY(Replicated)
 	float LeverValue = 0.0f;
 
 	bool bIsInteracting = false;
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 public:
 	virtual void Tick(float DeltaTime) override;
 
@@ -51,9 +53,6 @@ public:
 	float GetLeverValue() const { return LeverValue;}
 
 	FTimerHandle DecreaseValueTimerHandle;
-
-	void StartDecreaseValue();   
-	void DecreaseValueStep();   
 
 	//델리게이트
 	UPROPERTY()
@@ -64,5 +63,15 @@ private:
 	void OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	UFUNCTION()
 	void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION(Server, Reliable)
+	void Server_IsInteracting(bool isInteract);
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_IsInteracting(bool isInteract);
 	
+	void LeverInteracting(float dt);
+
+	// LeverValue 천천히 0으로 줄이는 함수
+	void StartDecreaseValue();   
+	void DecreaseValueStep();   
 };

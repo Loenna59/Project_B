@@ -14,44 +14,30 @@ class PROJECT_B_API AConveyorBelt : public AActor
 public:
 	AConveyorBelt();
 	
-	UPROPERTY(EditAnywhere)
-	class UBoxComponent* EndBox;
-
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	class UArrowComponent* StartArrow;
 	
-	UPROPERTY(EditAnywhere, Category = "Conveyor Belt")
+	UPROPERTY(EditDefaultsOnly, Category = "Conveyor Belt")
 	TArray<UStaticMeshComponent*> Plates;
 
-	UPROPERTY(EditAnywhere, Category = "Conveyor Belt")
+	UPROPERTY(EditDefaultsOnly, Category = "Conveyor Belt")
 	uint8 PlateCount = 16;
 
-	UPROPERTY(EditAnywhere, Category = "Conveyor Belt")
-	float Speed = 100.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Conveyor Belt")
-	float ForceScale = 200.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Conveyor Belt")
-	UBoxComponent* ForceBox;
+	FVector MoveDir;
+	FVector StarLoc;
+	FVector EndLoc;
+	float MaxDist;
 	
 private:
 	UPROPERTY()
 	USceneComponent* Root;
 
-	FVector MoveDir;
+	UPROPERTY()
+	TArray<FVector> PlateInitPositions;
+
 
 protected:
 	virtual void BeginPlay() override;
 
-
-public:
-	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION()
-	void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	UFUNCTION()
-	void OnCharacterStepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-	UFUNCTION()
-	void OnCharacterStepEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 };

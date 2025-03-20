@@ -10,6 +10,7 @@
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/LuggageChaos/Game/LuggageChaosGameMode.h"
+#include "Project_B/Maps/LuggageChaos/Game/LuggageChaosGameState.h"
 
 
 ALuggageGoalpost::ALuggageGoalpost()
@@ -38,14 +39,7 @@ void ALuggageGoalpost::OnBeginOverlapBind(UPrimitiveComponent* HitComponent, AAc
 	ALuggage* luggage = Cast<ALuggage>(OtherActor);
 	if (luggage != nullptr)
 	{
-		ALuggageChaosGameMode* gm = Cast<ALuggageChaosGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-		if (gm == nullptr)
-		{
-			LOG_ERROR(this,"게임모드 없음");
-			return;
-		}
-		
-		gm->AddScore(Team, luggage->Point);
+		Server_AddScore(luggage->Point);
 	}
 }
 
@@ -59,7 +53,23 @@ void ALuggageGoalpost::OnEndOverlapBind(UPrimitiveComponent* OverlappedComponent
 	ALuggage* lug = Cast<ALuggage>(OtherActor);
 	if (lug != nullptr)
 	{
+		
 		LuggageManager->OnReturnPooledObject.Broadcast(lug, Team);
 	}
 }
 
+void ALuggageGoalpost::Server_AddScore_Implementation(const uint8 point)
+{
+	Net_AddScore(point);
+}
+
+void ALuggageGoalpost::Net_AddScore_Implementation(const uint8 point)
+{
+	ALuggageChaosGameState* gs = Cast<ALuggageChaosGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	if (gs == nullptr)
+	{
+		LOG_ERROR(this,"게임스테이트 설정 필요");
+		return;
+	}
+	gs->AddScore(Team, point);
+}
