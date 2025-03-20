@@ -55,7 +55,7 @@ inline void ABlackholeGameMode::SpawnBlackhole()
 	if(BlackholeSpawnCount >=4) return;
 	if (Blackhole)
 	{
-		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
+		/*// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
 		switch (BlackholeSpawnCount)
 		{
 		case 0:
@@ -70,7 +70,7 @@ inline void ABlackholeGameMode::SpawnBlackhole()
 		default:
 			Blackhole->R = 550.f;
 			break;
-		}
+		}*/
 	}
 
 	// 10초 후 블랙홀 소멸
