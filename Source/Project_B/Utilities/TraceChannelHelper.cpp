@@ -104,6 +104,8 @@ void TraceChannelHelper::SphereSingleByChannel(
 			1.f
 		);
 	}
+
+	Callback(bHit, HitResult);
 }
 
 void TraceChannelHelper::BoxSingleByChannel(
@@ -152,6 +154,8 @@ void TraceChannelHelper::BoxSingleByChannel(
 			1.f
 		);
 	}
+
+	Callback(bHit, HitResult);
 }
 
 void TraceChannelHelper::LineMultiByChannel(

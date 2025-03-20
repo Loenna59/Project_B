@@ -44,6 +44,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D HitDirection;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bPicking;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector IKTargetLocation;
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartHitProcess(FVector2D Direction);
 };
