@@ -51,6 +51,9 @@ public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* KickAnimMontage;
 
+	UPROPERTY()
+	bool bIsAttacking = false;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -75,7 +78,16 @@ public:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAnimMontage(UAnimMontage* Montage, float PlayRate = 1.f, FName SectionName = NAME_None);
-	
-	
+
+	UFUNCTION()
 	void AddForceForwardVector();
+
+	UFUNCTION()
+	void OnPunchTraceChannel();
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnPunchTraceChannel();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnPunchTraceChannel(bool bHit, FHitResult HitResult);
 };

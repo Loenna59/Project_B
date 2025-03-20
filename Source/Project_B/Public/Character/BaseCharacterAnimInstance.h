@@ -37,4 +37,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsFalling;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsHit;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D HitDirection;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartHitProcess(FVector2D Direction);
 };

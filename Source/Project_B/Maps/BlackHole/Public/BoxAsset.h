@@ -25,7 +25,4 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UStaticMeshComponent* Box;
-
-	// 현재 공전 각도 저장
-	float CurrentAngle = 0.0f;
 };

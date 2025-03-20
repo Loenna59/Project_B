@@ -2,7 +2,9 @@
 
 #include "EnhancedInputComponent.h"
 #include "Character/BaseCharacter.h"
+#include "Character/BaseCharacterAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Project_B/Utilities/LogMacro.h"
 
@@ -65,6 +67,13 @@ void UBaseCharacterAttackComponent::Punch()
 	{
 		return;
 	}
+
+	if (bIsAttacking)
+	{
+		return;
+	}
+
+	bIsAttacking = true;
 	
 	FString BoneName = ArmDirection == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
 	
@@ -86,6 +95,13 @@ void UBaseCharacterAttackComponent::HeadButt()
 	{
 		return;
 	}
+
+	if (bIsAttacking)
+	{
+		return;
+	}
+
+	bIsAttacking = true;
 	
 	if (Character->HasAuthority())
 	{
@@ -105,6 +121,13 @@ void UBaseCharacterAttackComponent::Kick()
 	
 	if (Character->GetCharacterMovement()->IsFalling())
 	{
+		if (bIsAttacking)
+		{
+			return;
+		}
+
+		bIsAttacking = true;
+		
 		if (Character->HasAuthority())
 		{
 			Multicast_PlayAnimMontage(KickAnimMontage, 1.5f);
@@ -137,4 +160,54 @@ void UBaseCharacterAttackComponent::AddForceForwardVector()
 	
 	FVector ForceDirection = Character->GetActorForwardVector() * ForceAmount;
 	Character->GetMesh()->AddImpulseToAllBodiesBelow(ForceDirection, *BoneName, true);
+}
+
+void UBaseCharacterAttackComponent::OnPunchTraceChannel()
+{
+	Server_OnPunchTraceChannel();
+}
+
+void UBaseCharacterAttackComponent::Server_OnPunchTraceChannel_Implementation()
+{
+	FHitResult HitResult;
+
+	FName BoneName = ArmDirection == EArmDirection::LEFT? TEXT("Hand_R") : TEXT("Hand_L");
+
+	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
+
+	bool bHit = UKismetSystemLibrary::SphereTraceSingle
+	(
+		GetWorld(),
+		Location,
+		Location,
+		20,
+		UEngineTypes::ConvertToTraceType(ECC_Camera),
+		false,
+		{ Character },
+		EDrawDebugTrace::ForDuration,
+		HitResult,
+		true
+	);
+
+	Multicast_OnPunchTraceChannel(bHit, HitResult);
+}
+
+void UBaseCharacterAttackComponent::Multicast_OnPunchTraceChannel_Implementation(bool bHit, FHitResult HitResult)
+{
+	if (bHit)
+	{
+		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitResult.GetActor()))
+		{
+			if (UBaseCharacterAnimInstance* Anim = Cast<UBaseCharacterAnimInstance>(Other->GetMesh()->GetAnimInstance()))
+			{
+
+				float Dot = FVector::DotProduct(Other->GetActorForwardVector(), HitResult.ImpactNormal);
+				FVector DotVector = Other->GetActorForwardVector() * Dot;
+				
+				Anim->StartHitProcess(FVector2D(DotVector));
+
+				
+			}
+		}
+	}
 }
