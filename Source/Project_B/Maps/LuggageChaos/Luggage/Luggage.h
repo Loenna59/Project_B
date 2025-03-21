@@ -13,9 +13,6 @@ class PROJECT_B_API ALuggage : public AActor
 
 public:
 	ALuggage();
-	UPROPERTY(EditDefaultsOnly)
-	USceneComponent* Root;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UStaticMeshComponent* LuggageMesh;
 

@@ -36,5 +36,9 @@ public:
 	void OnBeginOverlapBind(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit);
 	UFUNCTION()
 	void OnEndOverlapBind(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	
+
+	UFUNCTION(Server, Reliable)
+	void Server_AddScore(const uint8 point);
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_AddScore(const uint8 point);
 };

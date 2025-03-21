@@ -5,7 +5,9 @@
 
 #include "Luggage.h"
 #include "LuggageSpawnPoint.h"
+#include "Components/ArrowComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
@@ -21,7 +23,7 @@ ALuggageManager::ALuggageManager()
 		BP_LuggageNormal = luggageN.Class;
 	}
 	
-	ConstructorHelpers::FClassFinder<ALuggage>luggageG(TEXT("'/Game/Maps/LuggageChaos/Luggage/BP_LuggageG.BP_LuggageG_C'"));
+	ConstructorHelpers::FClassFinder<ALuggage>luggageG(TEXT("'/Game/Maps/LuggageChaos/Luggage/BP_LuggegeG.BP_LuggegeG_C'"));
 	if (luggageG.Succeeded())
 	{
 		BP_LuggageGold = luggageG.Class;
@@ -49,11 +51,21 @@ void ALuggageManager::BeginPlay()
 		LOG_ERROR(this,TEXT("RedSpawnPoint is NULL"));
 	}
 
-	InitTeamSpawnPoints();
-	InitLuggagePool();
+	if (HasAuthority())
+	{
+		InitTeamSpawnPoints();
+		InitLuggagePool();
 	
-	GoldLuggage = SpawnGoldLuggage();
-	ActiveGoldLuggage();
+		GoldLuggage = SpawnGoldLuggage();
+	}
+}
+
+void ALuggageManager::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ALuggageManager,LuggagePool);
+	DOREPLIFETIME(ALuggageManager,GoldLuggage);
 }
 
 void ALuggageManager::Tick(float DeltaTime)
@@ -99,12 +111,6 @@ void ALuggageManager::InitLuggagePool()
 	}
 }
 
-void ALuggageManager::ActiveLuggage(ALuggage* lug)
-{
-	lug->LuggageMesh->SetSimulatePhysics(true);
-	lug->SetActorEnableCollision(true);
-	lug->SetActorHiddenInGame(false);
-}
 
 void ALuggageManager::DeactiveLuggage(ALuggage* lug, ETeamType team)
 {
@@ -131,25 +137,37 @@ void ALuggageManager::DeactiveLuggage(ALuggage* lug, ETeamType team)
 	{
 		//LOG_SCREEN("블루팀 골대");
 		lug->SetActorLocation(BlueSpawnPoint->GetActorLocation());
+		lug->SetActorRotation(BlueSpawnPoint->GetActorRotation());
+		ActiveLuggage(lug, BlueSpawnPoint->ThrowArrow->GetForwardVector());
 	}
 	else
 	{
 		//LOG_SCREEN("레드팀 골대");
 		lug->SetActorLocation(RedSpawnPoint->GetActorLocation());
+		lug->SetActorRotation(RedSpawnPoint->GetActorRotation());
+		ActiveLuggage(lug, RedSpawnPoint->ThrowArrow->GetForwardVector());
 	}
 	
-	ActiveLuggage(lug);
+}
+
+void ALuggageManager::ActiveLuggage(ALuggage* lug, FVector dir)
+{
+	lug->LuggageMesh->SetSimulatePhysics(true);
+	lug->SetActorEnableCollision(true);
+	lug->SetActorHiddenInGame(false);
+	lug->LuggageMesh->AddImpulse(dir*RespawnForce, NAME_None,true);
 }
 
 void ALuggageManager::ActiveGoldLuggage()
 {
-	ActiveLuggage(GoldLuggage);
+	GoldLuggage->LuggageMesh->SetSimulatePhysics(true);
+	GoldLuggage->SetActorEnableCollision(true);
+	GoldLuggage->SetActorHiddenInGame(false);
 	LOG_SCREEN("황금 러기지 등장  (*ﾟuﾟ )/\"");
 }
 
 ALuggage* ALuggageManager::SpawnLuggage(FVector pos)
 {
-	
 	ALuggage* lug = GetWorld()->SpawnActor<ALuggage>(BP_LuggageNormal, pos,GetActorRotation());
 
 	lug->LuggageMesh->SetSimulatePhysics(true);
@@ -163,9 +181,9 @@ ALuggage* ALuggageManager::SpawnGoldLuggage()
 {
 	ALuggage* lug = GetWorld()->SpawnActor<ALuggage>(BP_LuggageGold, GetTransform());
 
-	lug->LuggageMesh->SetSimulatePhysics(false);
-	lug->SetActorEnableCollision(false);
-	lug->SetActorHiddenInGame(true);
+	lug->LuggageMesh->SetSimulatePhysics(true);
+	lug->SetActorEnableCollision(true);
+	lug->SetActorHiddenInGame(false);
 	
 	return lug;
 }

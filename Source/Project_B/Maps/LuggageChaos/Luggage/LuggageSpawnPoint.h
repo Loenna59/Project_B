@@ -17,10 +17,16 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	ETeamType Team = ETeamType::Blue;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USceneComponent* Root;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UArrowComponent* ThrowArrow;
 
 protected:
 	virtual void BeginPlay() override;
 
-public:
+
 
 };

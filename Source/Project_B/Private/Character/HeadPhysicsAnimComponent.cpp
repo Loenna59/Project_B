@@ -9,6 +9,13 @@ UHeadPhysicsAnimComponent::UHeadPhysicsAnimComponent()
 	SetIsReplicatedByDefault(true);
 }
 
+void UHeadPhysicsAnimComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	TogglePhysicalAnimation(true);
+}
+
 void UHeadPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                               FActorComponentTickFunction* ThisTickFunction)
 {

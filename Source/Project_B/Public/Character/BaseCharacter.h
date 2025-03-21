@@ -52,4 +52,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterAttackComponent* AttackComp;
 
+	UPROPERTY(VisibleAnywhere)
+	class UBaseCharacterPickComponent* PickComp;
+
 };

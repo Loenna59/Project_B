@@ -13,7 +13,6 @@ class PROJECT_B_API UHeadPhysicsAnimComponent : public UBaseCharacterPhysicsAnim
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UHeadPhysicsAnimComponent();
 
 protected:
@@ -22,7 +21,8 @@ protected:
 	FVector PreviousVelocity;
 
 public:
-	// Called every frame
+	virtual void BeginPlay() override;
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 };
