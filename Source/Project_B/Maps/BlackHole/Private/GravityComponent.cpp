@@ -76,6 +76,7 @@ void UGravityComponent::ApplyGravity(float DeltaTime)
 	}
 	
 	// 1. 자전 구현 (Yaw,Pitch 회전)
+	// 물리 시뮬레이션과 충돌: 물리 시뮬레이션이 활성화된 액터의 경우 SetActorRotation이 물리 엔진에 의해 무시될 수 있음
 	FRotator CurrentRotation = GetOwner()->GetActorRotation();
 	CurrentRotation.Yaw += RotationSpeed * 4 * DeltaTime;
 	CurrentRotation.Pitch += RotationSpeed * 2 * DeltaTime ;
