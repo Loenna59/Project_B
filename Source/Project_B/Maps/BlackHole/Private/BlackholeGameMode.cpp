@@ -45,33 +45,13 @@ void ABlackholeGameMode::EndGame()
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("게임 종료!"));
 }
 
-
-inline void ABlackholeGameMode::SpawnBlackhole()
+void ABlackholeGameMode::SpawnBlackhole()
 {
 	// 블랙홀 스폰 함수
 	Blackhole->bIsActive = true;
 	Rotator->Rotate(true);
 	// 4페이즈까지만 있다
 	if(BlackholeSpawnCount >=4) return;
-	if (Blackhole)
-	{
-		/*// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
-		switch (BlackholeSpawnCount)
-		{
-		case 0:
-			Blackhole->R = 1000.f;
-			break;
-		case 1:
-			Blackhole->R = 800.f;
-			break;
-		case 2:
-			Blackhole->R = 600.f;
-			break;
-		default:
-			Blackhole->R = 550.f;
-			break;
-		}*/
-	}
 
 	// 10초 후 블랙홀 소멸
 	GetWorld()->GetTimerManager().SetTimer(BlackholeDestroyHandle, this, &ABlackholeGameMode::DestroyBalckhole, 10.0f, false);
@@ -86,6 +66,6 @@ void ABlackholeGameMode::DestroyBalckhole()
 	// 재소환 예약
 	if (BlackholeSpawnCount < 4)
 	{
-		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 30.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameMode::SpawnBlackhole, 5.0f, false);
 	}
 }
