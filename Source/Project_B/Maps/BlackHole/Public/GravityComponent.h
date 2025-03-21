@@ -28,28 +28,45 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
+	
 	void ApplyGravity(float DeltaTime);
+	void DeactivateGravity();
+	void SpawnCount();
 
+	// 궤도 각도 설정
+	float CurrentOrbitAngle = 0.0f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
 	AActor* Planet; // 중력을 적용할 행성 (외부에서 설정 가능)
 	ABlackHole* Blackhole;
 	ABlackholeGameMode* gm;
+	ACharacter* PlayerCharacter;
 
-	float CurrentOrbitAngle = 0.0f;
+	// 플레이어 캡슐 정렬
+	FTimerHandle AlignHandle;
+	void AlignCharacter();
 
 	// 페이즈별 적절하게 조절 필요
 	// 목표 궤도 반지름
 	UPROPERTY(EditAnywhere, Category = "Gravity")
-	float OrbitRadius = 1000.0f;
+	float OrbitRadius = 1500.0f;
 	// 자전 속도
 	UPROPERTY(EditAnywhere, Category = "Gravity")
 	float RotationSpeed = 20.0f;
 	// 공전 속도
 	UPROPERTY(EditAnywhere, Category = "Gravity")
-	float OrbitSpeed = 100.0f;
-	// 기본 중력 세기
+	float OrbitSpeed = 50.0f;
+	// 선형 보간 값
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
-	FVector GravityStrength; 
+	float InterpSpeed;
+
+	// 공용 변수들
+	FVector PlanetLocation;
+	FVector ObjectLocation;
+	// 오브젝트->블랙홀을 바라보는 방향
+	FVector Direction;
+	// 둘 사이 거리
+	float Distance;
 
 private:
 	UPrimitiveComponent* OwnerPhysicsComp; // 현재 오브젝트의 물리 컴포넌트
