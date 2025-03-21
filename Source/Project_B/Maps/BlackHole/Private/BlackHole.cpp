@@ -79,9 +79,33 @@ void ABlackHole::Tick(float DeltaTime)
 	if (bIsActive)
 	{
 		Sphere->SetVisibility(true);
+		ActivateBlackhole();
 	}
 	else
 	{
 		Sphere->SetVisibility(false);
 	}
 }
+
+void ABlackHole::ActivateBlackhole()
+{
+	// 체인 조사해서 포함시키기
+	AChain* ChainCable = Cast<AChain>(UGameplayStatics::GetActorOfClass(GetWorld(), AChain::StaticClass()));
+	UStaticMeshComponent* HandleComp = nullptr;
+	
+	if (ChainCable)
+	{
+		TArray<UActorComponent*> ChainComponents = ChainCable->GetComponentsByTag(UStaticMeshComponent::StaticClass(), FName("Handle"));
+		if (ChainComponents.Num() > 0)
+		{
+			HandleComp = Cast<UStaticMeshComponent>(ChainComponents[0]);
+			FVector StartLoc = HandleComp->GetComponentLocation();
+			FVector EndLoc = GetActorLocation();
+			FRotator InRot = UKismetMathLibrary::FindLookAtRotation(StartLoc, EndLoc);
+			GravityVel = UKismetMathLibrary::GetForwardVector(InRot)*300;
+			
+			HandleComp->SetPhysicsLinearVelocity(GravityVel, false, "None");
+		}
+	}
+}
+

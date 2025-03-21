@@ -50,10 +50,11 @@ public:
 
 	// 스폰(소멸)될 시간이 되면, 크기 조절
 
-	// 공전궤도 값
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float R = 0.f;
-	float CurrentAngle = 0.f;
+	// 체인
+	void ActivateBlackhole();
+	UPROPERTY()
+	FVector GravityVel;
+	
 	// 공전 속도 값
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float OrbitSpeed = 30.0f;
