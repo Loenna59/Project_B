@@ -18,6 +18,8 @@ ALuggageGoalpost::ALuggageGoalpost()
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	SetRootComponent(Box);
 	Box->SetBoxExtent(FVector(220.000000,175.000000,300.000000));
+
+	bReplicates = true;
 }
 
 void ALuggageGoalpost::BeginPlay()

@@ -18,12 +18,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 MaxPoint = 24;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class ULuggageScoreWidget> ScoreWidgetClass;
+
 private:
 	uint8 RedPoint = 0;
 	uint8 BluePoint = 0;
 
+	UPROPERTY()
+	ULuggageScoreWidget* ScoreWidget;
+
+protected:
+	virtual void BeginPlay() override;
+
 public:
 	void AddScore(ETeamType team ,const uint8 point);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_AddWidget();
 	
 private:
 	void Win(ETeamType team);
