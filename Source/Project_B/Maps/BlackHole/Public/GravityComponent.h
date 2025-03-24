@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BlackholeGameMode.h"
+#include "BlackholeGameState.h"
 #include "Components/ActorComponent.h"
 #include "GravityComponent.generated.h"
 
@@ -39,7 +40,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
 	AActor* Planet; // 중력을 적용할 행성 (외부에서 설정 가능)
 	ABlackHole* Blackhole;
-	ABlackholeGameMode* gm;
+	ABlackholeGameState* gs;
 	ACharacter* PlayerCharacter;
 
 	// 플레이어 캡슐 정렬
