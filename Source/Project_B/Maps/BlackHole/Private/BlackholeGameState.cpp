@@ -17,8 +17,7 @@ void ABlackholeGameState::BeginPlay()
 
 	// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다
 	// TODO: 실제 시연때는 30초로 변경하기
-	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 5.0f, false);
-
+	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
 }
 
 void ABlackholeGameState::Tick(float DeltaTime)
@@ -47,6 +46,6 @@ void ABlackholeGameState::DestroyBalckhole()
 	// 재소환 예약
 	if (BlackholeSpawnCount < 4)
 	{
-		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 5.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
 	}
 }

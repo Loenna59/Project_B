@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
+#include "Project_B/Maps/BlackHole/Public/GravityComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -54,7 +55,7 @@ ABaseCharacter::ABaseCharacter()
 	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
 	PickComp->SetNetAddressable();
 	PickComp->SetIsReplicated(true);
-
+	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
@@ -76,6 +77,11 @@ ABaseCharacter::ABaseCharacter()
 	RightFootPhysicsAnimComp->RegisterComponent();
 	RightFootPhysicsAnimComp->SetNetAddressable();
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
+	
+	GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
+	GravityComp->RegisterComponent();
+	GravityComp->SetNetAddressable();
+	GravityComp->SetIsReplicated(true);
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 

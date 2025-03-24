@@ -13,6 +13,9 @@ ABoxAsset::ABoxAsset()
 	Box = CreateDefaultSubobject<UStaticMeshComponent>("Box");
 	SetRootComponent(Box);
 	Box->SetSimulatePhysics(true);
+
+	// TODO: 확인
+	Box->bReplicatePhysicsToAutonomousProxy = true;
 }
 
 // Called when the game starts or when spawned
