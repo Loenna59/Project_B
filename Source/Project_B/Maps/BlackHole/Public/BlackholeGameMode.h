@@ -23,21 +23,7 @@ public:
 
 	// 게임 종료 함수
 	void EndGame();
-	
+
 	// 게임 진행 타이머 (3분)
 	FTimerHandle GameTimerHandle;
-
-	// 회전
-	ADestroyZone* Rotator = nullptr;
-	// 블랙홀
-	ABlackHole* Blackhole = nullptr;
-	void SpawnBlackhole();
-	void DestroyBalckhole();
-	
-	// 블랙홀 타이머 (게임시작->30초후, 페이즈완전히 종료 30초후)
-	FTimerHandle BlackholeSpawnHandle;
-	FTimerHandle BlackholeDestroyHandle;
-
-	// 블랙홀 소환 횟수
-	int32 BlackholeSpawnCount = 0;
 };

@@ -33,8 +33,8 @@ void UGravityComponent::BeginPlay()
 	// 플레이어 캐스팅
 	AActor* OwnerActor = GetOwner(); 
 	PlayerCharacter = Cast<ACharacter>(OwnerActor);
-	// 게임모드 캐스팅
-	gm = Cast<ABlackholeGameMode>(GetWorld()->GetAuthGameMode());
+	// 게임 스테이트 캐스팅
+	gs = Cast<ABlackholeGameState>(GetWorld()->GetGameState());
 
 	// 각 액터마다 랜덤한 초기 각도 부여
 	CurrentOrbitAngle = FMath::RandRange(0.0f, 360.0f);
@@ -52,7 +52,7 @@ void UGravityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		ApplyGravity(DeltaTime);
 		SpawnCount();
 	}
-	if (false == Blackhole->bIsActive && gm->BlackholeSpawnCount != 0)
+	if (false == Blackhole->bIsActive && gs->BlackholeSpawnCount != 0)
 	{
 		DeactivateGravity();
 	}
@@ -147,26 +147,30 @@ void UGravityComponent::DeactivateGravity()
 
 void UGravityComponent::SpawnCount()
 {
-	if (gm)
+	if (gs)
 	{
 		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
-		switch (gm->BlackholeSpawnCount)
+		switch (gs->BlackholeSpawnCount)
 		{
 		case 0:
 			OrbitRadius = 900;
 			OrbitSpeed = 10.0f;
+			UE_LOG(LogTemp, Warning, TEXT("@@@@1p"));
 			break;
 		case 1:
 			OrbitRadius = 750;
 			OrbitSpeed = 40.0f;
+			UE_LOG(LogTemp, Warning, TEXT("@@@@2p"));
 			break;
 		case 2:
 			OrbitRadius = 500;
 			OrbitSpeed = 70.0f;
+			UE_LOG(LogTemp, Warning, TEXT("@@@@3p"));
 			break;
 		default:
 			OrbitRadius = 400;
 			OrbitSpeed = 80.0f;
+			UE_LOG(LogTemp, Warning, TEXT("@@@@4p"));
 			break;
 		}
 	}
