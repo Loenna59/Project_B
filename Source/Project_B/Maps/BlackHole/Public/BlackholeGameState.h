@@ -3,18 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameState.h"
+#include "GameFramework/GameStateBase.h"
 #include "BlackholeGameState.generated.h"
 
 class ABlackHole;
 class ADestroyZone;
-
-
+/**
+ * 
+ */
 UCLASS()
-class PROJECT_B_API ABlackholeGameState : public AGameState
+class PROJECT_B_API ABlackholeGameState : public AGameStateBase
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

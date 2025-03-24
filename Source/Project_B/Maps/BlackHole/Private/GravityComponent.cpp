@@ -47,7 +47,9 @@ void UGravityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (Planet && Blackhole->bIsActive)
+	if (!Planet && !Blackhole) return;
+	
+	if (Blackhole->bIsActive)
 	{
 		ApplyGravity(DeltaTime);
 		SpawnCount();

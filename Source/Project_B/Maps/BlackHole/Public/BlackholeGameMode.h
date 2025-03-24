@@ -3,27 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BlackHole.h"
-#include "DestroyZone.h"
-#include "GameFramework/GameModeBase.h"
+#include "Project_B/Project_BGameMode.h"
 #include "BlackholeGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_B_API ABlackholeGameMode : public AGameModeBase
+class PROJECT_B_API ABlackholeGameMode : public AProject_BGameMode
 {
 	GENERATED_BODY()
-
-public:
-	ABlackholeGameMode();
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
-
-	// 게임 종료 함수
-	void EndGame();
-
-	// 게임 진행 타이머 (3분)
-	FTimerHandle GameTimerHandle;
 };

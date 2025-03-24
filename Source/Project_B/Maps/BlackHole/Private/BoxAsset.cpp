@@ -13,16 +13,16 @@ ABoxAsset::ABoxAsset()
 	Box = CreateDefaultSubobject<UStaticMeshComponent>("Box");
 	SetRootComponent(Box);
 	Box->SetSimulatePhysics(true);
-
-	// 동기화 설정
-	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
 void ABoxAsset::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	// 동기화
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called every frame
