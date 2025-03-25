@@ -1,9 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+// 게임의 실시간 상태 및 점수 관리
+// 팀 점수 및 게임 진행 상태
+// 게임 종료시 승리 팀 계산
+
 
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 
@@ -23,6 +28,14 @@ void ABlackholeGameState::BeginPlay()
 void ABlackholeGameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ABlackholeGameState::GetLifetimeReplicatedProps(
+	TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABlackholeGameState, );
 }
 
 void ABlackholeGameState::SpawnBlackhole()
@@ -48,4 +61,8 @@ void ABlackholeGameState::DestroyBalckhole()
 	{
 		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
 	}
+}
+
+void ABlackholeGameState::SetGameOver()
+{
 }
