@@ -7,5 +7,7 @@ enum class ETeamType : uint8
 {
 	None,
 	Red,
-	Blue
+	Blue,
+	Yellow,
+	Green
 };
