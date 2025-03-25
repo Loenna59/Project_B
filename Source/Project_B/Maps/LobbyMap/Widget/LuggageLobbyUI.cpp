@@ -16,5 +16,10 @@ void ULuggageLobbyUI::NativeConstruct()
 
 void ULuggageLobbyUI::GameStart()
 {
-	gi->bClick = true;
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	if (pc->HasAuthority())
+	{
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/LV_LuggageChaos_01?listen"));
+		UE_LOG(LogTemp, Warning, TEXT("러기지, 게임시작"));
+	}
 }

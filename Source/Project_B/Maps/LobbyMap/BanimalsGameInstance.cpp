@@ -78,23 +78,11 @@ void UBanimalsGameInstance::OnCreateSessionComplete(FName sessionName, bool bWas
 		{
 			GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby/GameLobbyMap?listen"));
 			UE_LOG(LogTemp, Warning, TEXT("듀오 모드. 블랙홀 로비로"));
-			
-			if (bClick)
-			{
-				GetWorld()->ServerTravel(TEXT("/Game/Maps/BlackholeMap_01?listen"));
-				UE_LOG(LogTemp, Warning, TEXT("블랙홀, 게임시작"));
-			}
 		}
 		else
 		{
 			GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby/GameLobbyMap?listen"));
 			UE_LOG(LogTemp, Warning, TEXT("팀 모드. 러기지 로비로"));
-		
-			if (bClick)
-			{
-				GetWorld()->ServerTravel(TEXT("/Game/Maps/LV_LuggageChaos_01?listen"));
-				UE_LOG(LogTemp, Warning, TEXT("러기지, 게임시작"));
-			}
 		}
 	}
 	else
