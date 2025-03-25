@@ -35,7 +35,7 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ABlackholeGameState, );
+	// DOREPLIFETIME(ABlackholeGameState, );
 }
 
 void ABlackholeGameState::SpawnBlackhole()
