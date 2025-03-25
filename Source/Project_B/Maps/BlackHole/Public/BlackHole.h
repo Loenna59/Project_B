@@ -45,7 +45,6 @@ public:
 	void ActivateBlackhole();
 	UPROPERTY()
 	FVector GravityVel;
-	
 };
 
 
