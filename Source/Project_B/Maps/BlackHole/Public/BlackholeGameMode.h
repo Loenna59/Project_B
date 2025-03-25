@@ -13,4 +13,9 @@ UCLASS()
 class PROJECT_B_API ABlackholeGameMode : public AProject_BGameMode
 {
 	GENERATED_BODY()
+public:
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	
+public:
+	int32 playerIdx = 0;
 };
