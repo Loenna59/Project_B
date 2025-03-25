@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Widget/BlackholeLobbyUI.h"
+#include "Widget/LuggageLobbyUI.h"
 #include "LobbyGameMode.generated.h"
 
 /**
@@ -14,6 +16,7 @@ class PROJECT_B_API ALobbyGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 public:
+	ALobbyGameMode();
 	// 서버 게임 세션에 접속하면 자동 호출
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
@@ -24,4 +27,5 @@ public:
 
 	UPROPERTY()
 	class UBanimalsGameInstance* gi;
+	
 };

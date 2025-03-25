@@ -68,4 +68,6 @@ public:
 
 	void SetIsWin(bool isWin) { bIsWin = isWin; }
 	bool GetIsWin(bool isWin) { return bIsWin; }
+
 };
+

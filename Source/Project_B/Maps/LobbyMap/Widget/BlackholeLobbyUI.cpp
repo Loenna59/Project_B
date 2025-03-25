@@ -16,5 +16,10 @@ void UBlackholeLobbyUI::NativeConstruct()
 
 void UBlackholeLobbyUI::GameStart()
 {
-	gi->bClick = true;
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	if (pc->HasAuthority())
+	{
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/BlackholeMap_01?listen"));
+		UE_LOG(LogTemp, Warning, TEXT("블랙홀, 게임시작"));
+	}
 }
