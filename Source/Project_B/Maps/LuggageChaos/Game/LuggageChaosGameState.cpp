@@ -5,11 +5,14 @@
 
 #include "LuggageChaosGameMode.h"
 #include "LuggagePlayerState.h"
+#include "MovieSceneTracksComponentTypes.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/LuggageChaos/Widget/LuggageScoreWidget.h"
 #include "Project_B/Maps/LuggageChaos/Widget/GameEndWidget.h"
+#include "Project_B/Maps/Podium/WinnerPrize.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
@@ -22,7 +25,7 @@ void ALuggageChaosGameState::BeginPlay()
 		LOG_SCREEN("READY..");
 	
 		FTimerHandle OnStartTimerHandle;
-	
+		
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
 	}
 }
@@ -33,9 +36,6 @@ void ALuggageChaosGameState::GameStart()
 	GetWorld()->GetTimerManager().SetTimer(GameTimerHandle, this, &ALuggageChaosGameState::TimeOut,GameTime,false);
 
 	Net_InitUI();
-
-	//TODO: 테스트용
-	AddScore(ETeamType::Red, 12);
 }
 
 void ALuggageChaosGameState::AddScore(ETeamType team, const uint8 point)
@@ -89,10 +89,33 @@ void ALuggageChaosGameState::Net_InitUI_Implementation()
 			}
 		}
 	}
+
+	//TODO: 테스트용
+	AddScore(ETeamType::Red, 4);
+	
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+
+	APlayerState* ps = pc->PlayerState;
+	ALuggagePlayerState* psLug = Cast<ALuggagePlayerState>(ps);
+	
+	if (psLug)
+	{
+		if (HasAuthority())
+		{
+			psLug->SetTeamType(ETeamType::Blue);
+			LOG_SCREEN_MY(2.0f,FColor::Blue,"나는 파랑팀");
+		}
+		else
+		{
+			psLug->SetTeamType(ETeamType::Red);
+			LOG_SCREEN_MY(2.0f,FColor::Red,"나는 빨강팀");
+		}
+	}
 }
 
 void ALuggageChaosGameState::GameEnd()
 {
+	//TODO: 시상대 맵으로 전환
 	if (HasAuthority())
 	{
 		Net_GameEnd();
@@ -125,10 +148,13 @@ void ALuggageChaosGameState::Win(ETeamType team)
 	APlayerState* ps = pc->PlayerState;
 	ALuggagePlayerState* psLug = Cast<ALuggagePlayerState>(ps);
 
+
+	//TODO: 게임인스턴스에서 정보 가져오는 것으로 수정
 	if (psLug)
 	{
 		if (psLug->GetTeamType() == team)
 		{
+			AddWinPrize(pc);
 			GameEndWidget->ShowVictory();
 			LOG_SCREEN("WIN");
 		}
@@ -140,6 +166,16 @@ void ALuggageChaosGameState::Win(ETeamType team)
 	}
 	
 	GameEnd();
+}
+
+void ALuggageChaosGameState::AddWinPrize(APlayerController* pc)
+{
+	AWinnerPrize* prize = GetWorld()->SpawnActor<AWinnerPrize>(WinnerPrizeClass, pc->GetCharacter()->GetTransform());
+	if (prize)
+	{
+		prize->AttachToComponent(pc->GetCharacter()->GetMesh(), 
+								 FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
 }
 
 void ALuggageChaosGameState::Net_JudgeWinner_Implementation()
