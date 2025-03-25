@@ -42,6 +42,9 @@ protected:
 	class ABaseCharacter* Character = nullptr;
 
 	UPROPERTY()
+	class UBaseCharacterAnimInstance* AnimInstance = nullptr;
+
+	UPROPERTY()
 	class USkeletalMeshComponent* Mesh = nullptr;
 	
 	UPROPERTY()

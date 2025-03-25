@@ -26,6 +26,9 @@ protected:
 
 public:
 	UPROPERTY(VisibleAnywhere)
+	class UCapsuleComponent* BodyCollisionComp;
+	
+	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(VisibleAnywhere)
@@ -41,10 +44,10 @@ public:
 	class UBaseCharacterPhysicsAnimComponent* HeadPhysicsAnimComp;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterPhysicsAnimComponent* LeftArmPhysicsAnimComp;
+	class UBaseCharacterArmComponent* LeftArmPhysicsAnimComp;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterPhysicsAnimComponent* RightArmPhysicsAnimComp;
+	class UBaseCharacterArmComponent* RightArmPhysicsAnimComp;
 
 	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterPhysicsAnimComponent* RightFootPhysicsAnimComp;
@@ -55,7 +58,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterPickComponent* PickComp;
 
-	UPROPERTY(VisibleAnywhere)
-	class UGravityComponent* GravityComp;
+	// UPROPERTY(VisibleAnywhere)
+	// class UGravityComponent* GravityComp;
 
 };

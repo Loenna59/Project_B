@@ -4,6 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Camera/CameraComponent.h"
+#include "Character/BaseCharacterArmComponent.h"
 #include "Character/BaseCharacterAttackComponent.h"
 #include "Character/BaseCharacterMoveComponent.h"
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
@@ -31,6 +32,14 @@ ABaseCharacter::ABaseCharacter()
 
 	GetMesh()->SetRelativeLocation(FVector(0, 0, -102.f));
 	GetMesh()->SetRelativeRotation(FRotator(0, -90.f, 0));
+
+	BodyCollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCollisionComp"));
+	BodyCollisionComp->SetupAttachment(GetMesh());
+	BodyCollisionComp->SetCapsuleRadius(45.f);
+	BodyCollisionComp->SetCapsuleHalfHeight(60.f);
+	BodyCollisionComp->SetRelativeLocation(FVector(0, 0, 90.f));
+	BodyCollisionComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	BodyCollisionComp->SetCollisionProfileName(TEXT("CharacterBody"));
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->SetupAttachment(RootComponent);
@@ -63,12 +72,12 @@ ABaseCharacter::ABaseCharacter()
 	HeadPhysicsAnimComp->SetNetAddressable();
 	HeadPhysicsAnimComp->SetIsReplicated(true);
 	
-	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("LeftArmPhysicsAnimComp"));
+	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("LeftArmPhysicsAnimComp"));
 	LeftArmPhysicsAnimComp->RegisterComponent();
 	LeftArmPhysicsAnimComp->SetNetAddressable();
 	LeftArmPhysicsAnimComp->SetIsReplicated(true);
 	
-	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightArmPhysicsAnimComp"));
+	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("RightArmPhysicsAnimComp"));
 	RightArmPhysicsAnimComp->RegisterComponent();
 	RightArmPhysicsAnimComp->SetNetAddressable();
 	RightArmPhysicsAnimComp->SetIsReplicated(true);
@@ -78,10 +87,10 @@ ABaseCharacter::ABaseCharacter()
 	RightFootPhysicsAnimComp->SetNetAddressable();
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
 	
-	GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
-	GravityComp->RegisterComponent();
-	GravityComp->SetNetAddressable();
-	GravityComp->SetIsReplicated(true);
+	// GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
+	// GravityComp->RegisterComponent();
+	// GravityComp->SetNetAddressable();
+	// GravityComp->SetIsReplicated(true);
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 

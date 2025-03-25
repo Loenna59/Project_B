@@ -2,10 +2,8 @@
 
 #include "EnhancedInputComponent.h"
 #include "Character/BaseCharacter.h"
-#include "Character/BaseCharacterAnimInstance.h"
+#include "Character/BaseCharacterArmComponent.h"
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
-#include "Project_B/Utilities/LogMacro.h"
-#include "Project_B/Utilities/TraceChannelHelper.h"
 
 UBaseCharacterPickComponent::UBaseCharacterPickComponent()
 {
@@ -25,7 +23,21 @@ void UBaseCharacterPickComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	HandLocation = Character->GetMesh()->GetBoneLocation(TEXT("Hand_R"));
+	if (!Character)
+	{
+		return;
+	}
+	
+	LeftArmComp = Cast<UBaseCharacterArmComponent>(Character->GetDefaultSubobjectByName(TEXT("LeftArmPhysicsAnimComp")));
+	RightArmComp = Cast<UBaseCharacterArmComponent>(Character->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp")));
+}
+
+void UBaseCharacterPickComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	
 }
 
 void UBaseCharacterPickComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -44,90 +56,25 @@ void UBaseCharacterPickComponent::SetupInputBiding(class UEnhancedInputComponent
 
 void UBaseCharacterPickComponent::BeginPick()
 {
-	if (!Character || !AnimInstance)
+	if (RightArmComp)
 	{
-		return;
+		RightArmComp->BeginGrab();
 	}
-
 }
 
 void UBaseCharacterPickComponent::Picking()
 {
-	if (!Character || !AnimInstance)
+	if (RightArmComp)
 	{
-		return;
+		RightArmComp->Grabbing();
 	}
-
-	AnimInstance->bPicking = true;
-	
-	TWeakObjectPtr<UBaseCharacterPickComponent> ThisWeak = this;
-	
-	TraceChannelHelper::SphereSingleByChannel
-	(
-		GetWorld(),
-		Character,
-		Character->GetActorLocation(),
-		Character->GetActorLocation(),
-		FRotator::ZeroRotator,
-		ECC_Visibility,
-		Radius,
-		true,
-		true,
-		[ThisWeak] (bool bHit, FHitResult HitResult)
-		{
-			if (ThisWeak.IsValid())
-			{
-				ThisWeak->DetectNearby(bHit, HitResult.GetActor());
-			}
-		}
-	);
 }
 
 void UBaseCharacterPickComponent::ReleasePick()
 {
-	UObject* obj = Character->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp"));
-	if (UBaseCharacterPhysicsAnimComponent* Right = Cast<UBaseCharacterPhysicsAnimComponent>(obj))
+	if (RightArmComp)
 	{
-		Right->TogglePhysicalAnimation(true);
-	}
-
-	if (AnimInstance)
-	{
-		AnimInstance->IKTargetLocation = HandLocation;
-		AnimInstance->bPicking = false;
-	}
-}
-
-void UBaseCharacterPickComponent::DetectNearby(bool bHit, AActor* Actor)
-{
-	if (Character)
-	{
-		if (AnimInstance)
-		{
-			if (bHit)
-			{
-				UObject* obj = Character->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp"));
-				if (UBaseCharacterPhysicsAnimComponent* Right = Cast<UBaseCharacterPhysicsAnimComponent>(obj))
-				{
-					Right->TogglePhysicalAnimation(false);
-				}
-				
-				FVector TargetLocation = Actor->GetActorLocation();
-			
-				AnimInstance->IKTargetLocation = FMath::VInterpTo(
-					AnimInstance->IKTargetLocation,
-					TargetLocation, GetWorld()->DeltaTimeSeconds,
-					2.5f
-				);
-
-				// LOG_SCREEN("DetectNearby %s", *Actor->GetActorNameOrLabel());
-				return;
-			}
-
-			// LOG_SCREEN("DetectNearby None");
-			
-			AnimInstance->IKTargetLocation = HandLocation;
-		}
+		RightArmComp->ReleaseGrab();
 	}
 }
 

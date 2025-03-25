@@ -18,12 +18,14 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	virtual void SetupInputBiding(class UEnhancedInputComponent* input) override;
-	
+
 	UFUNCTION()
 	void BeginPick();
 
@@ -33,17 +35,13 @@ public:
 	UFUNCTION()
 	void ReleasePick();
 
-	UFUNCTION()
-	void DetectNearby(bool bHit, AActor* Actor);
-
 protected:
 	UPROPERTY()
 	class UInputAction* PickInputAction;
 
 	UPROPERTY()
-	FVector HandLocation;
-	
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Radius = 130;
+	class UBaseCharacterArmComponent* LeftArmComp;
+
+	UPROPERTY()
+	class UBaseCharacterArmComponent* RightArmComp;
 };
