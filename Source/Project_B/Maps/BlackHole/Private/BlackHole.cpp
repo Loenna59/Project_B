@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "Project_B/Maps/BlackHole/Public/BoxAsset.h"
 #include "Project_B/Maps/BlackHole/Public/Chain.h"
@@ -31,7 +32,7 @@ ABlackHole::ABlackHole()
 	Sphere->SetRelativeScale3D(FVector(4.5f));
 	Sphere->SetVisibility(false);
 
-	// 오버랩 필드
+	// @fixme : 필요 없어짐(아마) Legacy: 오버랩 필드
 	SphereComp = CreateDefaultSubobject<USphereComponent>("Round");
 	SphereComp->SetupAttachment(RootComponent);
 	SphereComp->SetSphereRadius(1500);
@@ -48,26 +49,12 @@ ABlackHole::ABlackHole()
 	}
 }
 
-void ABlackHole::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	const FHitResult& SweepResult)
-{
-	if (OtherActor)
-	{
-		UGravityComponent* GravityComp = OtherActor->FindComponentByClass<UGravityComponent>();
-		if (GravityComp)
-		{
-			GravityComp->ApplyGravity(GetWorld()->DeltaTimeSeconds);
-		}
-	}
-}
 
 // Called when the game starts or when spawned
 void ABlackHole::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ABlackHole::OnOverlap);
 }
 
 // Called every frame
@@ -85,6 +72,13 @@ void ABlackHole::Tick(float DeltaTime)
 	{
 		Sphere->SetVisibility(false);
 	}
+}
+
+void ABlackHole::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ABlackHole, bIsActive);
 }
 
 void ABlackHole::ActivateBlackhole()

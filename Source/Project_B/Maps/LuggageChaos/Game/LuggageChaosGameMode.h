@@ -14,18 +14,5 @@ UCLASS()
 class PROJECT_B_API ALuggageChaosGameMode : public AProject_BGameMode
 {
 	GENERATED_BODY()
-	
-// public:
-// 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-// 	uint8 MaxPoint = 24;
-//
-// private:
-// 	uint8 RedPoint = 0;
-// 	uint8 BluePoint = 0;
-//
-// public:
-// 	void AddScore(ETeamType team ,const uint8 point);
-// 	
-// private:
-// 	void Win(ETeamType team);
+
 };

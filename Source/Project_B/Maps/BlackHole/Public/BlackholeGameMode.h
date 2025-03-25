@@ -3,41 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BlackHole.h"
-#include "DestroyZone.h"
-#include "GameFramework/GameModeBase.h"
+#include "Project_B/Project_BGameMode.h"
 #include "BlackholeGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_B_API ABlackholeGameMode : public AGameModeBase
+class PROJECT_B_API ABlackholeGameMode : public AProject_BGameMode
 {
 	GENERATED_BODY()
-
 public:
-	ABlackholeGameMode();
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	// 서버 게임 세션에 접속하면 자동 호출
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	
+public:
+	int32 playerIdx = 0;
 
-	// 게임 종료 함수
+	// 게임 제한 시간 (3분)
+	FTimerHandle timerHandle;
 	void EndGame();
-	
-	// 게임 진행 타이머 (3분)
-	FTimerHandle GameTimerHandle;
-
-	// 회전
-	ADestroyZone* Rotator = nullptr;
-	// 블랙홀
-	ABlackHole* Blackhole = nullptr;
-	void SpawnBlackhole();
-	void DestroyBalckhole();
-	
-	// 블랙홀 타이머 (게임시작->30초후, 페이즈완전히 종료 30초후)
-	FTimerHandle BlackholeSpawnHandle;
-	FTimerHandle BlackholeDestroyHandle;
-
-	// 블랙홀 소환 횟수
-	int32 BlackholeSpawnCount = 0;
 };

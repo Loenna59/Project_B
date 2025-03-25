@@ -55,4 +55,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UBaseCharacterPickComponent* PickComp;
 
+	UPROPERTY(VisibleAnywhere)
+	class UGravityComponent* GravityComp;
+
 };

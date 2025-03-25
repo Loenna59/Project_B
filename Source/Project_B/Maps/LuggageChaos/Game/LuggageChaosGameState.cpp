@@ -3,10 +3,13 @@
 
 #include "LuggageChaosGameState.h"
 
+#include "LuggageChaosGameMode.h"
+#include "LuggagePlayerState.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/LuggageChaos/Widget/LuggageScoreWidget.h"
+#include "Project_B/Maps/LuggageChaos/Widget/GameEndWidget.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
@@ -16,11 +19,23 @@ void ALuggageChaosGameState::BeginPlay()
 
 	if (HasAuthority())
 	{
+		LOG_SCREEN("READY..");
+	
 		FTimerHandle OnStartTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::Net_AddWidget,2.0f,false);
+	
+		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
 	}
+}
 
-	//bReplicates = true;
+void ALuggageChaosGameState::GameStart()
+{
+	LOG_SCREEN("START!");
+	GetWorld()->GetTimerManager().SetTimer(GameTimerHandle, this, &ALuggageChaosGameState::TimeOut,GameTime,false);
+
+	Net_InitUI();
+
+	//TODO: 테스트용
+	AddScore(ETeamType::Red, 12);
 }
 
 void ALuggageChaosGameState::AddScore(ETeamType team, const uint8 point)
@@ -52,30 +67,97 @@ void ALuggageChaosGameState::AddScore(ETeamType team, const uint8 point)
 	}
 }
 
-void ALuggageChaosGameState::Net_AddWidget_Implementation()
+void ALuggageChaosGameState::Net_InitUI_Implementation()
 {
-	for (APlayerState* PS : PlayerArray)
+	for (APlayerState* ps : PlayerArray)
 	{
-		APlayerController* PC = Cast<APlayerController>(PS->GetPlayerController());
-		if (PC && PC->IsLocalController())
+		APlayerController* pc = Cast<APlayerController>(ps->GetPlayerController());
+		if (pc && pc->IsLocalController())
 		{
-			ScoreWidget = CreateWidget<ULuggageScoreWidget>(PC, ScoreWidgetClass);
+			ScoreWidget = CreateWidget<ULuggageScoreWidget>(pc, ScoreWidgetClass);
+			
 			if (ScoreWidget)
 			{
 				ScoreWidget->AddToViewport();
+			}
+
+			GameEndWidget = CreateWidget<UGameEndWidget>(pc, GameEndWidgetClass);
+			
+			if (GameEndWidget)
+			{
+				GameEndWidget->AddToViewport();
 			}
 		}
 	}
 }
 
+void ALuggageChaosGameState::GameEnd()
+{
+	if (HasAuthority())
+	{
+		Net_GameEnd();
+	}
+}
+
+void ALuggageChaosGameState::Net_GameEnd_Implementation()
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowTime);
+}
+
+void ALuggageChaosGameState::TimeOut()
+{
+	Net_JudgeWinner();
+}
+
 void ALuggageChaosGameState::Win(ETeamType team)
 {
-	if (team == ETeamType::Blue)
+	WinnerTeam = team;
+
+	if (team == ETeamType::None)
 	{
-		LOG_SCREEN("블루팀 승리");
+		GameEndWidget->ShowDraw();
+		GameEnd();
+		return;
+	}
+	
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+
+	APlayerState* ps = pc->PlayerState;
+	ALuggagePlayerState* psLug = Cast<ALuggagePlayerState>(ps);
+
+	if (psLug)
+	{
+		if (psLug->GetTeamType() == team)
+		{
+			GameEndWidget->ShowVictory();
+			LOG_SCREEN("WIN");
+		}
+		else
+		{
+			GameEndWidget->ShowDefeat();
+			LOG_SCREEN("LOSE");
+		}
+	}
+	
+	GameEnd();
+}
+
+void ALuggageChaosGameState::Net_JudgeWinner_Implementation()
+{
+	if (RedPoint == BluePoint)
+	{
+		//LOG_SCREEN("DRAW GAME");
+		Win(ETeamType::None);
+	}
+
+	else if (RedPoint > BluePoint)
+	{
+		//LOG_SCREEN("WINNER: Red");
+		Win(ETeamType::Red);
 	}
 	else
 	{
-		LOG_SCREEN("레드팀 승리");
+		//LOG_SCREEN("WINNER: Blue");
+		Win(ETeamType::Blue);
 	}
 }
