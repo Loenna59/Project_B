@@ -17,11 +17,14 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
-	class UPhysicsHandleComponent* PhysicHandleComp;
-
 	UPROPERTY()
 	bool bIsAttached = false;
+
+	UPROPERTY()
+	class UPrimitiveComponent* GrabComponent = nullptr;
+
+	UPROPERTY()
+	class UPhysicsConstraintComponent* GrabConstraintComp = nullptr;
 	
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
@@ -50,4 +53,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SocketName = TEXT("Hand");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName BoneName = TEXT("Hand_R");
 };

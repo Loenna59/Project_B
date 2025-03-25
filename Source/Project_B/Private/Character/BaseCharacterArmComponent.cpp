@@ -5,6 +5,7 @@
 
 #include "Character/BaseCharacter.h"
 #include "Character/BaseCharacterAnimInstance.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
 #include "Project_B/Utilities/TraceChannelHelper.h"
@@ -14,7 +15,6 @@ UBaseCharacterArmComponent::UBaseCharacterArmComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	PhysicHandleComp = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandleComp"));
 }
 
 
@@ -28,14 +28,6 @@ void UBaseCharacterArmComponent::TickComponent(float DeltaTime, ELevelTick TickT
                                                FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (bIsAttached && PhysicHandleComp->GrabbedComponent)
-	{
-		FVector Location = Mesh->GetSocketLocation(SocketName);
-		// FRotator Rotation = Mesh->GetSocketRotation(SocketName);
-
-		PhysicHandleComp->SetTargetLocation(Location);
-	}
 }
 
 void UBaseCharacterArmComponent::BeginGrab()
@@ -97,9 +89,11 @@ void UBaseCharacterArmComponent::ReleaseGrab()
 	}
 
 	bIsAttached = false;
-	if (PhysicHandleComp->GrabbedComponent)
+	if (GrabConstraintComp)
 	{
-		PhysicHandleComp->ReleaseComponent();
+		GrabConstraintComp->BreakConstraint();
+		GrabConstraintComp->DestroyComponent();
+		GrabConstraintComp = nullptr;
 	}
 }
 
@@ -157,9 +151,28 @@ void UBaseCharacterArmComponent::AttachTo(UPrimitiveComponent* Comp, FVector Loc
 {
 	bIsAttached = true;
 
-	if (Comp)
+	if (Comp && !GrabConstraintComp)
 	{
-		PhysicHandleComp->GrabComponentAtLocationWithRotation(Comp, NAME_None, Location, Rotation);
+		FTransform CompTransform = Comp->GetComponentTransform();
+		
+		GrabConstraintComp = NewObject<UPhysicsConstraintComponent>(this);
+		GrabConstraintComp->RegisterComponent();
+		GrabConstraintComp->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
+
+		Comp->SetWorldTransform(CompTransform, false, nullptr, ETeleportType::TeleportPhysics);
+		
+		GrabConstraintComp->SetConstrainedComponents(Mesh, BoneName, Comp, NAME_None);
+
+		// 회전/이동을 제한하여 부드럽게 따라가도록 설정
+		GrabConstraintComp->SetAngularSwing1Limit(ACM_Limited, 45.0f);
+		GrabConstraintComp->SetAngularSwing2Limit(ACM_Limited, 45.0f);
+		GrabConstraintComp->SetAngularTwistLimit(ACM_Limited, 45.f);
+		GrabConstraintComp->SetLinearXLimit(LCM_Limited, 10.0f);
+		GrabConstraintComp->SetLinearYLimit(LCM_Limited, 10.0f);
+		GrabConstraintComp->SetLinearZLimit(LCM_Limited, 10.0f);
+		
+		// GrabComponent = Comp;
+		// Comp->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
 	}
 }
 
