@@ -27,5 +27,5 @@ public:
 
 	UPROPERTY()
 	class UBanimalsGameInstance* gi;
-	
+
 };

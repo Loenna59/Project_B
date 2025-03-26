@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Project_B/Project_BGameMode.h"
-#include "Project_B/Maps/TeamMatchType.h"
+#include "Project_B/Maps/BanimalsType.h"
 #include "LuggageChaosGameMode.generated.h"
 
 /**

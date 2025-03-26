@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Project_B/Maps/TeamMatchType.h"
+#include "Project_B/Maps/BanimalsType.h"
 #include "LuggageManager.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReturnPooledObject, ALuggage*, Luggage, ETeamType, Team);

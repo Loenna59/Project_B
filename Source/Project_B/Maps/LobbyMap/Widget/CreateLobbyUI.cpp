@@ -3,19 +3,34 @@
 
 #include "CreateLobbyUI.h"
 #include "Components/Button.h"
+#include "Components/WidgetSwitcher.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 
 void UCreateLobbyUI::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
+
+	// 마우스 활성화
+	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 	gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
-	Btn_JoinSession->OnClicked.AddDynamic(this, &UCreateLobbyUI::JoinSession);
+
+	Btn_MainCustomGame->OnClicked.AddDynamic(this, &UCreateLobbyUI::Btn_MainCustomGame_Clicked);
+	Btn_GoFirst->OnClicked.AddDynamic(this, &UCreateLobbyUI::Btn_GoFirst_Clicked);
+
+	Btn_FindSession->OnClicked.AddDynamic(this, &UCreateLobbyUI::Btn_FindSession_Clicked);
 }
 
 
-void UCreateLobbyUI::JoinSession()
+void UCreateLobbyUI::Btn_MainCustomGame_Clicked()
 {
-	// 만들어진 세션에 참여하고 싶은데요...
-	// gi->JoinOtherSession();
+	WidgetSwitcher->SetActiveWidgetIndex(1);
+}
+
+void UCreateLobbyUI::Btn_FindSession_Clicked()
+{
+}
+
+void UCreateLobbyUI::Btn_GoFirst_Clicked()
+{
+	WidgetSwitcher->SetActiveWidgetIndex(0);
 }
