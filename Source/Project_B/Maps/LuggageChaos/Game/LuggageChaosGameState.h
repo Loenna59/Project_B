@@ -28,6 +28,9 @@ public:
 	uint8 MaxPoint = 24;
 
 	ETeamType WinnerTeam = ETeamType::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class AWinnerPrize> WinnerPrizeClass;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class ULuggageScoreWidget> ScoreWidgetClass;
@@ -54,18 +57,19 @@ public:
 	/**서버만 실행*/
 	void GameStart();
 	
-	/**모든 클라이언트에서 실행되어야 함*/
+	/**모든 클라이언트에서 실행*/
 	void GameEnd();
 
 	/**서버에서만 실행*/
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_GameEnd();
 
-	/**모든 클라이언트에서 실행되어야 함*/
+	/**모든 클라이언트에서 실행*/
 	void AddScore(ETeamType team ,const uint8 point);
 
-	/**모든 클라이언트에서 실행되어야 함*/
+	/**모든 클라이언트에서 실행*/
 	void Win(ETeamType team = ETeamType::None);
+	void AddWinPrize(APlayerController* pc);
 	
 	/**서버만 실행*/
 	void TimeOut();

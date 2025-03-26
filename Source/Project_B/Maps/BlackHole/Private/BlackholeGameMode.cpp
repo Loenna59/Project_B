@@ -37,15 +37,6 @@ void ABlackholeGameMode::PostLogin(APlayerController* NewPlayer)
 	FVector NewPos = CenterPos + FVector(FMath::Cos(Angle), FMath::Sin(Angle), 0.0f) * Radius;
 	player->SetActorLocation(NewPos);
 
-	// 로비로!
-	// 들어온 순서대로 팀을 배정받자
-	if (ps)
-	{
-		// 2명씩 팀을 자동 배정한다
-		// 로비에서 맵인식해서 2,4 구분
-		int TeamIndex = playerIdx % 4; // 레드(0), 블루(1), 옐로(2), 그린(3)
-		ps->SetTeam(TeamIndex); // 팀 정보 설정
-	}
 	playerIdx++;
 }
 

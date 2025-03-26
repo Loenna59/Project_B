@@ -1,0 +1,33 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Camera/CameraActor.h"
+#include "PodiumCamera.generated.h"
+
+class UPictureWidget;
+
+UCLASS()
+class PROJECT_B_API APodiumCamera : public ACameraActor
+{
+	GENERATED_BODY()
+
+public:
+	APodiumCamera();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	USceneCaptureComponent2D* CaptureComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	TSubclassOf<UPictureWidget> PictureWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	UPictureWidget* PictureWidget;
+
+protected:
+	virtual void BeginPlay() override;
+
+public:
+	void Shoot();
+};
