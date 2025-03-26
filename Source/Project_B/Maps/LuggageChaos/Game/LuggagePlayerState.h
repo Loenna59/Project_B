@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
-#include "Project_B/Maps/TeamMatchType.h"
+#include "Project_B/Maps/BanimalsType.h"
 #include "LuggagePlayerState.generated.h"
 
 /**

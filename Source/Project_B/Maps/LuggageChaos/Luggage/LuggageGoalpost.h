@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Project_B/Maps/TeamMatchType.h"
+#include "Project_B/Maps/BanimalsType.h"
 #include "LuggageGoalpost.generated.h"
 
 class ALuggageManager;

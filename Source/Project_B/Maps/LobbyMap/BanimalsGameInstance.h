@@ -6,7 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
-#include "Project_B/Maps/TeamMatchType.h" // 팀정보
+#include "Project_B/Maps/BanimalsType.h" // 팀정보
 #include "BanimalsGameInstance.generated.h"
 
 /**
@@ -59,15 +59,12 @@ public:
 
 	
 private:
-	ETeamType MyTeamType = ETeamType::None;
-	bool bIsWin = false;
-
+	int32 MyPlayerID;
+	TArray<FPlayerInfo> PlayerList;
+	
 public:
-	void SetTeamType(const ETeamType team) { MyTeamType = team; }
-	ETeamType GetTeamType() const { return MyTeamType; }
-
-	void SetIsWin(bool isWin) { bIsWin = isWin; }
-	bool GetIsWin(bool isWin) { return bIsWin; }
+	void SetPlayerInfo(const TArray<FPlayerInfo> info) { PlayerList = info; }
+	void GetPlayerInfo(TArray<FPlayerInfo>& info) { info = PlayerList; }
 
 };
 
