@@ -3,7 +3,6 @@
 #include "EnhancedInputComponent.h"
 #include "Character/BaseCharacter.h"
 #include "Character/BaseCharacterArmComponent.h"
-#include "Character/BaseCharacterPhysicsAnimComponent.h"
 
 UBaseCharacterPickComponent::UBaseCharacterPickComponent()
 {
@@ -32,14 +31,6 @@ void UBaseCharacterPickComponent::BeginPlay()
 	RightArmComp = Cast<UBaseCharacterArmComponent>(Character->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp")));
 }
 
-void UBaseCharacterPickComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	
-}
-
 void UBaseCharacterPickComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -60,6 +51,11 @@ void UBaseCharacterPickComponent::BeginPick()
 	{
 		RightArmComp->BeginGrab();
 	}
+
+	if (LeftArmComp)
+	{
+		LeftArmComp->BeginGrab();
+	}
 }
 
 void UBaseCharacterPickComponent::Picking()
@@ -68,6 +64,11 @@ void UBaseCharacterPickComponent::Picking()
 	{
 		RightArmComp->Grabbing();
 	}
+
+	if (LeftArmComp)
+	{
+		LeftArmComp->Grabbing();
+	}
 }
 
 void UBaseCharacterPickComponent::ReleasePick()
@@ -75,6 +76,11 @@ void UBaseCharacterPickComponent::ReleasePick()
 	if (RightArmComp)
 	{
 		RightArmComp->ReleaseGrab();
+	}
+
+	if (LeftArmComp)
+	{
+		LeftArmComp->ReleaseGrab();
 	}
 }
 

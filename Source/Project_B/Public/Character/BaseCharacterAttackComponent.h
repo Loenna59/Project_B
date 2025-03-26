@@ -13,6 +13,17 @@ enum class EArmDirection : uint8
 	RIGHT
 };
 
+UENUM()
+enum class EAttackType : uint8
+{
+	PUNCH,
+	HEAD_BUTT,
+	KICK,
+	HAMMER,
+	BOTTLE,
+	CROSS_BOW
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECT_B_API UBaseCharacterAttackComponent : public UBaseCharacterInputComponent
 {
@@ -103,4 +114,23 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnPunchTraceChannel(bool bHit, FHitResult HitResult);
+
+	UFUNCTION()
+	void OnKickTraceChannel();
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnKickTraceChannel();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnKickTraceChannel(bool bHit, FHitResult HitResult);
+
+	UFUNCTION()
+	void OnHeadButtTraceChannel();
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnHeadButtTraceChannel();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnHeadButtTraceChannel(bool bHit, FHitResult HitResult);
+	
 };

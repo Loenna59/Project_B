@@ -18,6 +18,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY()
+	class UBaseCharacterPickComponent* PickComp = nullptr;
+	
+	UPROPERTY()
 	bool bIsAttached = false;
 
 	UPROPERTY()
@@ -44,6 +47,9 @@ public:
 
 	UFUNCTION()
 	void AttachTo(UPrimitiveComponent* Comp, FVector Location, FRotator Rotation);
+
+	UFUNCTION()
+	FVector FindNearestSurfacePoint(const FVector& Point, UPrimitiveComponent* Comp);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Radius = 20;
