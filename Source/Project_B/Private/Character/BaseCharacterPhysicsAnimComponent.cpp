@@ -1,6 +1,7 @@
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
 
 #include "Character/BaseCharacter.h"
+#include "Character/BaseCharacterAnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
@@ -23,6 +24,7 @@ void UBaseCharacterPhysicsAnimComponent::BeginPlay()
 	if (Character)
 	{
 		Mesh = Character->GetMesh();
+		AnimInstance = Cast<UBaseCharacterAnimInstance>(Mesh->GetAnimInstance());
 		PhysicalAnimationComp = Character->PhysicalAnimationComp;
 	}
 
