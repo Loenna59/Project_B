@@ -21,7 +21,7 @@ ABaseCharacter::ABaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
-	GetCapsuleComponent()->SetCapsuleRadius(60.f);
+	GetCapsuleComponent()->SetCapsuleRadius(40.f);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(100.f);
 
 	bUseControllerRotationPitch = false;
@@ -32,14 +32,6 @@ ABaseCharacter::ABaseCharacter()
 
 	GetMesh()->SetRelativeLocation(FVector(0, 0, -102.f));
 	GetMesh()->SetRelativeRotation(FRotator(0, -90.f, 0));
-
-	BodyCollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCollisionComp"));
-	BodyCollisionComp->SetupAttachment(GetMesh());
-	BodyCollisionComp->SetCapsuleRadius(45.f);
-	BodyCollisionComp->SetCapsuleHalfHeight(60.f);
-	BodyCollisionComp->SetRelativeLocation(FVector(0, 0, 90.f));
-	BodyCollisionComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	BodyCollisionComp->SetCollisionProfileName(TEXT("CharacterBody"));
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->SetupAttachment(RootComponent);

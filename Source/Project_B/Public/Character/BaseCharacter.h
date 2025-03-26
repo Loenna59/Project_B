@@ -26,9 +26,6 @@ protected:
 
 public:
 	UPROPERTY(VisibleAnywhere)
-	class UCapsuleComponent* BodyCollisionComp;
-	
-	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(VisibleAnywhere)

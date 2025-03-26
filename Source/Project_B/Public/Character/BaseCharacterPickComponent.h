@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacterInputComponent.h"
-#include "InputActionValue.h"
 #include "BaseCharacterPickComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGrabbing, FString);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECT_B_API UBaseCharacterPickComponent : public UBaseCharacterInputComponent
@@ -18,8 +18,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -44,4 +42,8 @@ protected:
 
 	UPROPERTY()
 	class UBaseCharacterArmComponent* RightArmComp;
+
+// public:
+// 	UPROPERTY()
+// 	FOnGrabbing OnGrabbing;
 };

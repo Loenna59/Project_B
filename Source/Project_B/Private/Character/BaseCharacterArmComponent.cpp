@@ -5,6 +5,7 @@
 
 #include "Character/BaseCharacter.h"
 #include "Character/BaseCharacterAnimInstance.h"
+#include "Character/BaseCharacterPickComponent.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
@@ -21,6 +22,13 @@ UBaseCharacterArmComponent::UBaseCharacterArmComponent()
 void UBaseCharacterArmComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!Character)
+	{
+		return;
+	}
+	
+	PickComp = Cast<UBaseCharacterPickComponent>(Character->GetDefaultSubobjectByName(TEXT("PickComp")));
 }
 
 
@@ -107,22 +115,23 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, FHitResult HitResult)
 	if (bHit)
 	{
 		AActor* Actor = HitResult.GetActor();
-		TogglePhysicalAnimation(false);
 
 		UPrimitiveComponent* Comp = HitResult.GetComponent();
 		if (Comp)
 		{
 			// 손과 물체의 표면이 가까운지 거리 계산
 			FVector HandClosestPoint;
-			FVector OtherClosestPoint;
 
 			Mesh->GetClosestPointOnCollision(HitResult.Location, HandClosestPoint);
-			Comp->GetClosestPointOnCollision(HitResult.Location, OtherClosestPoint);
+
+			FVector OtherClosestPoint = FindNearestSurfacePoint(HandClosestPoint, Comp);
+			
 
 			float Distance = FVector::Distance(HandClosestPoint, OtherClosestPoint);
 
 			if (Distance < AttachDistanceThreshold)
 			{
+				TogglePhysicalAnimation(false);
 				//LOG_SCREEN("%f", Distance);
 				AttachTo(Comp, HitResult.Location, HitResult.Normal.Rotation());
 			}
@@ -156,8 +165,8 @@ void UBaseCharacterArmComponent::AttachTo(UPrimitiveComponent* Comp, FVector Loc
 		FTransform CompTransform = Comp->GetComponentTransform();
 		
 		GrabConstraintComp = NewObject<UPhysicsConstraintComponent>(this);
-		GrabConstraintComp->RegisterComponent();
-		GrabConstraintComp->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
+		// GrabConstraintComp->RegisterComponent();
+		GrabConstraintComp->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform, BoneName);
 
 		Comp->SetWorldTransform(CompTransform, false, nullptr, ETeleportType::TeleportPhysics);
 		
@@ -167,12 +176,22 @@ void UBaseCharacterArmComponent::AttachTo(UPrimitiveComponent* Comp, FVector Loc
 		GrabConstraintComp->SetAngularSwing1Limit(ACM_Limited, 45.0f);
 		GrabConstraintComp->SetAngularSwing2Limit(ACM_Limited, 45.0f);
 		GrabConstraintComp->SetAngularTwistLimit(ACM_Limited, 45.f);
-		GrabConstraintComp->SetLinearXLimit(LCM_Limited, 10.0f);
-		GrabConstraintComp->SetLinearYLimit(LCM_Limited, 10.0f);
-		GrabConstraintComp->SetLinearZLimit(LCM_Limited, 10.0f);
-		
-		// GrabComponent = Comp;
-		// Comp->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+		GrabConstraintComp->SetLinearXLimit(LCM_Locked, 0);
+		GrabConstraintComp->SetLinearYLimit(LCM_Locked, 0);
+		GrabConstraintComp->SetLinearZLimit(LCM_Locked, 0);
 	}
+}
+
+FVector UBaseCharacterArmComponent::FindNearestSurfacePoint(const FVector& Point, UPrimitiveComponent* Comp)
+{
+	FVector LocalPoint = Comp->GetComponentTransform().InverseTransformPosition(Point);
+	FVector BoxExtent = Comp->GetLocalBounds().BoxExtent;
+
+	FVector SurfaceLocal;
+	SurfaceLocal.X = FMath::Clamp(LocalPoint.X, -BoxExtent.X, BoxExtent.X);
+	SurfaceLocal.Y = FMath::Clamp(LocalPoint.Y, -BoxExtent.Y, BoxExtent.Y);
+	SurfaceLocal.Z = FMath::Clamp(LocalPoint.Z, -BoxExtent.Z, BoxExtent.Z);
+
+	return Comp->GetComponentTransform().TransformPosition(SurfaceLocal);
 }
 
