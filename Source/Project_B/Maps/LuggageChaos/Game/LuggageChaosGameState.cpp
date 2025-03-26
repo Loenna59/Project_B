@@ -27,6 +27,8 @@ void ALuggageChaosGameState::BeginPlay()
 		FTimerHandle OnStartTimerHandle;
 		
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
+
+		TrueEndTime = EndTime * SlowTime;
 	}
 }
 
@@ -115,9 +117,11 @@ void ALuggageChaosGameState::Net_InitUI_Implementation()
 
 void ALuggageChaosGameState::GameEnd()
 {
-	//TODO: 시상대 맵으로 전환
 	if (HasAuthority())
 	{
+		FTimerHandle OnEndTimerHandle;
+	
+		GetWorld()->GetTimerManager().SetTimer(OnEndTimerHandle, this, &ALuggageChaosGameState::ChangeLevelPodium, TrueEndTime, false);
 		Net_GameEnd();
 	}
 }
@@ -125,6 +129,12 @@ void ALuggageChaosGameState::GameEnd()
 void ALuggageChaosGameState::Net_GameEnd_Implementation()
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowTime);
+}
+
+void ALuggageChaosGameState::ChangeLevelPodium()
+{
+	LOG_SCREEN("레벨 전환");
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Poidum?listen"));
 }
 
 void ALuggageChaosGameState::TimeOut()
