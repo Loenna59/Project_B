@@ -5,11 +5,14 @@
 
 #include "BanimalsGameInstance.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/PlayerState.h"
 #include "Widget/BlackholeLobbyUI.h"
 #include "Widget/LuggageLobbyUI.h"
 
 ALobbyGameState::ALobbyGameState()
 {
+	bReplicates = true;
+	
 	ConstructorHelpers::FClassFinder<UBlackholeLobbyUI> TempBHUI(TEXT("/Game/Maps/Lobby/UI/WBP_BlackholeLobby.WBP_BlackholeLobby_C"));
 	if (TempBHUI.Succeeded())
 	{
@@ -56,6 +59,49 @@ void ALobbyGameState::BeginPlay()
 			{
 				LuggageLobbyWidget->AddToViewport(); // UI 화면에 추가
 			}
+		}
+	}
+}
+
+/*
+void ALobbyGameState::MulticastRPC_UpdatePlayerTeam_Implementation(
+	const FNetInfo Info)
+{
+	if (gi)
+	{
+		gi->SetPlayerInfo(Info.Info);
+
+		for (auto& it : Info.Info)
+		{
+			FString Log = FString::Printf(TEXT("%s : %d"), *it.Key, (int32)it.Value.Team);
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *Log);
+		}
+	}
+}
+*/
+
+void ALobbyGameState::MulticastRPC_UpdatePlayerTeam_Implementation(const FString& PlayerKey,
+                                                                   const FPlayerInfo& PlayerInfo)
+{
+	UE_LOG(LogTemp, Warning, TEXT("HELLO"));
+	if (gi && !HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HELLO2222222"));
+		// 플레이어 키값
+		/*const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
+		if (NetIdRepl.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			FString Key = NetId->ToString(); // 요렇게!
+			UE_LOG(LogTemp, Warning, TEXT("ALobbyGameState:: %s"), *Key);
+		}
+		*/
+				
+		gi->AddPlayerInfo(PlayerKey, PlayerInfo);
+		TMap<FString, FPlayerInfo> info = gi->GetPlayerInfo();
+		for (auto& it : info)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s, %d"), *it.Key, it.Value.Team);
 		}
 	}
 }

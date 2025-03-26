@@ -32,4 +32,5 @@ public:
 	// 플레이어 정보를 저장
 	FString Key;
 	TMap<FString, FPlayerInfo> PlayerMap;
+
 };

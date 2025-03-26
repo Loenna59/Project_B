@@ -33,13 +33,6 @@ void UBanimalsGameInstance::Init()
 	InitializeMapInfo();
 }
 
-void UBanimalsGameInstance::GetLifetimeReplicatedProps(
-	TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-}
-
 void UBanimalsGameInstance::CreateLobbySession(FString displayName, int32 playerCount)
 {
 	// 세션을 만들기 위한 옵션을 설정
@@ -59,9 +52,9 @@ void UBanimalsGameInstance::CreateLobbySession(FString displayName, int32 player
 	sessionSettings.bShouldAdvertise = true;
 	// 세션 최대 인원 설정
 	sessionSettings.NumPublicConnections = playerCount;
-	/*// 커스텀 정보 (세션이름)
-	sessionSettings.Set(FName(TEXT("DP_NAME")), displayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);*/
-
+	
+	//sessionSettings.Set(FName(TEXT("DP_NAME")), displayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	
 	// 세션 생성
 	sessionInterface->CreateSession(0,FName(displayName),sessionSettings);
 }
@@ -105,6 +98,9 @@ void UBanimalsGameInstance::FindOtherSession()
 	// 어떤 옵션을 기준으로 검색
 	sessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
 
+	// 검색 갯수
+	sessionSearch->MaxSearchResults = 100;
+	
 	// 위 설정들을 가지고 세션 검색해주세요
 	sessionInterface->FindSessions(0, sessionSearch.ToSharedRef());
 }
@@ -119,17 +115,22 @@ void UBanimalsGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 		for (int32 i=0; i<results.Num(); i++)
 		{
 			FString displayName;
-			results[i].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
+			// results[i].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
 			UE_LOG(LogTemp,Warning,TEXT("세션 - %d, 이름: %s"), i, *displayName);
+			
+			OnFindComplete.ExecuteIfBound(i, displayName);
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp,Warning,TEXT("세션 검색 실패"));
 	}
+	
+	// 검색 끝났다는 걸 알리자
+	OnFindComplete.ExecuteIfBound(-1, FString());
 }
 
-void UBanimalsGameInstance::JoinOtherSession()
+void UBanimalsGameInstance::JoinOtherSession(int32 sessionIdx)
 {
 	// 검색된 세션 결과들
 	auto results = sessionSearch->SearchResults;
@@ -138,13 +139,13 @@ void UBanimalsGameInstance::JoinOtherSession()
 	// 세션 이름을 가져오자 (일단 0번째)
 	FString displayName;
 	// 5.5 이슈 해결 (이 값이 자동으로 false되니까 다시 변환해주기)
-	results[0].Session.SessionSettings.bUsesPresence = true;
-	results[0].Session.SessionSettings.bUseLobbiesIfAvailable = true;
+	results[sessionIdx].Session.SessionSettings.bUsesPresence = true;
+	results[sessionIdx].Session.SessionSettings.bUseLobbiesIfAvailable = true;
 	
-	results[0].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
+	// results[sessionIdx].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
 
 	// 세션참여
-	sessionInterface->JoinSession(0, FName(displayName), results[0]);
+	sessionInterface->JoinSession(0, FName(displayName), results[sessionIdx]);
 }
 
 void UBanimalsGameInstance::OnJoinSessionComplete(FName sessionName, EOnJoinSessionCompleteResult::Type result)
@@ -159,6 +160,11 @@ void UBanimalsGameInstance::OnJoinSessionComplete(FName sessionName, EOnJoinSess
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
 		pc->ClientTravel(url, TRAVEL_Absolute);
 	}
+}
+
+void UBanimalsGameInstance::AddPlayerInfo(const FString& PlayerKey, const FPlayerInfo& PlayerInfo)
+{
+	PlayerMap.Add(PlayerKey, PlayerInfo);
 }
 
 void UBanimalsGameInstance::InitializeMapInfo()
