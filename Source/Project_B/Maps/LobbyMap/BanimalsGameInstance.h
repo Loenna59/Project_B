@@ -43,28 +43,25 @@ public:
 	// 세션 검색할 때 사용하는 객체
 	TSharedPtr<FOnlineSessionSearch> sessionSearch;
 
-	
-public:
-	// 플레이어 팀 정보 관련
-	UPROPERTY(Replicated)
-	int32 TeamID;
-
-	// 블랙홀인지 러기지인지
-	// 블랙홀과 러기지를 구분할 변수
-	bool bIsBlackholeMode = false;
-	UFUNCTION(BlueprintCallable)
-	void SetBlackholeMode(bool bEnabled) { bIsBlackholeMode = bEnabled; }
-	// 버튼을 눌렀다면 맵으로 이동하자
-	bool bClick = false;
-
-	
 private:
-	int32 MyPlayerID;
-	TArray<FPlayerInfo> PlayerList;
+	FString NetID;
+	TMap<FString, FPlayerInfo> PlayerMap;
+
+public:
+	void SetPlayerInfo(const TMap<FString, FPlayerInfo> info) { PlayerMap = info; }
+	TMap<FString, FPlayerInfo> GetPlayerInfo() { return PlayerMap; }
 	
 public:
-	void SetPlayerInfo(const TArray<FPlayerInfo> info) { PlayerList = info; }
-	void GetPlayerInfo(TArray<FPlayerInfo>& info) { info = PlayerList; }
-
+	// 맵 정보 초기화
+	void InitializeMapInfo();
+	
+	// 맵 정보 저장
+	UPROPERTY()
+	TMap<int32, FMapInfo> MapInfoList;
+	// 현재 선택된 맵 ID
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	int32 CurrentMapID;
+	void SetCurrentMapInfo(int32 MapID) { CurrentMapID = MapID; }
+	FMapInfo* GetCurrentMapInfo() {	return MapInfoList.Find(CurrentMapID); }
 };
 

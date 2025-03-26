@@ -30,7 +30,7 @@ void ALobbyGameState::BeginPlay()
 	gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	UE_LOG(LogTemp, Warning, TEXT("게임스테이트 실행"));
 	
-	if (gi->bIsBlackholeMode)
+	if (gi->CurrentMapID == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("블랙홀 변수 확인"));
 		if (BlackholeLobbyWidgetClass) // 위젯 클래스가 설정되었는지 확인
@@ -45,7 +45,7 @@ void ALobbyGameState::BeginPlay()
 			}
 		}
 	}
-	if (!gi->bIsBlackholeMode)
+	if (gi->CurrentMapID == 1)
 	{
 		if (LuggageLobbyWidgetClass) // 위젯 클래스가 설정되었는지 확인
 		{
