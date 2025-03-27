@@ -4,8 +4,9 @@
 #include "PodiumCamera.h"
 
 #include "PictureWidget.h"
-#include "PodiumGameState.h"
+#include "PodiumMainWidget.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "GameFramework/PlayerState.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "Project_B/Utilities/LogMacro.h"
 
@@ -19,24 +20,6 @@ APodiumCamera::APodiumCamera()
 void APodiumCamera::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	AGameStateBase* gs = GetWorld()->GetGameState();
-	APodiumGameState* gsPo = Cast<APodiumGameState>(gs);
-	
-	if (gsPo)
-	{
-		gsPo->SetPodiumCamera(this);
-	}
-	else
-	{
-		LOG_ERROR(this, TEXT("잘못된 게임 스테이트"));
-	}
-
-	APlayerController* pc = GetWorld()->GetFirstPlayerController();
-	if (pc)
-	{
-		pc->SetViewTarget(this);
-	}
 }
 
 void APodiumCamera::Shoot()
@@ -59,10 +42,11 @@ void APodiumCamera::Shoot()
 	if (pc)
 	{
 		PictureWidget = CreateWidget<UPictureWidget>(pc, PictureWidgetClass);
+		PodiumWidget = CreateWidget<UPodiumMainWidget>(pc, PodiumWidgetClass);
 			
-		if (PictureWidget)
+		if (PodiumWidget)
 		{
-			PictureWidget->AddToViewport();
+			PodiumWidget->AddToViewport();
 		}
 	}
 }

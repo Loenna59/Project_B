@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "Project_B/Maps/BanimalsType.h"
 #include "PodiumGameState.generated.h"
 
+class UPodiumMainWidget;
 class UPictureWidget;
 /**
  * 
@@ -23,22 +25,39 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
 	float ReadyTime = 12.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class")
-	TSubclassOf<UPictureWidget> PictureWidgetClass;
-
 private:
+	TMap<FString,FPlayerInfo> PlayersInfo;
+	
+
 	UPROPERTY()
-	UPictureWidget* PictureWidget;
+	TArray<AActor*> WinnerPoints1;
+	UPROPERTY()
+	TArray<AActor*> WinnerPoints2;
+	UPROPERTY()
+	TArray<AActor*> NormalPoints1;
+	UPROPERTY()
+	TArray<AActor*> NormalPoints2;
+
+	uint8 WinIndex = 0;
+	uint8 NorIndex = 0;
+
+	FString mykey;
+	uint8 dummyKey = 0;
 	
 protected:
 	virtual void BeginPlay() override;
 
 public:
-	void SetPodiumCamera(APodiumCamera* podiumCamera) { PodiumCamera = podiumCamera; }
+	void InitPlayerLoc(APawn* pawn);
+	void InitPodiumCamera(APlayerController* pc);
 
 private:
+	void InitSpawnPoints();
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_Shoot();
 
 	void Shoot();
+
+	TMap<FString,FPlayerInfo> DummyPlayersInfo();
 };
