@@ -20,42 +20,55 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void OnHit(FVector NormalPoint, float damage);
+
 protected:
 	UPROPERTY()
-	class UInputMappingContext* IMC;
+	class UInputMappingContext* IMC = nullptr;
+
+	float CurrentHealth;
 
 public:
-	UPROPERTY(VisibleAnywhere)
-	class USpringArmComponent* SpringArmComp;
-
-	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* CameraComp;
-
 	UPROPERTY()
-	class UPhysicalAnimationComponent* PhysicalAnimationComp;
+	class UBaseCharacterAnimInstance* AnimInstance = nullptr;
 	
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterMoveComponent* MoveComp;
+	class USpringArmComponent* SpringArmComp = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterPhysicsAnimComponent* HeadPhysicsAnimComp;
+	class UCameraComponent* CameraComp = nullptr;
+
+	UPROPERTY()
+	class UPhysicalAnimationComponent* PhysicalAnimationComp = nullptr;
+	
+	UPROPERTY(VisibleAnywhere)
+	class UBaseCharacterMoveComponent* MoveComp = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterPhysicsAnimComponent* LeftArmPhysicsAnimComp;
+	class UBaseCharacterPhysicsAnimComponent* HeadPhysicsAnimComp = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterPhysicsAnimComponent* RightArmPhysicsAnimComp;
+	class UBaseCharacterArmComponent* LeftArmPhysicsAnimComp = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterPhysicsAnimComponent* RightFootPhysicsAnimComp;
+	class UBaseCharacterArmComponent* RightArmPhysicsAnimComp = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterAttackComponent* AttackComp;
+	class UBaseCharacterPhysicsAnimComponent* RightFootPhysicsAnimComp = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	class UBaseCharacterPickComponent* PickComp;
+	class UBaseCharacterAttackComponent* AttackComp = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	class UGravityComponent* GravityComp;
+	class UBaseCharacterPickComponent* PickComp = nullptr;
 
+	UPROPERTY(VisibleAnywhere)
+	class UGravityComponent* GravityComp = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxHealth = 100;
+
+	UPROPERTY()
+	bool IsDead;
+	
 };

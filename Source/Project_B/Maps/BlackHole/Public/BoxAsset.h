@@ -16,6 +16,9 @@ public:
 	ABoxAsset();
 
 protected:
+	UFUNCTION()
+	void OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -23,6 +26,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Box;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxLinearVelocity = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxAngularVelocity = 15;
 };

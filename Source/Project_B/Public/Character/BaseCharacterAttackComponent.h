@@ -13,6 +13,17 @@ enum class EArmDirection : uint8
 	RIGHT
 };
 
+UENUM()
+enum class EAttackType : uint8
+{
+	PUNCH,
+	HEAD_BUTT,
+	KICK,
+	HAMMER,
+	BOTTLE,
+	CROSS_BOW
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECT_B_API UBaseCharacterAttackComponent : public UBaseCharacterInputComponent
 {
@@ -48,6 +59,9 @@ protected:
 	float PunchPressingTime = 0;
 
 	const float PunchExecuteThreshold = 0.5f;
+
+	UPROPERTY()
+	TArray<AActor*> AlreadyHitActorsDuringAttack;
 
 public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
@@ -85,6 +99,8 @@ public:
 	UFUNCTION()
 	void Kick();
 
+	UFUNCTION()
+	void Finish();
 
 	UFUNCTION(Server, Reliable)
 	void Server_PlayAnimMontage(UAnimMontage* Montage, float PlayRate = 1.f, FName SectionName = NAME_None);
@@ -101,6 +117,20 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_OnPunchTraceChannel();
 
+	UFUNCTION()
+	void OnKickTraceChannel();
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnKickTraceChannel();
+
+	UFUNCTION()
+	void OnHeadButtTraceChannel();
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnHeadButtTraceChannel();
+
+
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnPunchTraceChannel(bool bHit, FHitResult HitResult);
+	void Multicast_OnHitTraceChannel(bool bHit, FHitResult HitResult, float damage);
+
 };

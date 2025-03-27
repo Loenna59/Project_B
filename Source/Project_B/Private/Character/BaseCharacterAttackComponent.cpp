@@ -4,8 +4,9 @@
 #include "Character/BaseCharacter.h"
 #include "Character/BaseCharacterAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Project_B/Utilities/LogMacro.h"
+#include "Project_B/Utilities/TraceChannelHelper.h"
 
 UBaseCharacterAttackComponent::UBaseCharacterAttackComponent()
 {
@@ -172,6 +173,13 @@ void UBaseCharacterAttackComponent::Kick()
 	
 }
 
+void UBaseCharacterAttackComponent::Finish()
+{
+	bIsAttacking = false;
+
+	AlreadyHitActorsDuringAttack.Empty();
+}
+
 void UBaseCharacterAttackComponent::Server_PlayAnimMontage_Implementation(UAnimMontage* Montage, float PlayRate,
                                                                           FName SectionName)
 {
@@ -202,43 +210,118 @@ void UBaseCharacterAttackComponent::OnPunchTraceChannel()
 
 void UBaseCharacterAttackComponent::Server_OnPunchTraceChannel_Implementation()
 {
-	FHitResult HitResult;
-
 	FName BoneName = ArmDirection == EArmDirection::LEFT? TEXT("Hand_R") : TEXT("Hand_L");
 
 	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
 
-	bool bHit = UKismetSystemLibrary::SphereTraceSingle
+	TWeakObjectPtr<UBaseCharacterAttackComponent> WeakThis = this;
+
+	TraceChannelHelper::SphereSingleByChannel
 	(
 		GetWorld(),
+		Character,
 		Location,
 		Location,
-		20,
-		UEngineTypes::ConvertToTraceType(ECC_Camera),
-		false,
-		{ Character },
-		EDrawDebugTrace::ForDuration,
-		HitResult,
-		true
+		FRotator::ZeroRotator,
+		ECC_Camera,
+		20.f,
+		true,
+		true,
+		[WeakThis] (bool bHit, FHitResult HitResult)
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, 10);
+			}
+		}
 	);
-
-	Multicast_OnPunchTraceChannel(bHit, HitResult);
 }
 
-void UBaseCharacterAttackComponent::Multicast_OnPunchTraceChannel_Implementation(bool bHit, FHitResult HitResult)
+void UBaseCharacterAttackComponent::OnKickTraceChannel()
+{
+	Server_OnKickTraceChannel();
+}
+
+void UBaseCharacterAttackComponent::Server_OnKickTraceChannel_Implementation()
+{
+	FName BoneName = TEXT("FootToe1_R");
+
+	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
+
+	TWeakObjectPtr<UBaseCharacterAttackComponent> WeakThis = this;
+
+	TraceChannelHelper::SphereSingleByChannel
+	(
+		GetWorld(),
+		Character,
+		Location,
+		Location,
+		FRotator::ZeroRotator,
+		ECC_Camera,
+		25.f,
+		true,
+		true,
+		[WeakThis] (bool bHit, FHitResult HitResult)
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, 10);
+			}
+		}
+	);
+	
+}
+
+void UBaseCharacterAttackComponent::OnHeadButtTraceChannel()
+{
+	Server_OnHeadButtTraceChannel();
+}
+
+
+void UBaseCharacterAttackComponent::Server_OnHeadButtTraceChannel_Implementation()
+{
+	FName BoneName = TEXT("Head");
+
+	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
+
+	TWeakObjectPtr<UBaseCharacterAttackComponent> WeakThis = this;
+
+	TraceChannelHelper::SphereSingleByChannel
+	(
+		GetWorld(),
+		Character,
+		Location,
+		Location,
+		FRotator::ZeroRotator,
+		ECC_Camera,
+		50.f,
+		true,
+		true,
+		[WeakThis] (bool bHit, FHitResult HitResult)
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, 10);
+			}
+		}
+	);
+}
+
+void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(bool bHit, FHitResult HitResult, float damage)
 {
 	if (bHit)
 	{
-		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitResult.GetActor()))
+		AActor* HitActor = HitResult.GetActor();
+		if (AlreadyHitActorsDuringAttack.Contains(HitActor))
 		{
-			if (UBaseCharacterAnimInstance* Anim = Cast<UBaseCharacterAnimInstance>(Other->GetMesh()->GetAnimInstance()))
-			{
+			return;
+		}
 
-				float Dot = FVector::DotProduct(Other->GetActorForwardVector(), HitResult.ImpactNormal);
-				FVector DotVector = Other->GetActorForwardVector() * Dot;
-				
-				Anim->StartHitProcess(FVector2D(DotVector));
-			}
+		AlreadyHitActorsDuringAttack.Add(HitActor);
+		
+		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitActor))
+		{
+			Other->OnHit(HitResult.ImpactNormal, damage);
 		}
 	}
 }

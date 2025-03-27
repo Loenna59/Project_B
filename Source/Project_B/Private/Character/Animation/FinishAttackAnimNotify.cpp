@@ -16,7 +16,7 @@ void UFinishAttackAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 	
 		if (AttackComp)
 		{
-			AttackComp->bIsAttacking = false;
+			AttackComp->Finish();
 		}
 	}
 }

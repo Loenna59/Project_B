@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacterInputComponent.h"
-#include "InputActionValue.h"
 #include "BaseCharacterPickComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGrabbing, FString);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECT_B_API UBaseCharacterPickComponent : public UBaseCharacterInputComponent
@@ -23,7 +23,7 @@ protected:
 
 public:
 	virtual void SetupInputBiding(class UEnhancedInputComponent* input) override;
-	
+
 	UFUNCTION()
 	void BeginPick();
 
@@ -33,17 +33,17 @@ public:
 	UFUNCTION()
 	void ReleasePick();
 
-	UFUNCTION()
-	void DetectNearby(bool bHit, AActor* Actor);
-
 protected:
 	UPROPERTY()
 	class UInputAction* PickInputAction;
 
 	UPROPERTY()
-	FVector HandLocation;
-	
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Radius = 130;
+	class UBaseCharacterArmComponent* LeftArmComp;
+
+	UPROPERTY()
+	class UBaseCharacterArmComponent* RightArmComp;
+
+// public:
+// 	UPROPERTY()
+// 	FOnGrabbing OnGrabbing;
 };

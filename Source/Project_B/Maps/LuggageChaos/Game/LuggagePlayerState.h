@@ -15,10 +15,9 @@ class PROJECT_B_API ALuggagePlayerState : public APlayerState
 {
 	GENERATED_BODY()
 
-public:
-	ETeamType MyTeamType = ETeamType::None;
-
 private:
+	ETeamType MyTeamType = ETeamType::None;
+	
 	bool bIsWin = false;
 	
 public:
@@ -26,4 +25,5 @@ public:
 	ETeamType GetTeamType() const { return MyTeamType; }
 
 	void SetIsWin(bool isWin) { bIsWin = isWin; }
+	bool GetIsWin() { return bIsWin; }
 };
