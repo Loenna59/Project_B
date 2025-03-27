@@ -5,9 +5,11 @@
 
 #include "DataTableEditorUtils.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
+#include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
@@ -62,9 +64,58 @@ void ADestroyZone::OnDestroyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	FString Key;
+	
+	// 서버에서만 관리
+	if (!HasAuthority()) return;
+	
 	// TODO: 플레이어 죽음
 	LOG_PRINT(TEXT("플레이어 죽음!"));
+	// overlap된 액터가 플레이어면
+	ABaseCharacter* player = Cast<ABaseCharacter>(OtherActor);
+	if (player)
+	{
+		// 플레이어 키값 가져올것
+		const FUniqueNetIdRepl& NetIdRepl = player->GetPlayerState<APlayerState>()->GetUniqueId();
+		if (NetIdRepl.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			Key = NetId->ToString();
+		}
+
+		// 서버에서 플레이어 상태 업데이트
+		ServerRPC_UpdatePlayerState(Key);
+	}
 }
+
+void ADestroyZone::UpdatePlayerState(const FString& playerKey)
+{
+	// 플레이어 상태를 변경
+	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+	
+	// 플레이어 정보 맵 참조
+	TMap<FString, FPlayerInfo>& PlayerInfoMap = gi->GetPlayerInfo();
+	// 플레이어 정보 존재 확인
+	if (PlayerInfoMap.Contains(playerKey))
+	{
+		// 상태 변경
+		FPlayerInfo& PlayerInfo = PlayerInfoMap[playerKey];
+		PlayerInfo.bIsAlive = false;
+	}
+}
+
+void ADestroyZone::ServerRPC_UpdatePlayerState_Implementation(const FString& playerKey)
+{
+	UpdatePlayerState(playerKey);
+	// 모든 클라이언트에 상태 전달
+	Multicast_UpdatePlayerState(playerKey);
+}
+
+void ADestroyZone::Multicast_UpdatePlayerState_Implementation(const FString& playerKey)
+{
+	UpdatePlayerState(playerKey);
+}
+
 
 // Called when the game starts or when spawned
 void ADestroyZone::BeginPlay()

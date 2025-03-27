@@ -73,3 +73,12 @@ public:
 		, LoadingWidget(nullptr)
 	{}
 };
+
+USTRUCT()
+struct FNetInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TMap<FString, FPlayerInfo> Info;
+};

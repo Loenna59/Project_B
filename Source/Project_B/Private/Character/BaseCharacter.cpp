@@ -4,6 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Camera/CameraComponent.h"
+#include "Character/BaseCharacterAnimInstance.h"
 #include "Character/BaseCharacterArmComponent.h"
 #include "Character/BaseCharacterAttackComponent.h"
 #include "Character/BaseCharacterMoveComponent.h"
@@ -15,13 +16,14 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Project_B/Maps/BlackHole/Public/GravityComponent.h"
+#include "Project_B/Utilities/LogMacro.h"
 
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
-	GetCapsuleComponent()->SetCapsuleRadius(40.f);
+	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(100.f);
 
 	bUseControllerRotationPitch = false;
@@ -46,43 +48,36 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
-	MoveComp->SetNetAddressable();
 	MoveComp->SetIsReplicated(true);
 	
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
-	AttackComp->SetNetAddressable();
 	AttackComp->SetIsReplicated(true);
 
 	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
-	PickComp->SetNetAddressable();
 	PickComp->SetIsReplicated(true);
 	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
 	HeadPhysicsAnimComp->RegisterComponent();
-	HeadPhysicsAnimComp->SetNetAddressable();
 	HeadPhysicsAnimComp->SetIsReplicated(true);
 	
 	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("LeftArmPhysicsAnimComp"));
 	LeftArmPhysicsAnimComp->RegisterComponent();
-	LeftArmPhysicsAnimComp->SetNetAddressable();
 	LeftArmPhysicsAnimComp->SetIsReplicated(true);
 	
 	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("RightArmPhysicsAnimComp"));
 	RightArmPhysicsAnimComp->RegisterComponent();
-	RightArmPhysicsAnimComp->SetNetAddressable();
 	RightArmPhysicsAnimComp->SetIsReplicated(true);
 
 	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
 	RightFootPhysicsAnimComp->RegisterComponent();
-	RightFootPhysicsAnimComp->SetNetAddressable();
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
 	
-	// GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
-	// GravityComp->RegisterComponent();
+	GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
+	GravityComp->RegisterComponent();
 	// GravityComp->SetNetAddressable();
-	// GravityComp->SetIsReplicated(true);
+	GravityComp->SetIsReplicated(true);
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
@@ -114,6 +109,10 @@ void ABaseCharacter::BeginPlay()
 	}
 
 	GetMesh()->SetAngularDamping(2.0f);
+
+	CurrentHealth = MaxHealth;
+
+	AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -135,5 +134,18 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PickComp->SetupInputBiding(pi);
 	}
 
+}
+
+void ABaseCharacter::OnHit(FVector NormalPoint, float damage)
+{
+	float Dot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
+	FVector DotVector = GetActorForwardVector() * Dot;
+
+	if (AnimInstance)
+	{
+		AnimInstance->StartHitProcess(FVector2D(DotVector));
+	}
+
+	LOG_SCREEN("damaged %f", damage);
 }
 

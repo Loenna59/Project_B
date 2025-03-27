@@ -173,6 +173,13 @@ void UBaseCharacterAttackComponent::Kick()
 	
 }
 
+void UBaseCharacterAttackComponent::Finish()
+{
+	bIsAttacking = false;
+
+	AlreadyHitActorsDuringAttack.Empty();
+}
+
 void UBaseCharacterAttackComponent::Server_PlayAnimMontage_Implementation(UAnimMontage* Montage, float PlayRate,
                                                                           FName SectionName)
 {
@@ -216,7 +223,7 @@ void UBaseCharacterAttackComponent::Server_OnPunchTraceChannel_Implementation()
 		Location,
 		Location,
 		FRotator::ZeroRotator,
-		ECC_Visibility,
+		ECC_Camera,
 		20.f,
 		true,
 		true,
@@ -224,28 +231,10 @@ void UBaseCharacterAttackComponent::Server_OnPunchTraceChannel_Implementation()
 		{
 			if (WeakThis.IsValid())
 			{
-				WeakThis->Multicast_OnPunchTraceChannel(bHit, HitResult);
+				WeakThis->Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, 10);
 			}
 		}
 	);
-}
-
-void UBaseCharacterAttackComponent::Multicast_OnPunchTraceChannel_Implementation(bool bHit, FHitResult HitResult)
-{
-	if (bHit)
-	{
-		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitResult.GetActor()))
-		{
-			if (UBaseCharacterAnimInstance* Anim = Cast<UBaseCharacterAnimInstance>(Other->GetMesh()->GetAnimInstance()))
-			{
-
-				float Dot = FVector::DotProduct(Other->GetActorForwardVector(), HitResult.ImpactNormal);
-				FVector DotVector = Other->GetActorForwardVector() * Dot;
-				
-				Anim->StartHitProcess(FVector2D(DotVector));
-			}
-		}
-	}
 }
 
 void UBaseCharacterAttackComponent::OnKickTraceChannel()
@@ -268,7 +257,7 @@ void UBaseCharacterAttackComponent::Server_OnKickTraceChannel_Implementation()
 		Location,
 		Location,
 		FRotator::ZeroRotator,
-		ECC_Visibility,
+		ECC_Camera,
 		25.f,
 		true,
 		true,
@@ -276,37 +265,18 @@ void UBaseCharacterAttackComponent::Server_OnKickTraceChannel_Implementation()
 		{
 			if (WeakThis.IsValid())
 			{
-				WeakThis->Multicast_OnKickTraceChannel(bHit, HitResult);
+				WeakThis->Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, 10);
 			}
 		}
 	);
 	
 }
 
-void UBaseCharacterAttackComponent::Multicast_OnKickTraceChannel_Implementation(bool bHit, FHitResult HitResult)
-{
-	if (bHit)
-	{
-		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitResult.GetActor()))
-		{
-			if (UBaseCharacterAnimInstance* Anim = Cast<UBaseCharacterAnimInstance>(Other->GetMesh()->GetAnimInstance()))
-			{
-
-				float Dot = FVector::DotProduct(Other->GetActorForwardVector(), HitResult.ImpactNormal);
-				FVector DotVector = Other->GetActorForwardVector() * Dot;
-
-				LOG_SCREEN("Kick");
-				
-				Anim->StartHitProcess(FVector2D(DotVector));
-			}
-		}
-	}
-}
-
 void UBaseCharacterAttackComponent::OnHeadButtTraceChannel()
 {
 	Server_OnHeadButtTraceChannel();
 }
+
 
 void UBaseCharacterAttackComponent::Server_OnHeadButtTraceChannel_Implementation()
 {
@@ -323,7 +293,7 @@ void UBaseCharacterAttackComponent::Server_OnHeadButtTraceChannel_Implementation
 		Location,
 		Location,
 		FRotator::ZeroRotator,
-		ECC_Visibility,
+		ECC_Camera,
 		50.f,
 		true,
 		true,
@@ -331,28 +301,27 @@ void UBaseCharacterAttackComponent::Server_OnHeadButtTraceChannel_Implementation
 		{
 			if (WeakThis.IsValid())
 			{
-				WeakThis->Multicast_OnHeadButtTraceChannel(bHit, HitResult);
+				WeakThis->Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, 10);
 			}
 		}
 	);
 }
 
-void UBaseCharacterAttackComponent::Multicast_OnHeadButtTraceChannel_Implementation(bool bHit, FHitResult HitResult)
+void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(bool bHit, FHitResult HitResult, float damage)
 {
 	if (bHit)
 	{
-		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitResult.GetActor()))
+		AActor* HitActor = HitResult.GetActor();
+		if (AlreadyHitActorsDuringAttack.Contains(HitActor))
 		{
-			if (UBaseCharacterAnimInstance* Anim = Cast<UBaseCharacterAnimInstance>(Other->GetMesh()->GetAnimInstance()))
-			{
+			return;
+		}
 
-				float Dot = FVector::DotProduct(Other->GetActorForwardVector(), HitResult.ImpactNormal);
-				FVector DotVector = Other->GetActorForwardVector() * Dot;
-
-				LOG_SCREEN("HeadButt");
-				
-				Anim->StartHitProcess(FVector2D(DotVector));
-			}
+		AlreadyHitActorsDuringAttack.Add(HitActor);
+		
+		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitActor))
+		{
+			Other->OnHit(HitResult.ImpactNormal, damage);
 		}
 	}
 }

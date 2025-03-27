@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "Project_B/Maps/BanimalsType.h"
 #include "LobbyGameState.generated.h"
 
 class ULuggageLobbyUI;
@@ -11,6 +12,7 @@ class UBlackholeLobbyUI;
 /**
  * 
  */
+
 UCLASS()
 class PROJECT_B_API ALobbyGameState : public AGameStateBase
 {
@@ -32,4 +34,8 @@ public:
 	TSubclassOf<ULuggageLobbyUI> LuggageLobbyWidgetClass;
 	UPROPERTY()
 	ULuggageLobbyUI* LuggageLobbyWidget;
+
+	// 플레이어가 들어올 때마다 정보를 보내줄 것이다
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_UpdatePlayerTeam(const FString& PlayerKey, const FPlayerInfo& PlayerInfo);
 };

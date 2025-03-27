@@ -80,6 +80,11 @@ void UGravityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	// 서버에서만 중력계산
 	if (GetOwnerRole() == ROLE_Authority)
 	{
+		if (!Blackhole)
+		{
+			return;
+		}
+		
 		if (Blackhole->bIsActive)
 		{
 			ApplyGravity(DeltaTime);

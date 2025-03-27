@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Project_B/Maps/BanimalsType.h"
 #include "Widget/BlackholeLobbyUI.h"
 #include "Widget/LuggageLobbyUI.h"
 #include "LobbyGameMode.generated.h"
@@ -22,10 +23,14 @@ public:
 
 public:
 	int32 playerIdx = 0;
-	int32 teamIndex = 0;
+	int32 teamMaxPlayers = 0;
 	int32 teamCnt = 0;
 
 	UPROPERTY()
 	class UBanimalsGameInstance* gi;
+
+	// 플레이어 정보를 저장
+	FString Key;
+	TMap<FString, FPlayerInfo> PlayerMap;
 
 };

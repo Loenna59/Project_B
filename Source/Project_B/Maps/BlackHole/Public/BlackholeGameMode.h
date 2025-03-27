@@ -6,6 +6,7 @@
 #include "Project_B/Project_BGameMode.h"
 #include "BlackholeGameMode.generated.h"
 
+class ABlackholeGameState;
 /**
  * 
  */
@@ -20,8 +21,18 @@ public:
 	
 public:
 	int32 playerIdx = 0;
+	ABlackholeGameState* gs;
 
 	// 게임 제한 시간 (3분)
+	// 게임 종료 함수
 	FTimerHandle timerHandle;
 	void EndGame();
+
+	/*
+	// 플레이어 사망처리
+	UFUNCTION(BlueprintCallable)
+	void OnPlayerDeath(APlayerController* PlayerController);*/
+	
+	// 게임 종료 로직
+	void CheckGameEndConditions();
 };
