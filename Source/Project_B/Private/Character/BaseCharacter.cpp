@@ -48,15 +48,19 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
+	MoveComp->RegisterComponent();
 	MoveComp->SetIsReplicated(true);
 	
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
+	AttackComp->RegisterComponent();
 	AttackComp->SetIsReplicated(true);
 
 	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
+	PickComp->RegisterComponent();
 	PickComp->SetIsReplicated(true);
 	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
+	PhysicalAnimationComp->RegisterComponent();
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
 	HeadPhysicsAnimComp->RegisterComponent();

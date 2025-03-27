@@ -60,7 +60,7 @@ protected:
 
 	const float PunchExecuteThreshold = 0.5f;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<AActor*> AlreadyHitActorsDuringAttack;
 
 public:
@@ -75,6 +75,15 @@ public:
 
 	UPROPERTY()
 	bool bIsAttacking = false;
+
+	UPROPERTY(EditAnywhere, Category=Attack)
+	float PunchDamage = 0;
+
+	UPROPERTY(EditAnywhere, Category=Attack)
+	float KickDamage = 0;
+
+	UPROPERTY(EditAnywhere, Category=Attack)
+	float HeadButtDamage = 0;
 
 protected:
 	// Called when the game starts
@@ -114,23 +123,16 @@ public:
 	UFUNCTION()
 	void OnPunchTraceChannel();
 
-	UFUNCTION(Server, Reliable)
-	void Server_OnPunchTraceChannel();
-
 	UFUNCTION()
 	void OnKickTraceChannel();
-
-	UFUNCTION(Server, Reliable)
-	void Server_OnKickTraceChannel();
 
 	UFUNCTION()
 	void OnHeadButtTraceChannel();
 
 	UFUNCTION(Server, Reliable)
-	void Server_OnHeadButtTraceChannel();
-
+	void Server_OnHitTraceChannel(FName BoneName, float Radius, float Damage);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnHitTraceChannel(bool bHit, FHitResult HitResult, float damage);
+	void Multicast_OnHitTraceChannel(bool bHit, FHitResult HitResult, float Damage);
 
 };

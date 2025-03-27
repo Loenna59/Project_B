@@ -37,6 +37,7 @@ void UBaseCharacterPhysicsAnimComponent::GetLifetimeReplicatedProps(
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UBaseCharacterPhysicsAnimComponent, SimulateBoneName);
+	DOREPLIFETIME(UBaseCharacterPhysicsAnimComponent, Mesh);
 }
 
 void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -67,11 +68,22 @@ void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 
 void UBaseCharacterPhysicsAnimComponent::Server_TogglePhysicalAnimation_Implementation(FName BoneName, bool bSimulate)
 {
-	Multicast_TogglePhysicalAnimation(BoneName, bSimulate);
+	if (GetOwner()->HasAuthority())
+	{
+		Multicast_TogglePhysicalAnimation(BoneName, bSimulate);
+		return;
+	}
+
+	TogglePhysicalAnimationInternal(BoneName, bSimulate);
 }
 
 void UBaseCharacterPhysicsAnimComponent::Multicast_TogglePhysicalAnimation_Implementation(FName BoneName,
 	bool bSimulate)
+{
+	TogglePhysicalAnimationInternal(BoneName, bSimulate);
+}
+
+void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimationInternal(FName BoneName, bool bSimulate)
 {
 	if (!Mesh)
 	{
