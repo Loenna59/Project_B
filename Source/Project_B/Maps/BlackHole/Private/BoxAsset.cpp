@@ -22,10 +22,11 @@ ABoxAsset::ABoxAsset()
 void ABoxAsset::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (HitComponent->IsSimulatingPhysics())
-	{
-		HitComponent->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
-	}
+	// if (HitComponent->IsSimulatingPhysics())
+	// {
+	// 	HitComponent->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
+	// 	HitComponent->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+	// }
 }
 
 // Called when the game starts or when spawned
@@ -46,12 +47,18 @@ void ABoxAsset::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	FVector Velocity = Box->GetPhysicsLinearVelocity();
-
-	float MaxSpeed = 100.f;
-	if (Velocity.Size() > MaxSpeed)
+	FVector Angular = Box->GetPhysicsAngularVelocityInDegrees();
+	
+	if (Velocity.Size() > MaxLinearVelocity)
 	{
-		Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
+		Velocity = Velocity.GetClampedToMaxSize(MaxLinearVelocity);
 		Box->SetPhysicsLinearVelocity(Velocity);
+	}
+
+	if (Angular.Size() > MaxAngularVelocity)
+	{
+		Angular = Angular.GetClampedToMaxSize(MaxAngularVelocity);
+		Box->SetAllPhysicsAngularVelocityInDegrees(Angular);
 	}
 }
 
