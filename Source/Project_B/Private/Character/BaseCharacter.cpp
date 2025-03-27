@@ -72,10 +72,10 @@ ABaseCharacter::ABaseCharacter()
 	RightFootPhysicsAnimComp->RegisterComponent();
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
 	
-	// GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
-	// GravityComp->RegisterComponent();
+	GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
+	GravityComp->RegisterComponent();
 	// GravityComp->SetNetAddressable();
-	// GravityComp->SetIsReplicated(true);
+	GravityComp->SetIsReplicated(true);
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
