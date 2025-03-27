@@ -38,7 +38,6 @@ UBaseCharacterAttackComponent::UBaseCharacterAttackComponent()
 void UBaseCharacterAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void UBaseCharacterAttackComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
@@ -198,10 +197,10 @@ void UBaseCharacterAttackComponent::Multicast_PlayAnimMontage_Implementation(UAn
 
 void UBaseCharacterAttackComponent::AddForceForwardVector()
 {
-	FString BoneName = ArmDirection == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
-	
-	FVector ForceDirection = Character->GetActorForwardVector() * ForceAmount;
-	Character->GetMesh()->AddImpulseToAllBodiesBelow(ForceDirection, *BoneName, true);
+	// FString BoneName = ArmDirection == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
+	//
+	// FVector ForceDirection = Character->GetActorForwardVector() * ForceAmount;
+	// Character->GetMesh()->AddImpulseToAllBodiesBelow(ForceDirection, *BoneName, true);
 }
 
 void UBaseCharacterAttackComponent::OnPunchTraceChannel()
