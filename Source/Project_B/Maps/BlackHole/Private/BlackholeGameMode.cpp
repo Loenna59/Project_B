@@ -6,16 +6,23 @@
 // 승리/패배 팀 결정 및 최종 결과 전달
 
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameMode.h"
-
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholePlayerState.h"
 
 void ABlackholeGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
+	float StartTime = GetWorld()->GetTimeSeconds();
 	// 3분후에는 게임 종료 함수가 호출된다
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &ABlackholeGameMode::EndGame, 180.f, false);	
+
+	// 게임 시작 알리기
+	gs = GetGameState<ABlackholeGameState>();
+	if (gs)
+	{
+		gs->MulticastRPC_SetGameStart(StartTime);
+	}
 }
 
 void ABlackholeGameMode::PostLogin(APlayerController* NewPlayer)
@@ -42,10 +49,10 @@ void ABlackholeGameMode::PostLogin(APlayerController* NewPlayer)
 
 void ABlackholeGameMode::EndGame()
 {
+	UE_LOG(LogTemp, Warning, TEXT("End Game!!!!"));
 	// 게임이 종료되면, 게임 스테이트에 전달하자
-	ABlackholeGameState* gs = GetGameState<ABlackholeGameState>();
 	if (gs)
 	{
-		gs->SetGameOver();
+		gs->MulticastRPC_SetGameOver();
 	}
 }

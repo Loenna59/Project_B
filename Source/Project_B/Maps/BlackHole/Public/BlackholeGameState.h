@@ -6,6 +6,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "BlackholeGameState.generated.h"
 
+class UBanimalsGameInstance;
 class ABlackHole;
 class ADestroyZone;
 /**
@@ -21,6 +22,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+
+	// 게임 인스턴스
+	UBanimalsGameInstance* gi;
+	
 	// 블랙홀 관련 내용
 	// 회전체
 	ADestroyZone* Rotator = nullptr;
@@ -34,8 +39,25 @@ public:
 	// 블랙홀 소환 횟수
 	int32 BlackholeSpawnCount = 0;
 	
-	// 게임 승리/패배 결정을 위한 스코어 처리
+	// 게임 승리/패배 결정을 위한 생존 플레이어 수 체크
+	UPROPERTY(Replicated, VisibleAnywhere)
+	int32 AlivePlayers = 0;
+	// 게임 종료 조건 확인
+	UFUNCTION()
+	void CheckGameEndConditions();
+	
+	// 승자 결정
+	void DetermineWinner();
+	// 관전자 모드 전환
+	void SetSpectatorMode(APlayerController* PlayerController);
 
+	// 게임 시작
+	UPROPERTY(Replicated)
+	float GameStartTime = 0.0f;
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetGameStart(float StartTime);
+	
 	// 게임 종료
-	void SetGameOver();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetGameOver();
 };

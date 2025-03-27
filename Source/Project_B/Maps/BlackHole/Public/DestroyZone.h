@@ -28,6 +28,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// 플레이어 상태 업데이트
+	void UpdatePlayerState(const FString& playerKey);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_UpdatePlayerState(const FString& playerKey);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdatePlayerState(const FString& playerKey);
+
 	// 외관 (회전체, 콜리전-겹치면 죽음)
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class USceneComponent* Root;
@@ -50,3 +57,6 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float RotateSpeed = 0.f;
 };
+
+
+
