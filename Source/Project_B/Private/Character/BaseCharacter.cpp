@@ -46,37 +46,30 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
-	MoveComp->SetNetAddressable();
 	MoveComp->SetIsReplicated(true);
 	
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
-	AttackComp->SetNetAddressable();
 	AttackComp->SetIsReplicated(true);
 
 	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
-	PickComp->SetNetAddressable();
 	PickComp->SetIsReplicated(true);
 	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
 	HeadPhysicsAnimComp->RegisterComponent();
-	HeadPhysicsAnimComp->SetNetAddressable();
 	HeadPhysicsAnimComp->SetIsReplicated(true);
 	
 	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("LeftArmPhysicsAnimComp"));
 	LeftArmPhysicsAnimComp->RegisterComponent();
-	LeftArmPhysicsAnimComp->SetNetAddressable();
 	LeftArmPhysicsAnimComp->SetIsReplicated(true);
 	
 	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("RightArmPhysicsAnimComp"));
 	RightArmPhysicsAnimComp->RegisterComponent();
-	RightArmPhysicsAnimComp->SetNetAddressable();
 	RightArmPhysicsAnimComp->SetIsReplicated(true);
 
 	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
 	RightFootPhysicsAnimComp->RegisterComponent();
-	RightFootPhysicsAnimComp->SetNetAddressable();
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
 	
 	// GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
