@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacterInputComponent.h"
+#include "Character/AttackType.h"
 #include "BaseCharacterAttackComponent.generated.h"
 
 UENUM()
@@ -11,17 +12,6 @@ enum class EArmDirection : uint8
 {
 	LEFT,
 	RIGHT
-};
-
-UENUM()
-enum class EAttackType : uint8
-{
-	PUNCH,
-	HEAD_BUTT,
-	KICK,
-	HAMMER,
-	BOTTLE,
-	CROSS_BOW
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -60,8 +50,9 @@ protected:
 
 	const float PunchExecuteThreshold = 0.5f;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<AActor*> AlreadyHitActorsDuringAttack;
+	
 
 public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
@@ -76,6 +67,18 @@ public:
 	UPROPERTY()
 	bool bIsAttacking = false;
 
+	UPROPERTY(EditAnywhere, Category=Attack)
+	float PunchDamage = 0;
+
+	UPROPERTY(EditAnywhere, Category=Attack)
+	float KickDamage = 0;
+
+	UPROPERTY(EditAnywhere, Category=Attack)
+	float HeadButtDamage = 0;
+
+	UPROPERTY(EditAnywhere)
+	bool DrawDebug = true;
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -114,23 +117,16 @@ public:
 	UFUNCTION()
 	void OnPunchTraceChannel();
 
-	UFUNCTION(Server, Reliable)
-	void Server_OnPunchTraceChannel();
-
 	UFUNCTION()
 	void OnKickTraceChannel();
-
-	UFUNCTION(Server, Reliable)
-	void Server_OnKickTraceChannel();
 
 	UFUNCTION()
 	void OnHeadButtTraceChannel();
 
 	UFUNCTION(Server, Reliable)
-	void Server_OnHeadButtTraceChannel();
-
+	void Server_OnHitTraceChannel(EAttackType Type, FName BoneName, float Radius, float Damage);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnHitTraceChannel(bool bHit, FHitResult HitResult, float damage);
+	void Multicast_OnHitTraceChannel(EAttackType Type, bool bHit, FHitResult HitResult, float Damage);
 
 };

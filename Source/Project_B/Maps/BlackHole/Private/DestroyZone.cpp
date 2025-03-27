@@ -8,7 +8,10 @@
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Project_B/Maps/Base/BanimalsGameState.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
+#include "Project_B/Maps/BlackHole/Public/BlackholeGameMode.h"
+#include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 #include "Project_B/Utilities/LogMacro.h"
 
@@ -107,14 +110,17 @@ void ADestroyZone::UpdatePlayerState(const FString& playerKey)
 void ADestroyZone::ServerRPC_UpdatePlayerState_Implementation(const FString& playerKey)
 {
 	LOG_PRINT(TEXT("플레이어 상태, 죽음으로 바뀌었습니다"));
-	UpdatePlayerState(playerKey);
+	// TODO: 죽었을 때 실행될 로직 만들기
 	// 모든 클라이언트에 상태 전달
 	Multicast_UpdatePlayerState(playerKey);
+	
 }
 
 void ADestroyZone::Multicast_UpdatePlayerState_Implementation(const FString& playerKey)
 {
 	UpdatePlayerState(playerKey);
+	ABlackholeGameState* gs = Cast<ABlackholeGameState>(GetWorld()->GetGameState());
+	gs->OnPlayerDeath(GetWorld()->GetFirstPlayerController());
 }
 
 

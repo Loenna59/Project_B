@@ -3,6 +3,7 @@
 
 #include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 
+#include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 
 
@@ -12,8 +13,8 @@ ATargetActor::ATargetActor()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
-	SetRootComponent(BoxComponent);
+	cameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("cameraComp"));
+	SetRootComponent(cameraComp);
 }
 
 // Called when the game starts or when spawned

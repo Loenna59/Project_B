@@ -49,6 +49,8 @@ public:
 	
 	// 승자 결정
 	void DetermineWinner();
+	// 죽음 처리
+	void OnPlayerDeath(APlayerController* PlayerController);
 	// 관전자 모드 전환
 	// void SetSpectatorMode(APlayerController* PlayerController);
 

@@ -10,7 +10,7 @@
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
 #include "Project_B/Utilities/TraceChannelHelper.h"
-
+#include "Weapon/Weapon.h"
 
 UBaseCharacterArmComponent::UBaseCharacterArmComponent()
 {
@@ -115,6 +115,12 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, FHitResult HitResult)
 	if (bHit)
 	{
 		AActor* Actor = HitResult.GetActor();
+
+		if (Actor->IsA<AWeapon>())
+		{
+			LOG_SCREEN("무기");
+			return;
+		}
 
 		UPrimitiveComponent* Comp = HitResult.GetComponent();
 		if (Comp)

@@ -48,15 +48,19 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
+	MoveComp->RegisterComponent();
 	MoveComp->SetIsReplicated(true);
 	
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
+	AttackComp->RegisterComponent();
 	AttackComp->SetIsReplicated(true);
 
 	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
+	PickComp->RegisterComponent();
 	PickComp->SetIsReplicated(true);
 	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
+	PhysicalAnimationComp->RegisterComponent();
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
 	HeadPhysicsAnimComp->RegisterComponent();
@@ -136,16 +140,62 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
-void ABaseCharacter::OnHit(FVector NormalPoint, float damage)
+void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
 {
-	float Dot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
-	FVector DotVector = GetActorForwardVector() * Dot;
+	float ForwardDot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
 
-	if (AnimInstance)
+	float clampedForwardDot = FMath::Clamp(ForwardDot, -1.f, 1.f);
+
+	float SideDot = FVector::DotProduct(GetActorRightVector(), NormalPoint);
+
+	if (HasAuthority())
 	{
-		AnimInstance->StartHitProcess(FVector2D(DotVector));
+		Multicast_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
 	}
+	else
+	{
+		Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+	}
+}
 
-	LOG_SCREEN("damaged %f", damage);
+void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
+{
+	Multicast_OnPlayHitMontage(Type, ForwardDot, SideDot);
+}
+
+void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
+{
+	switch (Type)
+	{
+	case EAttackType::PUNCH:
+	case EAttackType::BOTTLE:
+	case EAttackType::CROSS_BOW:
+		if (AnimInstance)
+		{
+			AnimInstance->StartHitProcess(ForwardDot, SideDot);
+		}
+		break;
+	default:
+		if (ForwardDot > 0.6f)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Forward"));
+			return;
+		}
+	
+		if (ForwardDot < -0.6f)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Backward"));
+			return;
+		}
+	
+		if (SideDot > 0)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Left"));
+			return;
+		}
+	
+		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Right"));
+		break;
+	}
 }
 

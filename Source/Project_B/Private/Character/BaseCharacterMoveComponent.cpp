@@ -136,7 +136,7 @@ void UBaseCharacterMoveComponent::Multicast_UpdateSpeed_Implementation(float Spe
 
 void UBaseCharacterMoveComponent::UpdateSpeed(float Speed)
 {
-	if (Character->HasAuthority())
+	if (GetOwner()->HasAuthority())
 	{
 		Multicast_UpdateSpeed(Speed);
 		return;

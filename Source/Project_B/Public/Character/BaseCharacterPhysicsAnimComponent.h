@@ -35,6 +35,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_TogglePhysicalAnimation(FName BoneName, bool bSimulate);
 
+	UFUNCTION()
+	void TogglePhysicalAnimationInternal(FName BoneName, bool bSimulate);
+
 	void AddForceForwardVector();
 
 protected:
@@ -44,7 +47,7 @@ protected:
 	UPROPERTY()
 	class UBaseCharacterAnimInstance* AnimInstance = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	class USkeletalMeshComponent* Mesh = nullptr;
 	
 	UPROPERTY()

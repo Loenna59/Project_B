@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Character/AttackType.h"
 #include "BaseCharacter.generated.h"
 
 UCLASS()
@@ -20,7 +21,13 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void OnHit(FVector NormalPoint, float damage);
+	void OnHit(EAttackType Type, FVector NormalPoint, float damage);
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot);
 
 protected:
 	UPROPERTY()
@@ -70,5 +77,8 @@ public:
 
 	UPROPERTY()
 	bool IsDead;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UAnimMontage* KnockdownMontage;
 	
 };
