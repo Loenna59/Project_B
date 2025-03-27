@@ -62,6 +62,7 @@ protected:
 
 	UPROPERTY(Replicated)
 	TArray<AActor*> AlreadyHitActorsDuringAttack;
+	
 
 public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
@@ -85,6 +86,9 @@ public:
 	UPROPERTY(EditAnywhere, Category=Attack)
 	float HeadButtDamage = 0;
 
+	UPROPERTY(EditAnywhere)
+	bool DrawDebug = true;
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

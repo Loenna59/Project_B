@@ -1,6 +1,7 @@
 #include "Character/BaseCharacterAttackComponent.h"
 
 #include "EnhancedInputComponent.h"
+#include "KismetTraceUtils.h"
 #include "Character/BaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -224,30 +225,42 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(FNam
 {
 	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
 
-	TWeakObjectPtr<UBaseCharacterAttackComponent> WeakThis = this;
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
 
-	TraceChannelHelper::SphereSingleByChannel
-	(
-		GetWorld(),
-		Character,
+	CollisionParams.AddIgnoredActor(Character);
+	CollisionParams.AddIgnoredComponent(Character->GetMesh());
+	
+	bool bHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
 		Location,
 		Location,
-		FRotator::ZeroRotator,
+		FQuat::Identity,
 		ECC_Camera,
-		Radius,
-		true,
-		true,
-		[WeakThis, Damage] (bool bHit, FHitResult HitResult)
-		{
-			if (bHit)
-			{
-				if (WeakThis.IsValid())
-				{
-					WeakThis->Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, Damage);
-				}
-			}
-		}
+		FCollisionShape::MakeSphere(Radius),
+		CollisionParams
 	);
+
+	if (DrawDebug)
+	{
+		DrawDebugSphereTraceSingle(
+			GetWorld(),
+			Location,
+			Location,
+			Radius,
+			EDrawDebugTrace::ForDuration,
+			bHit,
+			HitResult,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
+	}
+
+	if (bHit)
+	{
+		Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, Damage);
+	}
 }
 
 void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(bool bHit, FHitResult HitResult, float Damage)
