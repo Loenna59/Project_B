@@ -7,11 +7,12 @@
 
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 
+#include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
-#include "Project_B/Maps/BlackHole/Public/BlackholeGameMode.h"
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
+#include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 
 void ABlackholeGameState::BeginPlay()
@@ -74,25 +75,21 @@ void ABlackholeGameState::DestroyBalckhole()
 
 void ABlackholeGameState::CheckGameEndConditions()
 {
-	// 생존 플레이어 수 카운트
-	int32 WinningPlayerCount = 0;
-
 	// 게임 인스턴스에서 플레이어 정보 확인
 	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
-	
+
 	// 플레이어 정보 순회
 	for (auto& it : InfoMap)
 	{
 		FPlayerInfo& PlayerInfo = it.Value;
-        
-		// 생존 플레이어 카운트
+		// 살아있다면
 		if (PlayerInfo.bIsAlive)
 		{
 			AlivePlayers++;
 		}
 	}
 
-	// 종료조건
+	// TODO: 종료 조건: 한 팀만 남았거나 플레이어가 1명 이하일 때
 	if (AlivePlayers <= 1)
 	{
 		DetermineWinner();
@@ -101,10 +98,7 @@ void ABlackholeGameState::CheckGameEndConditions()
 
 void ABlackholeGameState::DetermineWinner()
 {
-	// 승자를 결정하는 시점에
-	// 살아있다면, 이김
 	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
-	
 	for (auto& it : InfoMap)
 	{
 		FPlayerInfo& PlayerInfo = it.Value;
@@ -113,6 +107,7 @@ void ABlackholeGameState::DetermineWinner()
 
 	UE_LOG(LogTemp, Warning, TEXT("Game Over! Winner determined."));
 }
+
 
 void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTime)
 {
@@ -123,9 +118,42 @@ void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTi
 void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("End Game!!!!"));
-
+	
 	// 승패 가르기
 	DetermineWinner();
+}
+
+void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
+{
+	// 플레이어 키값 가져올것
+	FString Key;
+	const FUniqueNetIdRepl& NetIdRepl = PlayerController->GetPlayerState<APlayerState>()->GetUniqueId();
+	if (NetIdRepl.IsValid())
+	{
+		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+		Key = NetId->ToString();
+	}
+
+	// 플레이어 상태가 죽음일 때만 이 로직이 실행될 것이다
+	// 즉, Info[Key].bIsAlive = false; 라고 가정
+	UE_LOG(LogTemp,Warning,TEXT("Player Death"));
+
+	// 플레이어의 화면을 흑백으로 전환하자
+	
+	// 3초뒤에 플레이어를 관전자 모드로 전환하자 (이때는 당연히 흑백이 아니어야함)
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([PlayerController, this]()
+	{
+		AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
+		if (Target)
+		{
+			PlayerController->SetViewTarget(Target);
+		}
+	}), 3.0f, false);
+	
+	// 이때, 조작은 클릭만 받게 해야함
+	PlayerController->SetIgnoreMoveInput(true);
+	PlayerController->SetIgnoreLookInput(true);
 }
 
 

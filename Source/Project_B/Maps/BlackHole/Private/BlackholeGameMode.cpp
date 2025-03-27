@@ -6,8 +6,12 @@
 // 승리/패배 팀 결정 및 최종 결과 전달
 
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameMode.h"
+
+#include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholePlayerState.h"
+#include "Project_B/Maps/BlackHole/Public/TargetActor.h"
+#include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 
 void ABlackholeGameMode::BeginPlay()
 {
@@ -50,6 +54,7 @@ void ABlackholeGameMode::PostLogin(APlayerController* NewPlayer)
 void ABlackholeGameMode::EndGame()
 {
 	UE_LOG(LogTemp, Warning, TEXT("End Game!!!!"));
+	
 	// 게임이 종료되면, 게임 스테이트에 전달하자
 	if (gs)
 	{

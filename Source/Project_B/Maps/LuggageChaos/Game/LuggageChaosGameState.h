@@ -5,78 +5,130 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "Project_B/Maps/BanimalsType.h"
+#include "Project_B/Maps/Base/BanimalsGameState.h"
 #include "LuggageChaosGameState.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_B_API ALuggageChaosGameState : public AGameStateBase
+class PROJECT_B_API ALuggageChaosGameState : public ABanimalsGameState
 {
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ALuggageChaosGameState();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
 	float ReadyTime = 2.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
 	float GameTime = 6.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
 	float SlowTime = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
+	float EndTime = 1.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
+	float RespawnTime = 3.0f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Game")
 	uint8 MaxPoint = 24;
 
 	ETeamType WinnerTeam = ETeamType::None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | WinPrize")
 	TSubclassOf<class AWinnerPrize> WinnerPrizeClass;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
 	TSubclassOf<class ULuggageScoreWidget> ScoreWidgetClass;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
+	TSubclassOf<class UGameReadyWidget> ReadyWidgetClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
 	TSubclassOf<class UGameEndWidget> GameEndWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
+	TSubclassOf<class UUserWidget> TransitionWidgetClass;
+	
+
 private:
+	FTimerHandle GameTimerHandle;
+	
+	FDelegateHandle OnPostLoadMapHandle;
+
+	FLatentActionInfo LatenActionInfo;
+
+	uint8 LoadComplete = 0;
+
+	// 플레이어 unique ID, Info
+	TMap<FString,FPlayerInfo> PlayersInfo;
+
+
+	// 플레이어 초기 위치 초기화를 위한 함수
+	TArray<AActor*> BlueSpawnPoints;
+	TArray<AActor*> RedSpawnPoints;
+	int32 dummyIdx = 0;
+
+	int32 blueIdx = 0;
+	int32 redIdx = 0;
+	
 	uint8 RedPoint = 0;
 	uint8 BluePoint = 0;
-
-	FTimerHandle GameTimerHandle;
 	
 	UPROPERTY()
 	ULuggageScoreWidget* ScoreWidget;
 	UPROPERTY()
+	UGameReadyWidget* GameReadyWidget;
+	UPROPERTY()
 	UGameEndWidget* GameEndWidget;
-
+	UPROPERTY()
+	UUserWidget* TransitionWidget;
 
 protected:
 	virtual void BeginPlay() override;
 	
 public:
-	/**서버만 실행*/
+	/**모든 클라이언트에서 호출되어야 함*/
+	void AddScore(ETeamType team ,const uint8 point);
+	void InitPlayerLoc(APawn* pawn);
+
+protected:
+	void GameReady();
+	
+	void InitUI(APlayerController* pc);
+	
+	void InitSpawnPoint();
+
 	void GameStart();
 	
-	/**모든 클라이언트에서 실행*/
-	void GameEnd();
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_GameStart();
+	
+	void TimeOut();
 
-	/**서버에서만 실행*/
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_JudgeWinner();
+	
+	void Win(ETeamType winner = ETeamType::None);
+	
+	void AddWinPrize(APlayerController* pc);
+	
+	void GameEnd();
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_GameEnd();
 
-	/**모든 클라이언트에서 실행*/
-	void AddScore(ETeamType team ,const uint8 point);
+	UFUNCTION()
+	void OnLevelLoadComplete(UWorld* loadedWorld);
 
-	/**모든 클라이언트에서 실행*/
-	void Win(ETeamType team = ETeamType::None);
-	void AddWinPrize(APlayerController* pc);
+	void LevelLoadComplete();
 	
-	/**서버만 실행*/
-	void TimeOut();
+	UFUNCTION(Server, Reliable)
+	void Server_LevelLoadComplete();
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void Net_JudgeWinner();
+	void ChangeLevelPodium();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Net_InitUI();
+	TMap<FString,FPlayerInfo> DummyPlayersInfo();
 };

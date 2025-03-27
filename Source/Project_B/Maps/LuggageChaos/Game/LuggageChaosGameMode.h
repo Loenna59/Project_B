@@ -14,5 +14,6 @@ UCLASS()
 class PROJECT_B_API ALuggageChaosGameMode : public AProject_BGameMode
 {
 	GENERATED_BODY()
-
+private:
+	virtual void OnPostLogin(AController* NewPlayer) override;
 };

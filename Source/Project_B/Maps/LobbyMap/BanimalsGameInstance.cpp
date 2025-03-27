@@ -40,6 +40,15 @@ void UBanimalsGameInstance::CreateLobbySession(FString displayName, int32 player
 
 	// Lan 사용 여부
 	FName subsystemName = IOnlineSubsystem::Get()->GetSubsystemName();
+
+	/*const FNamedOnlineSession* ExistSession = sessionInterface->GetNamedSession(FName(displayName));
+	if (ExistSession)
+	{
+		UE_LOG(LogTemp, Error, TEXT("이미 만들어진 세션이 존재합니다."));
+		sessionInterface->DestroySession(FName(displayName));
+		UE_LOG(LogTemp, Error, TEXT("세션 제거"));
+	}*/
+	
 	UE_LOG(LogTemp, Warning, TEXT("서브시스템 이름: %s"), *subsystemName.ToString())
 	sessionSettings.bIsLANMatch = subsystemName.IsEqual(FName(TEXT("NULL")));
 
@@ -53,7 +62,7 @@ void UBanimalsGameInstance::CreateLobbySession(FString displayName, int32 player
 	// 세션 최대 인원 설정
 	sessionSettings.NumPublicConnections = playerCount;
 	
-	//sessionSettings.Set(FName(TEXT("DP_NAME")), displayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	sessionSettings.Set(FName(TEXT("DP_NAME")), displayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	
 	// 세션 생성
 	sessionInterface->CreateSession(0,FName(displayName),sessionSettings);
@@ -115,7 +124,7 @@ void UBanimalsGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 		for (int32 i=0; i<results.Num(); i++)
 		{
 			FString displayName;
-			// results[i].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
+			results[i].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
 			UE_LOG(LogTemp,Warning,TEXT("세션 - %d, 이름: %s"), i, *displayName);
 			
 			OnFindComplete.ExecuteIfBound(i, displayName);
@@ -142,7 +151,7 @@ void UBanimalsGameInstance::JoinOtherSession(int32 sessionIdx)
 	results[sessionIdx].Session.SessionSettings.bUsesPresence = true;
 	results[sessionIdx].Session.SessionSettings.bUseLobbiesIfAvailable = true;
 	
-	// results[sessionIdx].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
+	results[sessionIdx].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
 
 	// 세션참여
 	sessionInterface->JoinSession(0, FName(displayName), results[sessionIdx]);

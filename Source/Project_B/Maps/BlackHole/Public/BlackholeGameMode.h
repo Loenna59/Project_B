@@ -27,12 +27,8 @@ public:
 	// 게임 종료 함수
 	FTimerHandle timerHandle;
 	void EndGame();
-
-	/*
-	// 플레이어 사망처리
-	UFUNCTION(BlueprintCallable)
-	void OnPlayerDeath(APlayerController* PlayerController);*/
 	
 	// 게임 종료 로직
 	void CheckGameEndConditions();
+	
 };
