@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Character/AttackType.h"
 #include "BaseCharacter.generated.h"
 
 UCLASS()
@@ -20,7 +21,7 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void OnHit(FVector NormalPoint, float damage);
+	void OnHit(EAttackType Type, FVector NormalPoint, float damage);
 
 protected:
 	UPROPERTY()

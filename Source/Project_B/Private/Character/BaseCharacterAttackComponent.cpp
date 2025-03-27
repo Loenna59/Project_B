@@ -208,20 +208,20 @@ void UBaseCharacterAttackComponent::OnPunchTraceChannel()
 {
 	FName BoneName = ArmDirection == EArmDirection::LEFT? TEXT("Hand_R") : TEXT("Hand_L");
 
-	Server_OnHitTraceChannel(BoneName, 20.f, PunchDamage);
+	Server_OnHitTraceChannel(EAttackType::PUNCH, BoneName, 20.f, PunchDamage);
 }
 
 void UBaseCharacterAttackComponent::OnKickTraceChannel()
 {
-	Server_OnHitTraceChannel(TEXT("FootToe1_R"), 25.f, KickDamage);
+	Server_OnHitTraceChannel(EAttackType::KICK, TEXT("FootToe1_R"), 25.f, KickDamage);
 }
 
 void UBaseCharacterAttackComponent::OnHeadButtTraceChannel()
 {
-	Server_OnHitTraceChannel(TEXT("Head"), 50.f, HeadButtDamage);
+	Server_OnHitTraceChannel(EAttackType::HEAD_BUTT, TEXT("Head"), 50.f, HeadButtDamage);
 }
 
-void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(FName BoneName, float Radius, float Damage)
+void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAttackType Type, FName BoneName, float Radius, float Damage)
 {
 	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
 
@@ -259,11 +259,11 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(FNam
 
 	if (bHit)
 	{
-		Multicast_OnHitTraceChannel_Implementation(bHit, HitResult, Damage);
+		Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResult, Damage);
 	}
 }
 
-void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(bool bHit, FHitResult HitResult, float Damage)
+void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(EAttackType Type, bool bHit, FHitResult HitResult, float Damage)
 {
 	if (bHit)
 	{
@@ -277,7 +277,7 @@ void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(b
 		
 		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitActor))
 		{
-			Other->OnHit(HitResult.ImpactNormal, Damage);
+			Other->OnHit(Type, HitResult.Normal.GetSafeNormal(), Damage);
 		}
 	}
 }

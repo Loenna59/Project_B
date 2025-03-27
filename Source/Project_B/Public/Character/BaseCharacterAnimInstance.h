@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Character/AttackType.h"
 #include "BaseCharacterAnimInstance.generated.h"
 
 /**
@@ -51,5 +52,5 @@ public:
 	FVector IKTargetLocation;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void StartHitProcess(FVector2D Direction);
+	void StartHitProcess(EAttackType Type, float ForwardDot, float SideDot);
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacterInputComponent.h"
+#include "Character/AttackType.h"
 #include "BaseCharacterAttackComponent.generated.h"
 
 UENUM()
@@ -11,17 +12,6 @@ enum class EArmDirection : uint8
 {
 	LEFT,
 	RIGHT
-};
-
-UENUM()
-enum class EAttackType : uint8
-{
-	PUNCH,
-	HEAD_BUTT,
-	KICK,
-	HAMMER,
-	BOTTLE,
-	CROSS_BOW
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -134,9 +124,9 @@ public:
 	void OnHeadButtTraceChannel();
 
 	UFUNCTION(Server, Reliable)
-	void Server_OnHitTraceChannel(FName BoneName, float Radius, float Damage);
+	void Server_OnHitTraceChannel(EAttackType Type, FName BoneName, float Radius, float Damage);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnHitTraceChannel(bool bHit, FHitResult HitResult, float Damage);
+	void Multicast_OnHitTraceChannel(EAttackType Type, bool bHit, FHitResult HitResult, float Damage);
 
 };

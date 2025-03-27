@@ -140,16 +140,17 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
-void ABaseCharacter::OnHit(FVector NormalPoint, float damage)
+void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
 {
-	float Dot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
-	FVector DotVector = GetActorForwardVector() * Dot;
+	float ForwardDot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
+
+	float clampedForwardDot = FMath::Clamp(ForwardDot, -1.f, 1.f);
+
+	float SideDot = FVector::DotProduct(GetActorRightVector(), NormalPoint);
 
 	if (AnimInstance)
 	{
-		AnimInstance->StartHitProcess(FVector2D(DotVector));
+		AnimInstance->StartHitProcess(Type, clampedForwardDot, SideDot);
 	}
-
-	LOG_SCREEN("damaged %f", damage);
 }
 
