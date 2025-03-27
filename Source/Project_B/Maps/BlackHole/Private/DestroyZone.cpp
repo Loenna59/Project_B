@@ -106,6 +106,7 @@ void ADestroyZone::UpdatePlayerState(const FString& playerKey)
 
 void ADestroyZone::ServerRPC_UpdatePlayerState_Implementation(const FString& playerKey)
 {
+	LOG_PRINT(TEXT("플레이어 상태, 죽음으로 바뀌었습니다"));
 	UpdatePlayerState(playerKey);
 	// 모든 클라이언트에 상태 전달
 	Multicast_UpdatePlayerState(playerKey);
