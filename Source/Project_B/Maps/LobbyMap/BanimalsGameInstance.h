@@ -11,6 +11,8 @@
 
 // 세션 검색 완료시 호출되는 함수를 등록하는 델리게이트
 DECLARE_DELEGATE_TwoParams(FFindComplete, int32, FString);
+// 플레이어 상태 변경 시 호출되는 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnPlayerStateChanged);
 
 
 UCLASS()
@@ -45,6 +47,9 @@ public:
 	
 	// 세션 검색완료시 호출되는 델리게이트
 	FFindComplete OnFindComplete;
+	
+	// 플레이어 상태 변경 시 호출되는 델리게이트
+	FOnPlayerStateChanged OnPlayerStateChanged;
 
 private:
 	FString NetID;

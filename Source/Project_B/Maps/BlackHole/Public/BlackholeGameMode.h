@@ -28,11 +28,13 @@ public:
 	FTimerHandle timerHandle;
 	void EndGame();
 
-	/*
 	// 플레이어 사망처리
 	UFUNCTION(BlueprintCallable)
-	void OnPlayerDeath(APlayerController* PlayerController);*/
+	void OnPlayerDeath(APlayerController* PlayerController);
+	/*UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnPlayerDeath(const FString& Key);*/
 	
 	// 게임 종료 로직
 	void CheckGameEndConditions();
+	
 };

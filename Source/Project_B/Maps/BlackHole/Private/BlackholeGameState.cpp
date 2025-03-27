@@ -74,25 +74,21 @@ void ABlackholeGameState::DestroyBalckhole()
 
 void ABlackholeGameState::CheckGameEndConditions()
 {
-	// 생존 플레이어 수 카운트
-	int32 WinningPlayerCount = 0;
-
 	// 게임 인스턴스에서 플레이어 정보 확인
 	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
-	
+
 	// 플레이어 정보 순회
 	for (auto& it : InfoMap)
 	{
 		FPlayerInfo& PlayerInfo = it.Value;
-        
-		// 생존 플레이어 카운트
+		// 살아있다면
 		if (PlayerInfo.bIsAlive)
 		{
 			AlivePlayers++;
 		}
 	}
 
-	// 종료조건
+	// TODO: 종료 조건: 한 팀만 남았거나 플레이어가 1명 이하일 때
 	if (AlivePlayers <= 1)
 	{
 		DetermineWinner();
@@ -101,10 +97,7 @@ void ABlackholeGameState::CheckGameEndConditions()
 
 void ABlackholeGameState::DetermineWinner()
 {
-	// 승자를 결정하는 시점에
-	// 살아있다면, 이김
 	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
-	
 	for (auto& it : InfoMap)
 	{
 		FPlayerInfo& PlayerInfo = it.Value;
@@ -113,6 +106,7 @@ void ABlackholeGameState::DetermineWinner()
 
 	UE_LOG(LogTemp, Warning, TEXT("Game Over! Winner determined."));
 }
+
 
 void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTime)
 {
@@ -123,7 +117,7 @@ void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTi
 void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("End Game!!!!"));
-
+	
 	// 승패 가르기
 	DetermineWinner();
 }
