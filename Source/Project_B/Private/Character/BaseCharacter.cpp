@@ -148,9 +148,54 @@ void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
 
 	float SideDot = FVector::DotProduct(GetActorRightVector(), NormalPoint);
 
-	if (AnimInstance)
+	if (HasAuthority())
 	{
-		AnimInstance->StartHitProcess(Type, clampedForwardDot, SideDot);
+		Multicast_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+	}
+	else
+	{
+		Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+	}
+}
+
+void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
+{
+	Multicast_OnPlayHitMontage(Type, ForwardDot, SideDot);
+}
+
+void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
+{
+	switch (Type)
+	{
+	case EAttackType::PUNCH:
+	case EAttackType::BOTTLE:
+	case EAttackType::CROSS_BOW:
+		if (AnimInstance)
+		{
+			AnimInstance->StartHitProcess(ForwardDot, SideDot);
+		}
+		break;
+	default:
+		if (ForwardDot > 0.6f)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Forward"));
+			return;
+		}
+	
+		if (ForwardDot < -0.6f)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Backward"));
+			return;
+		}
+	
+		if (SideDot > 0)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Left"));
+			return;
+		}
+	
+		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Right"));
+		break;
 	}
 }
 

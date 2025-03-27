@@ -23,6 +23,12 @@ public:
 
 	void OnHit(EAttackType Type, FVector NormalPoint, float damage);
 
+	UFUNCTION(Server, Reliable)
+	void Server_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot);
+
 protected:
 	UPROPERTY()
 	class UInputMappingContext* IMC = nullptr;
@@ -71,5 +77,8 @@ public:
 
 	UPROPERTY()
 	bool IsDead;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UAnimMontage* KnockdownMontage;
 	
 };

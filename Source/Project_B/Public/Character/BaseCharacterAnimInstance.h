@@ -52,5 +52,5 @@ public:
 	FVector IKTargetLocation;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void StartHitProcess(EAttackType Type, float ForwardDot, float SideDot);
+	void StartHitProcess(float ForwardDot, float SideDot);
 };
