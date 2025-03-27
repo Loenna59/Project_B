@@ -60,6 +60,9 @@ protected:
 
 	const float PunchExecuteThreshold = 0.5f;
 
+	UPROPERTY()
+	TArray<AActor*> AlreadyHitActorsDuringAttack;
+
 public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* PunchAnimMontage;
@@ -96,6 +99,8 @@ public:
 	UFUNCTION()
 	void Kick();
 
+	UFUNCTION()
+	void Finish();
 
 	UFUNCTION(Server, Reliable)
 	void Server_PlayAnimMontage(UAnimMontage* Montage, float PlayRate = 1.f, FName SectionName = NAME_None);
@@ -112,17 +117,11 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_OnPunchTraceChannel();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnPunchTraceChannel(bool bHit, FHitResult HitResult);
-
 	UFUNCTION()
 	void OnKickTraceChannel();
 
 	UFUNCTION(Server, Reliable)
 	void Server_OnKickTraceChannel();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnKickTraceChannel(bool bHit, FHitResult HitResult);
 
 	UFUNCTION()
 	void OnHeadButtTraceChannel();
@@ -130,7 +129,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_OnHeadButtTraceChannel();
 
+
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnHeadButtTraceChannel(bool bHit, FHitResult HitResult);
-	
+	void Multicast_OnHitTraceChannel(bool bHit, FHitResult HitResult, float damage);
+
 };

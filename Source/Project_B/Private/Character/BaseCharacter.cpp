@@ -4,6 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Camera/CameraComponent.h"
+#include "Character/BaseCharacterAnimInstance.h"
 #include "Character/BaseCharacterArmComponent.h"
 #include "Character/BaseCharacterAttackComponent.h"
 #include "Character/BaseCharacterMoveComponent.h"
@@ -15,13 +16,14 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Project_B/Maps/BlackHole/Public/GravityComponent.h"
+#include "Project_B/Utilities/LogMacro.h"
 
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
-	GetCapsuleComponent()->SetCapsuleRadius(40.f);
+	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(100.f);
 
 	bUseControllerRotationPitch = false;
@@ -107,6 +109,10 @@ void ABaseCharacter::BeginPlay()
 	}
 
 	GetMesh()->SetAngularDamping(2.0f);
+
+	CurrentHealth = MaxHealth;
+
+	AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -128,5 +134,18 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PickComp->SetupInputBiding(pi);
 	}
 
+}
+
+void ABaseCharacter::OnHit(FVector NormalPoint, float damage)
+{
+	float Dot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
+	FVector DotVector = GetActorForwardVector() * Dot;
+
+	if (AnimInstance)
+	{
+		AnimInstance->StartHitProcess(FVector2D(DotVector));
+	}
+
+	LOG_SCREEN("damaged %f", damage);
 }
 
