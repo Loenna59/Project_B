@@ -24,5 +24,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* BoxComponent;
+	class UCameraComponent* cameraComp;
 };
