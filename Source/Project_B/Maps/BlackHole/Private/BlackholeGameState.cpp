@@ -10,11 +10,18 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
+#include "Project_B/Maps/BlackHole/Public/BlackholeGameMode.h"
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
+#include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 
 void ABlackholeGameState::BeginPlay()
 {
 	Super::BeginPlay();
+
+	bReplicates = true;
+
+	// 게임 인스턴스
+	gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	
 	// 블랙홀 + 회전체
 	Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
@@ -35,8 +42,10 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// DOREPLIFETIME(ABlackholeGameState, );
+	DOREPLIFETIME(ABlackholeGameState, GameStartTime);
+	DOREPLIFETIME(ABlackholeGameState, AlivePlayers);
 }
+
 
 void ABlackholeGameState::SpawnBlackhole()
 {
@@ -63,6 +72,60 @@ void ABlackholeGameState::DestroyBalckhole()
 	}
 }
 
-void ABlackholeGameState::SetGameOver()
+void ABlackholeGameState::CheckGameEndConditions()
 {
+	// 생존 플레이어 수 카운트
+	int32 WinningPlayerCount = 0;
+
+	// 게임 인스턴스에서 플레이어 정보 확인
+	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
+	
+	// 플레이어 정보 순회
+	for (auto& it : InfoMap)
+	{
+		FPlayerInfo& PlayerInfo = it.Value;
+        
+		// 생존 플레이어 카운트
+		if (PlayerInfo.bIsAlive)
+		{
+			AlivePlayers++;
+		}
+	}
+
+	// 종료조건
+	if (AlivePlayers <= 1)
+	{
+		DetermineWinner();
+	}
 }
+
+void ABlackholeGameState::DetermineWinner()
+{
+	// 승자를 결정하는 시점에
+	// 살아있다면, 이김
+	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
+	
+	for (auto& it : InfoMap)
+	{
+		FPlayerInfo& PlayerInfo = it.Value;
+		PlayerInfo.bIsWin = PlayerInfo.bIsAlive;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Game Over! Winner determined."));
+}
+
+void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTime)
+{
+	// 게임 시작 로직
+	GameStartTime = StartTime;
+}
+
+void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("End Game!!!!"));
+
+	// 승패 가르기
+	DetermineWinner();
+}
+
+
