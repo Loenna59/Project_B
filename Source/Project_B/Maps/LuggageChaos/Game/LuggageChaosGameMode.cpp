@@ -10,6 +10,7 @@
 void ALuggageChaosGameMode::OnPostLogin(AController* NewPlayer)
 {
 	Super::OnPostLogin(NewPlayer);
+	
 	ALuggageChaosGameState* gs = Cast<ALuggageChaosGameState>(GetWorld()->GetGameState());
 	if (gs)
 	{

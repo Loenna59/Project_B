@@ -9,6 +9,8 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Misc/LowLevelTestAdapter.h"
+#include "Net/UnrealNetwork.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 #include "Project_B/Maps/LuggageChaos/Widget/LuggageScoreWidget.h"
 #include "Project_B/Maps/Base/Widget/GameReadyWidget.h"
@@ -19,10 +21,6 @@
 
 ALuggageChaosGameState::ALuggageChaosGameState()
 {
-	LatenActionInfo. CallbackTarget = this;
-	LatenActionInfo.ExecutionFunction = FName("OnLevelLoadComplete");
-	LatenActionInfo.UUID = 1; 
-	LatenActionInfo.Linkage = 0;    
 }
 
 void ALuggageChaosGameState::BeginPlay()
@@ -37,10 +35,14 @@ void ALuggageChaosGameState::GameReady()
 	{
 		UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 
-		//TODO: gi로부터 플레이어 정보 가져오기
-		PlayersInfo= gi->GetPlayerInfo();
-	
-		//PlayersInfo = DummyPlayersInfo();
+		if (isDummyPlayerInfo)
+		{
+			PlayersInfo = DummyPlayersInfo();
+		}
+		else
+		{
+			PlayersInfo= gi->GetPlayerInfo();
+		}
 		
 		FTimerHandle OnStartTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
@@ -60,17 +62,25 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn)
 		return;
 	}
 	
-	//FString dummyKey = FString::FromInt(dummyIdx);
-
-	const FUniqueNetIdRepl& NetIdRepl = pawn->GetPlayerState<APlayerState>()->GetUniqueId();
-	FString Key;
-	if (NetIdRepl.IsValid())
+	if (isDummyPlayerInfo)
 	{
-		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-		 Key = NetId->ToString();
+		MyKey = FString::FromInt(dummyIdx);
+		LOG_PRINT(TEXT("나의 키: %s"), *MyKey);
+		++dummyIdx;
 	}
+	else
+	{
+		const FUniqueNetIdRepl& NetIdRepl = pawn->GetPlayerState<APlayerState>()->GetUniqueId();
 	
-	if (FPlayerInfo* Info = PlayersInfo.Find(Key))
+		if (NetIdRepl.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			MyKey = NetId->ToString();
+			LOG_PRINT(TEXT("나의 키: %s"), *MyKey);
+		}
+	}
+
+	if (FPlayerInfo* Info = PlayersInfo.Find(MyKey))
 	{
 		if (Info->Team == ETeamType::Blue)
 		{
@@ -91,8 +101,6 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn)
 	{
 		LOG_ERROR(this,TEXT("존재하지 않는 Key"));
 	}
-
-	//++dummyIdx;
 }
 
 void ALuggageChaosGameState::InitUI(APlayerController* pc)
@@ -114,6 +122,17 @@ void ALuggageChaosGameState::InitUI(APlayerController* pc)
 	{
 		GameEndWidget->AddToViewport();
 	}
+
+	//TODO: 테스트
+	if (isAddScoreBlue)
+	{
+		AddScore(ETeamType::Blue, 4);
+	}
+	if (isAddScoreRed)
+	{
+		AddScore(ETeamType::Red, 4);
+	}
+	
 }
 
 void ALuggageChaosGameState::InitSpawnPoint()
@@ -134,7 +153,6 @@ void ALuggageChaosGameState::InitSpawnPoint()
 	{
 		RedSpawnPoints.Add(actor);
 	}
-	
 }
 
 void ALuggageChaosGameState::GameStart()
@@ -183,45 +201,15 @@ void ALuggageChaosGameState::AddScore(ETeamType team, const uint8 point)
 
 void ALuggageChaosGameState::GameEnd()
 {
-	if (HasAuthority())
-	{
-		Net_GameEnd();
-	}
+	FTimerHandle OnEndTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(OnEndTimerHandle, this, &ALuggageChaosGameState::ChangeLevelPodium,EndTime*SlowTime,false);
+	
+	Net_GameEnd();
 }
 
 void ALuggageChaosGameState::Net_GameEnd_Implementation()
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowTime);
-	
-	UGameplayStatics::LoadStreamLevel(GetWorld(), FName("LV_Poidum"),false,false,LatenActionInfo);
-}
-
-void ALuggageChaosGameState::OnLevelLoadComplete(UWorld* loadedWorld)
-{
-	// LOG_SCREEN("비동기 레벨 로드 완료");
-	// if (HasAuthority())
-	// {
-	// 	LevelLoadComplete();
-	// }
-	// Server_LevelLoadComplete(); 
-}
-
-void ALuggageChaosGameState::LevelLoadComplete()
-{
-	++LoadComplete;
-
-	LOG_PRINT(TEXT("로드완료된 인원: %d"), LoadComplete);
-	LOG_PRINT(TEXT("총 플레이어 수: %d"), PlayerArray.Num());
-	
-	if (LoadComplete >= PlayerArray.Num())
-	{
-		ChangeLevelPodium();
-	}
-}
-
-void ALuggageChaosGameState::Server_LevelLoadComplete_Implementation()
-{
-	LevelLoadComplete();
 }
 
 void ALuggageChaosGameState::ChangeLevelPodium()
@@ -243,44 +231,30 @@ void ALuggageChaosGameState::Win(ETeamType winner)
 	if (winner == ETeamType::None)
 	{
 		GameEndWidget->ShowDraw();
-		GameEnd();
+		
+		if (HasAuthority())
+		{
+			GameEnd();
+		}
+		return;
+	}
+
+	FPlayerInfo* myInfo = PlayersInfo.Find(MyKey);
+	
+	if (myInfo == nullptr)
+	{
+		LOG_ERROR(this,TEXT("나의 키: %s, 키가 없어욤"),*MyKey);
 		return;
 	}
 	
-	const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
-
-	TSharedPtr<const FUniqueNetId> NetId = nullptr;
-	if (NetIdRepl.IsValid())
+	if (myInfo->Team == winner)
 	{
-		NetId = NetIdRepl.GetUniqueNetId();
-	}
-	else
-	{
-		LOG_ERROR(this,TEXT("NetID Null"));
-		return;
-	}
-	
-	if (FPlayerInfo* info = PlayersInfo.Find(NetId->ToString()))
-	{
-		myTeam = info->Team;
-	}
-
-	//TODO: 테스트 더미
-	if (HasAuthority())
-	{
-		myTeam = ETeamType::Blue;
-	}
-	else
-	{
-		myTeam = ETeamType::Red;
-	}
-	
-	if (myTeam == winner)
-	{
-		APlayerController* pc = GetWorld()->GetFirstPlayerController();
-		AddWinPrize(pc);
 		GameEndWidget->ShowVictory();
 		LOG_SCREEN("WIN");
+		
+		APlayerController* pc = GetWorld()->GetFirstPlayerController();
+		AddWinPrize(pc);
+		myInfo->bIsWin = true;
 	}
 	else
 	{
@@ -288,7 +262,10 @@ void ALuggageChaosGameState::Win(ETeamType winner)
 		LOG_SCREEN("LOSE");
 	}
 	
-	GameEnd();
+	if (HasAuthority())
+	{
+		GameEnd();
+	}
 }
 
 void ALuggageChaosGameState::AddWinPrize(APlayerController* pc)
