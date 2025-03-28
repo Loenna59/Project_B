@@ -53,7 +53,7 @@ public:
 	// 죽음 처리
 	void OnPlayerDeath(APlayerController* PlayerController);
 	UFUNCTION(Client, Reliable)
-	void ClinetRPC_OnPlayerDeath(APlayerController* PlayerController);
+	void ClinetRPC_OnPlayerDeath(ABaseCharacter* Player);
 
 	// 게임 시작
 	UPROPERTY(Replicated)
