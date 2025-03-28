@@ -165,8 +165,10 @@ void UBanimalsGameInstance::OnJoinSessionComplete(FName sessionName, EOnJoinSess
 		// 서버가 만들어 놓은 세션 url얻어오자
 		FString url;
 		sessionInterface->GetResolvedConnectString(sessionName, url);
-		sessionInterface->GetNamedSession(sessionName)->SessionSettings.NumPublicConnections; // 세션 최대 인원수
-		sessionInterface->GetNamedSession(sessionName)->NumOpenPublicConnections; // 남은 접속 가능한 수
+		int32 maxplayer = sessionInterface->GetNamedSession(sessionName)->SessionSettings.NumPublicConnections; // 세션 최대 인원수
+		UE_LOG(LogTemp, Warning, TEXT("maxplayer@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ :%d"), maxplayer);
+		int32 reaminplayer = sessionInterface->GetNamedSession(sessionName)->NumOpenPublicConnections; // 남은 접속 가능한 수
+		UE_LOG(LogTemp, Warning, TEXT("reaminplayer@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ :%d"), reaminplayer);
 		// 서버가 있는 맵으로 이동하자
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
 		pc->ClientTravel(url, TRAVEL_Absolute);

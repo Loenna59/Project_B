@@ -21,7 +21,7 @@ void USelectModeUI::CreateBlackholeSession()
 	gi->SetCurrentMapInfo(0);
 
 	// 생성
-	gi->CreateLobbySession(FString(TEXT("Blackhole")), 8);
+	gi->CreateLobbySession(FString(TEXT("Blackhole")), 9);
 	RemoveFromParent();
 }
 
@@ -31,6 +31,6 @@ void USelectModeUI::CreateLuggageSession()
 	gi->SetCurrentMapInfo(1);
 	
 	// 생성
-	gi->CreateLobbySession(FString(TEXT("Luggage")), 8);
+	gi->CreateLobbySession(FString(TEXT("Luggage")), 9;
 	RemoveFromParent();
 }
