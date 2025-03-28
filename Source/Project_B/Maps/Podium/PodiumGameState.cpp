@@ -27,7 +27,7 @@ void APodiumGameState::BeginPlay()
 	{
 		PlayersInfo = DummyPlayersInfo();
 		mykey = FString::FromInt(dummyKey);
-		UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *mykey);
+		UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *FString::FromInt(dummyKey));
 	}
 	else
 	{
@@ -39,7 +39,10 @@ void APodiumGameState::BeginPlay()
 		{
 			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 			mykey = NetId->ToString();
-			UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *mykey);
+			UE_LOG(LogTemp,Error,TEXT("나의 키: %s"), *mykey);
+
+			FPlayerInfo* Info = PlayersInfo.Find(mykey);
+			UE_LOG(LogTemp,Error,TEXT("나의 팀: %"), *Info->Team);
 		}
 	}
 	
@@ -93,31 +96,9 @@ void APodiumGameState::InitPodiumCamera(APlayerController* pc)
 	pc->SetViewTarget(PodiumCamera);
 }
 
-void APodiumGameState::InitPlayerLoc(APawn* pawn)
+void APodiumGameState::InitPlayerLoc(APawn* pawn,FString key)
 {
-	if (isDummyPlayer)
-	{
-		mykey = FString::FromInt(dummyKey);
-		++dummyKey;
-	}
-	else
-	{
-		const FUniqueNetIdRepl& NetIdRepl = pawn->GetPlayerState<APlayerState>()->GetUniqueId();
-	
-		if (NetIdRepl.IsValid())
-		{
-			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-			mykey = NetId->ToString();
-			LOG_PRINT(TEXT("나의 키: %s"), *mykey);
-		}
-	}
-
-	if (HasAuthority() == false)
-	{
-		return;
-	}
-
-	if (FPlayerInfo* Info = PlayersInfo.Find(mykey))
+	if (FPlayerInfo* Info = PlayersInfo.Find(key))
 	{
 		if (Info->bIsWin && WinIndex < 2)
 		{

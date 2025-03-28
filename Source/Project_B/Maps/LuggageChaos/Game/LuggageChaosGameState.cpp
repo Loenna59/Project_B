@@ -49,7 +49,18 @@ void ALuggageChaosGameState::GameReady()
 		{
 			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 			MyKey = NetId->ToString();
-			UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *MyKey);
+			UE_LOG(LogTemp,Error,TEXT("나의 키: %s"), *MyKey);
+
+			FPlayerInfo* Info = PlayersInfo.Find(MyKey);
+			if (Info->Team == ETeamType::Blue)
+			{
+				UE_LOG(LogTemp,Error,TEXT("나의 팀: Blue"));
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("나의 팀: Red"));
+			}
+			
 		}
 	}
 	
@@ -66,20 +77,21 @@ void ALuggageChaosGameState::GameReady()
 	InitUI(pc);
 }
 
-void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn)
+void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 {
-	if (FPlayerInfo* Info = PlayersInfo.Find(MyKey))
+	UE_LOG(LogTemp,Error,TEXT("키: %s 를 가진 플레이어는"), *key);
+	if (FPlayerInfo* Info = PlayersInfo.Find(key))
 	{
 		if (Info->Team == ETeamType::Blue)
 		{
-			LOG_PRINT(TEXT("나는 파랑팀"));
+			LOG_PRINT(TEXT("저는 파랑팀"));
 			pawn->SetActorLocation(BlueSpawnPoints[blueIdx]->GetActorLocation());
 			pawn->SetActorRotation(BlueSpawnPoints[blueIdx]->GetActorRotation());
 			++blueIdx;
 		}
 		else
 		{
-			LOG_PRINT(TEXT("나는 레드팀"));
+			LOG_PRINT(TEXT("저는 레드팀"));
 			pawn->SetActorLocation(RedSpawnPoints[redIdx]->GetActorLocation());
 			pawn->SetActorRotation(RedSpawnPoints[blueIdx]->GetActorRotation());
 			++redIdx;
