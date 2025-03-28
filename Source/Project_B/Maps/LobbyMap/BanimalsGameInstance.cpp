@@ -145,12 +145,10 @@ void UBanimalsGameInstance::JoinOtherSession(int32 sessionIdx)
 	results[sessionIdx].Session.SessionSettings.bUsesPresence = true;
 	results[sessionIdx].Session.SessionSettings.bUseLobbiesIfAvailable = true;
 
-	// 위와 세트임
 	// 진행 중인 세션 참여 허용
 	results[sessionIdx].Session.SessionSettings.bAllowJoinInProgress = true;
 	// 세션 검색을 허용할 지 여부
 	results[sessionIdx].Session.SessionSettings.bShouldAdvertise = true;
-
 	
 	results[sessionIdx].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
 
