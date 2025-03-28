@@ -16,6 +16,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
@@ -28,6 +30,15 @@ public:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot);
+
+	UFUNCTION()
+	void TakeWeapon(class AWeapon* Weapon);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TakeWeapon(class AWeapon* Weapon);
+
+	UFUNCTION()
+	void AttachWeapon();
 
 protected:
 	UPROPERTY()
@@ -72,13 +83,22 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UGravityComponent* GravityComp = nullptr;
 
+	UPROPERTY(VisibleAnywhere)
+	class USceneComponent* TwoHandedSocket = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100;
 
 	UPROPERTY()
-	bool IsDead;
+	bool IsDead = false;
+
+	UPROPERTY()
+	bool bHasWeapon = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UAnimMontage* KnockdownMontage;
+
+	UPROPERTY(ReplicatedUsing=AttachWeapon)
+	class AWeapon* OwnedWeapon = nullptr;
 	
 };

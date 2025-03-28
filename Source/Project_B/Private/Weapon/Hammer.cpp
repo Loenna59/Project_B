@@ -22,6 +22,10 @@ AHammer::AHammer()
 	{
 		Mesh->SetStaticMesh(tempMesh.Object);
 	}
+
+	HitPoint = CreateDefaultSubobject<USceneComponent>(TEXT("HitPoint"));
+	HitPoint->SetupAttachment(Mesh);
+	HitPoint->SetRelativeLocation(FVector(0, 0, -150.f));
 }
 
 // Called when the game starts or when spawned
@@ -35,5 +39,20 @@ void AHammer::BeginPlay()
 void AHammer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AHammer::ToggleSimulatePhysics(bool bSimulate)
+{
+	Super::ToggleSimulatePhysics(bSimulate);
+
+	if (Mesh)
+	{
+		Mesh->SetSimulatePhysics(bSimulate);
+	}
+
+	ECollisionEnabled::Type CollisionEnabled = bSimulate? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision;
+	
+	Mesh->SetCollisionEnabled(CollisionEnabled);
+	Trigger->SetCollisionEnabled(CollisionEnabled);
 }
 

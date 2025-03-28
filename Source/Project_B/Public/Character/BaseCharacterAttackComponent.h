@@ -64,6 +64,9 @@ public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* KickAnimMontage;
 
+	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
+	class UAnimMontage* WeaponAttackAnimMontage;
+
 	UPROPERTY()
 	bool bIsAttacking = false;
 
@@ -129,4 +132,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnHitTraceChannel(EAttackType Type, bool bHit, FHitResult HitResult, float Damage);
 
+	UFUNCTION()
+	void PlayWeaponAttackAnimMontage(FString SelectionName);
+
+	UFUNCTION(Server, Reliable)
+	void Server_PlayWeaponAttackAnimMontage(const FString& SelectionName);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayWeaponAttackAnimMontage(const FString& SelectionName);
 };

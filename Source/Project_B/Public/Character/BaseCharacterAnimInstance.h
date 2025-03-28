@@ -7,9 +7,15 @@
 #include "Character/AttackType.h"
 #include "BaseCharacterAnimInstance.generated.h"
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	None,
+	OneHanded,
+	TwoHanded,
+	Ranged
+};
+
 UCLASS()
 class PROJECT_B_API UBaseCharacterAnimInstance : public UAnimInstance
 {
@@ -50,6 +56,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector IKTargetLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EWeaponType CurrentWeaponType = EWeaponType::None;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartHitProcess(float ForwardDot, float SideDot);

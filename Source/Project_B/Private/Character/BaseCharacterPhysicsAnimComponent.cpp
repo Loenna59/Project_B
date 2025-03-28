@@ -62,19 +62,18 @@ void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 	{
 		return;
 	}
+
+	if (!Character->IsLocallyControlled())
+	{
+		return;
+	}
 	
 	Server_TogglePhysicalAnimation(SimulateBoneName, toggle);
 }
 
 void UBaseCharacterPhysicsAnimComponent::Server_TogglePhysicalAnimation_Implementation(FName BoneName, bool bSimulate)
 {
-	if (GetOwner()->HasAuthority())
-	{
-		Multicast_TogglePhysicalAnimation(BoneName, bSimulate);
-		return;
-	}
-
-	TogglePhysicalAnimationInternal(BoneName, bSimulate);
+	Multicast_TogglePhysicalAnimation(BoneName, bSimulate);
 }
 
 void UBaseCharacterPhysicsAnimComponent::Multicast_TogglePhysicalAnimation_Implementation(FName BoneName,

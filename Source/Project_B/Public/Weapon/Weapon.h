@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/BaseCharacterAnimInstance.h"
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
@@ -28,4 +29,9 @@ public:
 
 	int32 CurrentCapacity;
 
+	virtual void ToggleSimulatePhysics(bool bSimulate) {}
+
+	virtual EWeaponType GetWeaponType() const { return EWeaponType::None; }
+
+	virtual void OnAttackTraceChannel() {}
 };

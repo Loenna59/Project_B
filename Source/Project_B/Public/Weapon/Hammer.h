@@ -25,7 +25,14 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	class UCapsuleComponent* Trigger;
 
+	UPROPERTY(VisibleAnywhere)
+	class USceneComponent* HitPoint;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void ToggleSimulatePhysics(bool bSimulate) override;
+
+	virtual EWeaponType GetWeaponType() const override { return EWeaponType::TwoHanded; }
 };
