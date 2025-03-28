@@ -58,6 +58,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
 	TSubclassOf<class UUserWidget> TransitionWidgetClass;
 	
+	UPROPERTY(Replicated)
+	TArray<FString> WinnerKeys;
 
 private:
 	FTimerHandle GameTimerHandle;
@@ -70,6 +72,7 @@ private:
 
 	// 플레이어 unique ID, Info
 	TMap<FString,FPlayerInfo> PlayersInfo;
+
 
 	FString MyKey = "";
 	
@@ -102,11 +105,15 @@ public:
 	void InitPlayerLoc(APawn* pawn,FString key);
  
 protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	void GameReady();
 	
-	void InitUI(APlayerController* pc);
+	void InitPlayerInfo();
 	
 	void InitSpawnPoint();
+	
+	void InitUI(APlayerController* pc);
 
 	void GameStart();
 	

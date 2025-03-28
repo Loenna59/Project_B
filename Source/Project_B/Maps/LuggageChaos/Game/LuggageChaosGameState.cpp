@@ -1,15 +1,11 @@
 ﻿#include "LuggageChaosGameState.h"
 
-#include <rapidjson/reader.h>
-
 #include "LuggageChaosGameMode.h"
-#include "LuggagePlayerState.h"
 
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
-#include "Misc/LowLevelTestAdapter.h"
 #include "Net/UnrealNetwork.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 #include "Project_B/Maps/LuggageChaos/Widget/LuggageScoreWidget.h"
@@ -21,6 +17,7 @@
 
 ALuggageChaosGameState::ALuggageChaosGameState()
 {
+	bReplicates = true;
 }
 
 void ALuggageChaosGameState::BeginPlay()
@@ -30,6 +27,23 @@ void ALuggageChaosGameState::BeginPlay()
 }
 
 void ALuggageChaosGameState::GameReady()
+{
+	InitPlayerInfo();
+	
+	if (HasAuthority())
+	{
+		FTimerHandle OnStartTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
+		
+		InitSpawnPoint();
+	}
+
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	
+	InitUI(pc);
+}
+
+void ALuggageChaosGameState::InitPlayerInfo()
 {
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	
@@ -47,6 +61,7 @@ void ALuggageChaosGameState::GameReady()
 		GetWorld()->GetTimerManager().SetTimer(LambdaTimerHandle, [this]()
 		{
 			const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
+			
 			if (NetIdRepl.IsValid())
 			{
 				TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
@@ -72,18 +87,6 @@ void ALuggageChaosGameState::GameReady()
 			}
 		}, 0.8f, false);
 	}
-	
-	if (HasAuthority())
-	{
-		FTimerHandle OnStartTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
-		
-		InitSpawnPoint();
-	}
-
-	APlayerController* pc = GetWorld()->GetFirstPlayerController();
-	
-	InitUI(pc);
 }
 
 void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
@@ -110,6 +113,13 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 	{
 		LOG_ERROR(this,TEXT("존재하지 않는 Key"));
 	}
+}
+
+void ALuggageChaosGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ALuggageChaosGameState, WinnerKeys);
 }
 
 void ALuggageChaosGameState::InitUI(APlayerController* pc)
@@ -212,6 +222,10 @@ void ALuggageChaosGameState::GameEnd()
 {
 	FTimerHandle OnEndTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(OnEndTimerHandle, this, &ALuggageChaosGameState::ChangeLevelPodium,EndTime*SlowTime,false);
+
+	//TODO: gi의 winnerkey 설정
+	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+	gi->WinnerKeys = WinnerKeys;
 	
 	Net_GameEnd();
 }
@@ -235,8 +249,7 @@ void ALuggageChaosGameState::TimeOut()
 void ALuggageChaosGameState::Win(ETeamType winner)
 {
 	WinnerTeam = winner;
-	ETeamType myTeam = ETeamType::None;
-
+	
 	if (winner == ETeamType::None)
 	{
 		GameEndWidget->ShowDraw();
@@ -263,7 +276,7 @@ void ALuggageChaosGameState::Win(ETeamType winner)
 		
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
 		AddWinPrize(pc);
-		myInfo->bIsWin = true;
+		WinnerKeys.Add(MyKey);
 	}
 	else
 	{
