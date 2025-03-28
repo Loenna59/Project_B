@@ -15,7 +15,6 @@
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 #include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
-#include "Project_B/Utilities/LogMacro.h"
 
 void ABlackholeGameState::BeginPlay()
 {
@@ -47,6 +46,7 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 
 	DOREPLIFETIME(ABlackholeGameState, GameStartTime);
 	DOREPLIFETIME(ABlackholeGameState, AlivePlayers);
+	DOREPLIFETIME(ABlackholeGameState, DeadPlayers);
 }
 
 
@@ -80,6 +80,7 @@ void ABlackholeGameState::CheckGameEndConditions()
 	// 게임 인스턴스에서 플레이어 정보 확인
 	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
 
+	AlivePlayers = 0;
 	// 플레이어 정보 순회
 	for (auto& it : InfoMap)
 	{
@@ -98,13 +99,38 @@ void ABlackholeGameState::CheckGameEndConditions()
 	}
 }
 
+
+void ABlackholeGameState::AddDeadPlayer(APlayerController* PlayerController)
+{
+	if (HasAuthority())
+	{
+		DeadPlayers.AddUnique(PlayerController);
+		OnRep_PlayerDeathStates(); // 서버에서 즉시 실행
+	}
+}
+
+void ABlackholeGameState::OnRep_PlayerDeathStates()
+{
+	for (APlayerController* PC : DeadPlayers)
+	{
+		if (PC && PC->IsLocalController()) // 로컬 플레이어만 처리
+		{
+			DeathEffects(PC);
+		}
+	}
+}
+
 void ABlackholeGameState::DetermineWinner()
 {
-	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
-	for (auto& it : InfoMap)
+	for (APlayerState* PS : PlayerArray)
 	{
-		FPlayerInfo& PlayerInfo = it.Value;
-		PlayerInfo.bIsWin = PlayerInfo.bIsAlive;
+		if (PS && !DeadPlayers.Contains(PS->GetPlayerController()))
+		{
+			if (gi)
+			{
+				gi->SetPlayerWinInfo(PS->GetUniqueId()->ToString(), true);
+			}
+		}
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Game Over! Winner determined."));
@@ -127,14 +153,20 @@ void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
 
 void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
+	if (!HasAuthority()) return;
+	
+	CheckGameEndConditions();
+	// 서버에서 사망 플레이어를 추가한다
+	AddDeadPlayer(PlayerController);
+
+	// 사망 처리 로직
 	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
-    
 	UE_LOG(LogTemp, Warning, TEXT("Player Death"));
 
-	// 클라이언트에 RPC 호출
-	ClinetRPC_OnPlayerDeath(Player);
-
-	// 서버 측 사망 처리 로직
+	// 사망 처리 로직
+	PlayerController->SetIgnoreLookInput(true);
+	PlayerController->SetIgnoreMoveInput(true);
+	
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([Player, PlayerController, this]()
 	{
@@ -148,41 +180,19 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 	}), 3.0f, false);
 }
 
-void ABlackholeGameState::ClinetRPC_OnPlayerDeath_Implementation(ABaseCharacter* Player)
+void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
 {
-	// 해당 플레이어의 로컬 플레이어 컨트롤러인 경우에만 실행
-	APlayerController* LocalPlayerController = GetWorld()->GetFirstPlayerController();
-	if (LocalPlayerController && LocalPlayerController->GetPawn() == Player)
-	{
-		// 카메라 흑백 처리
-		if (Player->CameraComp)
-		{
-			Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
-		}
+	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
 
-		// 입력 차단
-		LocalPlayerController->SetIgnoreLookInput(true);
-		LocalPlayerController->SetIgnoreMoveInput(true);
-	}
-
-	// 플레이어 키값
-	FString Key;
-	const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
-	if (NetIdRepl.IsValid())
+	UE_LOG(LogTemp, Warning, TEXT("카메라 흑백효과입니다"));
+	// 카메라 흑백 효과
+	if (Player->CameraComp)
 	{
-		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-		Key = NetId->ToString();
-		UE_LOG(LogTemp, Warning, TEXT("blackhole: %s"), *Key);
-	}
-	TMap<FString, FPlayerInfo> Info = gi->GetPlayerInfo();
-	FPlayerInfo* myInfo = Info.Find(Key);
-	
-	if (myInfo == nullptr)
-	{
-		LOG_ERROR(this,TEXT("나의 키: %s, 키가 없어욤"),*Key);
-		return;
+		Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
+		UE_LOG(LogTemp, Warning, TEXT("카메라 전환합니다"));
 	}
 }
+
 
 
 
