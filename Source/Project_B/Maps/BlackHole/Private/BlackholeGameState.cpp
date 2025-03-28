@@ -15,6 +15,7 @@
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 #include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
+#include "Project_B/Utilities/LogMacro.h"
 
 void ABlackholeGameState::BeginPlay()
 {
@@ -126,54 +127,60 @@ void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
 
 void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
-	// 서버에서만 실행!
-	if (!HasAuthority()) return;
-	
 	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
-	
-	// 플레이어 상태가 죽음일 때만 이 로직이 실행될 것이다
-	// 즉, Info[Key].bIsAlive = false; 라고 가정
-	UE_LOG(LogTemp,Warning,TEXT("Player Death"));
+    
+	UE_LOG(LogTemp, Warning, TEXT("Player Death"));
 
-	// 죽은 플레이어는 같은 로직 실행
-	ClinetRPC_OnPlayerDeath(PlayerController);
+	// 클라이언트에 RPC 호출
+	ClinetRPC_OnPlayerDeath(Player);
 
-	// 플레이어의 화면을 흑백으로 전환하자
-	// 이때, 조작은 클릭만 받게 해야함
-	Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0,0,0,1);
-	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->SetIgnoreMoveInput(true);
-	
-	// 3초뒤에 플레이어를 관전자 모드로 전환하자
+	// 서버 측 사망 처리 로직
 	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([Player,PlayerController, this]()
+	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([Player, PlayerController, this]()
 	{
-		AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
-		if (Target)
-		{
-			PlayerController->SetViewTarget(Target);
-			Player->SetActorHiddenInGame(true);
-			Player->SetActorEnableCollision(false);
-		}
+	   AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
+	   if (Target)
+	   {
+		  PlayerController->SetViewTarget(Target);
+		  Player->SetActorHiddenInGame(true);
+		  Player->SetActorEnableCollision(false);
+	   }
 	}), 3.0f, false);
 }
 
-void ABlackholeGameState::ClinetRPC_OnPlayerDeath_Implementation(APlayerController* PlayerController)
+void ABlackholeGameState::ClinetRPC_OnPlayerDeath_Implementation(ABaseCharacter* Player)
 {
-	// 본인만 실행
-	if (PlayerController->IsLocalController())
+	// 해당 플레이어의 로컬 플레이어 컨트롤러인 경우에만 실행
+	APlayerController* LocalPlayerController = GetWorld()->GetFirstPlayerController();
+	if (LocalPlayerController && LocalPlayerController->GetPawn() == Player)
 	{
-		ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
-
-		// 화면을 흑백으로 변경
+		// 카메라 흑백 처리
 		if (Player->CameraComp)
 		{
-			Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0,0,0,1);
+			Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
 		}
 
 		// 입력 차단
-		PlayerController->SetIgnoreLookInput(true);
-		PlayerController->SetIgnoreMoveInput(true);
+		LocalPlayerController->SetIgnoreLookInput(true);
+		LocalPlayerController->SetIgnoreMoveInput(true);
+	}
+
+	// 플레이어 키값
+	FString Key;
+	const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
+	if (NetIdRepl.IsValid())
+	{
+		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+		Key = NetId->ToString();
+		UE_LOG(LogTemp, Warning, TEXT("blackhole: %s"), *Key);
+	}
+	TMap<FString, FPlayerInfo> Info = gi->GetPlayerInfo();
+	FPlayerInfo* myInfo = Info.Find(Key);
+	
+	if (myInfo == nullptr)
+	{
+		LOG_ERROR(this,TEXT("나의 키: %s, 키가 없어욤"),*Key);
+		return;
 	}
 }
 
