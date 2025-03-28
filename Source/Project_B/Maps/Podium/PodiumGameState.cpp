@@ -84,11 +84,6 @@ void APodiumGameState::InitPodiumCamera(APlayerController* pc)
 
 void APodiumGameState::InitPlayerLoc(APawn* pawn)
 {
-	if (HasAuthority() == false)
-	{
-		return;
-	}
-
 	if (isDummyPlayer)
 	{
 		mykey = FString::FromInt(dummyKey);
@@ -104,6 +99,11 @@ void APodiumGameState::InitPlayerLoc(APawn* pawn)
 			mykey = NetId->ToString();
 			LOG_PRINT(TEXT("나의 키: %s"), *mykey);
 		}
+	}
+
+	if (HasAuthority() == false)
+	{
+		return;
 	}
 
 	if (FPlayerInfo* Info = PlayersInfo.Find(mykey))
