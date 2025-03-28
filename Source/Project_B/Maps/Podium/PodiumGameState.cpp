@@ -21,19 +21,19 @@ void APodiumGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (isDummyPlayer)
+	{
+		PlayersInfo = DummyPlayersInfo();
+	}
+	else
+	{
+		UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+
+		PlayersInfo = gi->GetPlayerInfo();
+	}
+	
 	if (HasAuthority())
 	{
-		if (isDummyPlayer)
-		{
-			PlayersInfo = DummyPlayersInfo();
-		}
-		else
-		{
-			UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
-
-			PlayersInfo = gi->GetPlayerInfo();
-		}
-		
 		FTimerHandle OnStartTimerHandle;
 		
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &APodiumGameState::Shoot,ReadyTime,false);
@@ -112,6 +112,7 @@ void APodiumGameState::InitPlayerLoc(APawn* pawn)
 		{
 			pawn->SetActorLocation(WinnerPoints1[WinIndex]->GetActorLocation());
 			pawn->SetActorRotation(WinnerPoints1[WinIndex]->GetActorRotation());
+			WinIndex++;
 			
 			AddWinPrize(pawn);
 		}
@@ -119,6 +120,7 @@ void APodiumGameState::InitPlayerLoc(APawn* pawn)
 		{
 			pawn->SetActorLocation(WinnerPoints2[WinIndex-2]->GetActorLocation());
 			pawn->SetActorRotation(WinnerPoints2[WinIndex-2]->GetActorRotation());
+			WinIndex++;
 			
 			AddWinPrize(pawn);
 		}
@@ -126,11 +128,13 @@ void APodiumGameState::InitPlayerLoc(APawn* pawn)
 		{
 			pawn->SetActorLocation(NormalPoints1[NorIndex]->GetActorLocation());
 			pawn->SetActorRotation(NormalPoints1[NorIndex]->GetActorRotation());
+			NorIndex++;
 		}
 		else if (Info->bIsWin == false && NorIndex >= 2)
 		{
 			pawn->SetActorLocation(NormalPoints2[NorIndex-2]->GetActorLocation());
 			pawn->SetActorRotation(NormalPoints2[NorIndex-2]->GetActorRotation());
+			NorIndex++;
 		}
 	}
 	else
@@ -214,7 +218,7 @@ TMap<FString, FPlayerInfo> APodiumGameState::DummyPlayersInfo()
 	Player2.Team = ETeamType::Blue;
 	Player2.bIsReady = true;
 	Player2.bIsAlive = true;
-	Player2.bIsWin = true;
+	Player2.bIsWin = false;
 	dummyPlayers.Add(TEXT("2"), Player2);
 	
 	return dummyPlayers;
