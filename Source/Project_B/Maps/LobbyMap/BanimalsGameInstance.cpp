@@ -40,14 +40,6 @@ void UBanimalsGameInstance::CreateLobbySession(FString displayName, int32 player
 
 	// Lan 사용 여부
 	FName subsystemName = IOnlineSubsystem::Get()->GetSubsystemName();
-
-	/*const FNamedOnlineSession* ExistSession = sessionInterface->GetNamedSession(FName(displayName));
-	if (ExistSession)
-	{
-		UE_LOG(LogTemp, Error, TEXT("이미 만들어진 세션이 존재합니다."));
-		sessionInterface->DestroySession(FName(displayName));
-		UE_LOG(LogTemp, Error, TEXT("세션 제거"));
-	}*/
 	
 	UE_LOG(LogTemp, Warning, TEXT("서브시스템 이름: %s"), *subsystemName.ToString())
 	sessionSettings.bIsLANMatch = subsystemName.IsEqual(FName(TEXT("NULL")));
@@ -57,6 +49,8 @@ void UBanimalsGameInstance::CreateLobbySession(FString displayName, int32 player
 	// 위와 세트임
 	// 친구 상태를 확인할 수 있는지 (게임중/로그아웃 등등 공개할건지) 여부
 	sessionSettings.bUsesPresence = true;
+	// 진행 중인 세션 참여 허용
+	sessionSettings.bAllowJoinInProgress = true;
 	// 세션 검색을 허용할 지 여부
 	sessionSettings.bShouldAdvertise = true;
 	// 세션 최대 인원 설정
@@ -150,6 +144,13 @@ void UBanimalsGameInstance::JoinOtherSession(int32 sessionIdx)
 	// 5.5 이슈 해결 (이 값이 자동으로 false되니까 다시 변환해주기)
 	results[sessionIdx].Session.SessionSettings.bUsesPresence = true;
 	results[sessionIdx].Session.SessionSettings.bUseLobbiesIfAvailable = true;
+
+	// 위와 세트임
+	// 진행 중인 세션 참여 허용
+	results[sessionIdx].Session.SessionSettings.bAllowJoinInProgress = true;
+	// 세션 검색을 허용할 지 여부
+	results[sessionIdx].Session.SessionSettings.bShouldAdvertise = true;
+
 	
 	results[sessionIdx].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
 

@@ -246,7 +246,7 @@ void ALuggageChaosGameState::Net_GameEnd_Implementation()
 void ALuggageChaosGameState::ChangeLevelPodium()
 {
 	LOG_SCREEN("레벨 전환");
-	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Poidum?listen"));
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Podium01?listen"));
 }
 
 void ALuggageChaosGameState::TimeOut()

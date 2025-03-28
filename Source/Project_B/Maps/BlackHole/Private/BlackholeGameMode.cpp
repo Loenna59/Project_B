@@ -25,7 +25,7 @@ void ABlackholeGameMode::BeginPlay()
 	gs = GetGameState<ABlackholeGameState>();
 	if (gs)
 	{
-		gs->MulticastRPC_SetGameStart(StartTime);
+		// gs->MulticastRPC_SetGameStart(StartTime);
 	}
 }
 
@@ -58,6 +58,6 @@ void ABlackholeGameMode::EndGame()
 	// 게임이 종료되면, 게임 스테이트에 전달하자
 	if (gs)
 	{
-		gs->MulticastRPC_SetGameOver();
+		// gs->MulticastRPC_SetGameOver();
 	}
 }
