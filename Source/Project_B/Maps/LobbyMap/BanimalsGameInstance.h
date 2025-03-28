@@ -72,5 +72,7 @@ public:
 	int32 CurrentMapID;
 	void SetCurrentMapInfo(int32 MapID) { CurrentMapID = MapID; }
 	FMapInfo* GetCurrentMapInfo() {	return MapInfoList.Find(CurrentMapID); }
+
+	TArray<FString> WinnerKeys;
 };
 
