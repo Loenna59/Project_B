@@ -21,6 +21,19 @@ void APodiumGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//InitPlayerInfo();
+	
+	if (HasAuthority())
+	{
+		FTimerHandle OnStartTimerHandle;
+		
+		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &APodiumGameState::Net_Shoot,ReadyTime,false);
+		InitSpawnPoints();
+	}
+}
+
+void APodiumGameState::InitPlayerInfo()
+{
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	
 	if (isDummyPlayer)
@@ -43,34 +56,25 @@ void APodiumGameState::BeginPlay()
 				TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 				mykey = NetId->ToString();
 				UE_LOG(LogTemp, Error, TEXT("나의 키: %s"), *mykey);
-
-				FPlayerInfo* Info = PlayersInfo.Find(mykey);
-				if (Info)
-				{
-					if (Info->bIsWin)
-					{
-						UE_LOG(LogTemp, Error, TEXT("이겼다!!!!!!!"));
-					}
-					else
-					{
-						UE_LOG(LogTemp, Error, TEXT("졌어ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ"));
-					}
-				}
+				
+				// FPlayerInfo* Info = PlayersInfo.Find(mykey);
+				// if (Info)
+				// {
+				// 	if (Info->bIsWin)
+				// 	{
+				// 		UE_LOG(LogTemp, Error, TEXT("이겼다!!!!!!!"));
+				// 	}
+				// 	else
+				// 	{
+				// 		UE_LOG(LogTemp, Error, TEXT("졌어ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ"));
+				// 	}
+				// }
 			}
 			else
 			{
 				UE_LOG(LogTemp, Warning, TEXT("NetIdRepl is invalid"));
 			}
 		}, 0.8f, false);
-	}
-	
-	if (HasAuthority())
-	{
-		FTimerHandle OnStartTimerHandle;
-		
-		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &APodiumGameState::Shoot,ReadyTime,false);
-		InitSpawnPoints();
-
 	}
 }
 
@@ -114,57 +118,39 @@ void APodiumGameState::InitPodiumCamera(APlayerController* pc)
 	pc->SetViewTarget(PodiumCamera);
 }
 
-void APodiumGameState::InitPlayerLoc(APawn* pawn,FString key)
+void APodiumGameState::InitPlayerLoc(APawn* pawn, bool bIsWin)
 {
-	if (FPlayerInfo* Info = PlayersInfo.Find(key))
+	if (bIsWin && WinIndex < 2)
 	{
-		if (Info->bIsWin && WinIndex < 2)
-		{
-			pawn->SetActorLocation(WinnerPoints1[WinIndex]->GetActorLocation());
-			pawn->SetActorRotation(WinnerPoints1[WinIndex]->GetActorRotation());
-			WinIndex++;
-			
-			AddWinPrize(pawn);
-		}
-		else if (Info->bIsWin && WinIndex >= 2)
-		{
-			pawn->SetActorLocation(WinnerPoints2[WinIndex-2]->GetActorLocation());
-			pawn->SetActorRotation(WinnerPoints2[WinIndex-2]->GetActorRotation());
-			WinIndex++;
-			
-			AddWinPrize(pawn);
-		}
-		else if (Info->bIsWin == false && NorIndex < 2)
-		{
-			pawn->SetActorLocation(NormalPoints1[NorIndex]->GetActorLocation());
-			pawn->SetActorRotation(NormalPoints1[NorIndex]->GetActorRotation());
-			NorIndex++;
-		}
-		else if (Info->bIsWin == false && NorIndex >= 2)
-		{
-			pawn->SetActorLocation(NormalPoints2[NorIndex-2]->GetActorLocation());
-			pawn->SetActorRotation(NormalPoints2[NorIndex-2]->GetActorRotation());
-			NorIndex++;
-		}
+		pawn->SetActorLocation(WinnerPoints1[WinIndex]->GetActorLocation());
+		pawn->SetActorRotation(WinnerPoints1[WinIndex]->GetActorRotation());
+		WinIndex++;
+		
+		AddWinPrize(pawn);
 	}
-	else
+	else if (bIsWin && WinIndex >= 2)
 	{
-		LOG_ERROR(this,TEXT("존재하지 않는 Key"));
+		pawn->SetActorLocation(WinnerPoints2[WinIndex-2]->GetActorLocation());
+		pawn->SetActorRotation(WinnerPoints2[WinIndex-2]->GetActorRotation());
+		WinIndex++;
+		
+		AddWinPrize(pawn);
+	}
+	else if (bIsWin == false && NorIndex < 2)
+	{
+		pawn->SetActorLocation(NormalPoints1[NorIndex]->GetActorLocation());
+		pawn->SetActorRotation(NormalPoints1[NorIndex]->GetActorRotation());
+		NorIndex++;
+	}
+	else if (bIsWin == false && NorIndex >= 2)
+	{
+		pawn->SetActorLocation(NormalPoints2[NorIndex-2]->GetActorLocation());
+		pawn->SetActorRotation(NormalPoints2[NorIndex-2]->GetActorRotation());
+		NorIndex++;
 	}
 }
 
 void APodiumGameState::AddWinPrize(APawn* pawn)
-{
-	AWinnerPrize* prize = GetWorld()->SpawnActor<AWinnerPrize>(WinnerPrizeClass, pawn->GetTransform());
-	
-	if (prize)
-	{
-		prize->AttachToComponent(pawn->GetController()->GetCharacter()->GetMesh(), 
-								 FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	}
-}
-
-void APodiumGameState::Net_AddWinPrize_Implementation(APawn* pawn)
 {
 	AWinnerPrize* prize = GetWorld()->SpawnActor<AWinnerPrize>(WinnerPrizeClass, pawn->GetTransform());
 	

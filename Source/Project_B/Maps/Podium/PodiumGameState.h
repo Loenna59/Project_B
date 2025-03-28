@@ -49,15 +49,13 @@ private:
 	uint8 dummyKey = 0;
 	
 protected:
+	void InitPlayerInfo();
 	virtual void BeginPlay() override;
 
 public:
-	void InitPlayerLoc(APawn* pawn,FString key);
+	void InitPlayerLoc(APawn* pawn, bool bIsWin);
 
 	void AddWinPrize(APawn* pawn);
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void Net_AddWinPrize(APawn* pawn);
 	
 	void InitPodiumCamera(APlayerController* pc);
 

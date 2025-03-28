@@ -16,7 +16,11 @@ class PROJECT_B_API APodiumGameMode : public AGameModeBase
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float BeginDelay = 1.0f;
+
+private:
+	TArray<FString> WinnerKeys;
 	
 private:
+	virtual void BeginPlay() override;
 	virtual void OnPostLogin(AController* NewPlayer) override;
 };
