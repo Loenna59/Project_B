@@ -7,6 +7,7 @@
 
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 
+#include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -125,6 +126,8 @@ void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
 
 void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
+	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
+	
 	// 플레이어 키값 가져올것
 	FString Key;
 	const FUniqueNetIdRepl& NetIdRepl = PlayerController->GetPlayerState<APlayerState>()->GetUniqueId();
@@ -139,21 +142,23 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 	UE_LOG(LogTemp,Warning,TEXT("Player Death"));
 
 	// 플레이어의 화면을 흑백으로 전환하자
+	// 이때, 조작은 클릭만 받게 해야함
+	Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0,0,0,1);
+	PlayerController->SetIgnoreLookInput(true);
+	PlayerController->SetIgnoreMoveInput(true);
 	
-	// 3초뒤에 플레이어를 관전자 모드로 전환하자 (이때는 당연히 흑백이 아니어야함)
+	// 3초뒤에 플레이어를 관전자 모드로 전환하자
 	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([PlayerController, this]()
+	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([Player,PlayerController, this]()
 	{
 		AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
 		if (Target)
 		{
 			PlayerController->SetViewTarget(Target);
+			Player->SetActorHiddenInGame(true);
+			Player->SetActorEnableCollision(false);
 		}
 	}), 3.0f, false);
-	
-	// 이때, 조작은 클릭만 받게 해야함
-	PlayerController->SetIgnoreMoveInput(true);
-	PlayerController->SetIgnoreLookInput(true);
 }
 
 
