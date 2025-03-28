@@ -31,19 +31,19 @@ void ALuggageChaosGameState::BeginPlay()
 
 void ALuggageChaosGameState::GameReady()
 {
+	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+	
+	if (isDummyPlayerInfo)
+	{
+		PlayersInfo = DummyPlayersInfo();
+	}
+	else
+	{
+		PlayersInfo= gi->GetPlayerInfo();
+	}
+	
 	if (HasAuthority())
 	{
-		UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
-
-		if (isDummyPlayerInfo)
-		{
-			PlayersInfo = DummyPlayersInfo();
-		}
-		else
-		{
-			PlayersInfo= gi->GetPlayerInfo();
-		}
-		
 		FTimerHandle OnStartTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
 		

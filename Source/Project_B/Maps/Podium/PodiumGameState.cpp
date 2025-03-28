@@ -21,19 +21,19 @@ void APodiumGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (isDummyPlayer)
+	{
+		PlayersInfo = DummyPlayersInfo();
+	}
+	else
+	{
+		UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+
+		PlayersInfo = gi->GetPlayerInfo();
+	}
+	
 	if (HasAuthority())
 	{
-		if (isDummyPlayer)
-		{
-			PlayersInfo = DummyPlayersInfo();
-		}
-		else
-		{
-			UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
-
-			PlayersInfo = gi->GetPlayerInfo();
-		}
-		
 		FTimerHandle OnStartTimerHandle;
 		
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &APodiumGameState::Shoot,ReadyTime,false);
