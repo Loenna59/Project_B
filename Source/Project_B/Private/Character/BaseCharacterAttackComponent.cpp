@@ -262,14 +262,14 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 {
 	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
 
-	FHitResult HitResult;
+	TArray<FHitResult> HitResults;
 	FCollisionQueryParams CollisionParams;
 
 	CollisionParams.AddIgnoredActor(Character);
 	CollisionParams.AddIgnoredComponent(Character->GetMesh());
 	
-	bool bHit = GetWorld()->SweepSingleByChannel(
-		HitResult,
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		HitResults,
 		Location,
 		Location,
 		FQuat::Identity,
@@ -280,14 +280,14 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 
 	if (DrawDebug)
 	{
-		DrawDebugSphereTraceSingle(
+		DrawDebugSphereTraceMulti(
 			GetWorld(),
 			Location,
 			Location,
 			Radius,
 			EDrawDebugTrace::ForDuration,
 			bHit,
-			HitResult,
+			HitResults,
 			FColor::Yellow,
 			FColor::Green,
 			1.f
@@ -296,25 +296,28 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 
 	if (bHit)
 	{
-		Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResult, Damage);
+		Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResults, Damage);
 	}
 }
 
-void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(EAttackType Type, bool bHit, FHitResult HitResult, float Damage)
+void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(EAttackType Type, bool bHit, const TArray<FHitResult>& HitResults, float Damage)
 {
 	if (bHit)
 	{
-		AActor* HitActor = HitResult.GetActor();
-		if (AlreadyHitActorsDuringAttack.Contains(HitActor))
+		for (FHitResult HitResult : HitResults)
 		{
-			return;
-		}
+			AActor* HitActor = HitResult.GetActor();
+			if (AlreadyHitActorsDuringAttack.Contains(HitActor))
+			{
+				continue;
+			}
 
-		AlreadyHitActorsDuringAttack.Add(HitActor);
+			AlreadyHitActorsDuringAttack.Add(HitActor);
 		
-		if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitActor))
-		{
-			Other->OnHit(Type, HitResult.Normal.GetSafeNormal(), Damage);
+			if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitActor))
+			{
+				Other->OnHit(Type, HitResult.Normal.GetSafeNormal(), Damage);
+			}
 		}
 	}
 }
