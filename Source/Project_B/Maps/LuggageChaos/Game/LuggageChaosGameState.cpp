@@ -29,6 +29,7 @@ void ALuggageChaosGameState::BeginPlay()
 void ALuggageChaosGameState::GameReady()
 {
 	InitPlayerInfo();
+	UE_LOG(LogTemp,Warning,TEXT("GameReady: 게임 레디"));
 	
 	if (HasAuthority())
 	{
@@ -36,6 +37,7 @@ void ALuggageChaosGameState::GameReady()
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
 		
 		InitSpawnPoint();
+		UE_LOG(LogTemp,Warning,TEXT("HasAuthority: 게임 레디"));
 	}
 
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
@@ -45,6 +47,7 @@ void ALuggageChaosGameState::GameReady()
 
 void ALuggageChaosGameState::InitPlayerInfo()
 {
+	UE_LOG(LogTemp,Warning,TEXT("InitPlayerInfo: 플레이어 초기화 시작"));
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	
 	if (isDummyPlayerInfo)
@@ -243,7 +246,7 @@ void ALuggageChaosGameState::Net_GameEnd_Implementation()
 void ALuggageChaosGameState::ChangeLevelPodium()
 {
 	LOG_SCREEN("레벨 전환");
-	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Poidum?listen"));
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Podium01?listen"));
 }
 
 void ALuggageChaosGameState::TimeOut()

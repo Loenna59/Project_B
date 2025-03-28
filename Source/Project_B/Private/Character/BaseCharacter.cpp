@@ -168,11 +168,6 @@ void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
 
 	float SideDot = FVector::DotProduct(GetActorRightVector(), NormalPoint);
 
-	if (!IsLocallyControlled())
-	{
-		return;
-	}
-
 	Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
 }
 
@@ -270,6 +265,13 @@ void ABaseCharacter::Multicast_UnequipWeapon_Implementation(AWeapon* Weapon)
 
 void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
 {
+	// if (!IsLocallyControlled())
+	// {
+	// 	return;
+	// }
+	//
+	LOG_SCREEN("Hit");
+	
 	Multicast_OnPlayHitMontage(Type, ForwardDot, SideDot);
 }
 
