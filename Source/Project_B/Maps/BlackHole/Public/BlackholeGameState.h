@@ -47,14 +47,19 @@ public:
 	// 게임 종료 조건 확인
 	UFUNCTION()
 	void CheckGameEndConditions();
+
+	// Replicated 변수 추가
+	UPROPERTY(ReplicatedUsing = OnRep_PlayerDeathStates)
+	TArray<APlayerController*> DeadPlayers;
+	UFUNCTION()
+	void OnRep_PlayerDeathStates();
+	void AddDeadPlayer(APlayerController* PlayerController);
 	
 	// 승자 결정
 	void DetermineWinner();
 	// 죽음 처리
 	void OnPlayerDeath(APlayerController* PlayerController);
 	void DeathEffects(APlayerController* PlayerController);
-	UFUNCTION(Client, Reliable)
-	void ClinetRPC_OnPlayerDeath(APlayerController* PlayerController);
 
 	// 게임 시작
 	UPROPERTY(Replicated)

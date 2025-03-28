@@ -123,7 +123,6 @@ void ADestroyZone::Multicast_UpdatePlayerState_Implementation(const FString& pla
 	ABlackholeGameState* gs = Cast<ABlackholeGameState>(GetWorld()->GetGameState());
 	
 	UGameInstance* GameInstance = GetWorld()->GetGameInstance();
-	if (!GameInstance) return;
 
 	// 게임 인스턴스를 통해 플레이어 찾기
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GameInstance);

@@ -46,6 +46,7 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 
 	DOREPLIFETIME(ABlackholeGameState, GameStartTime);
 	DOREPLIFETIME(ABlackholeGameState, AlivePlayers);
+	DOREPLIFETIME(ABlackholeGameState, DeadPlayers);
 }
 
 
@@ -79,6 +80,7 @@ void ABlackholeGameState::CheckGameEndConditions()
 	// 게임 인스턴스에서 플레이어 정보 확인
 	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
 
+	AlivePlayers = 0;
 	// 플레이어 정보 순회
 	for (auto& it : InfoMap)
 	{
@@ -97,13 +99,38 @@ void ABlackholeGameState::CheckGameEndConditions()
 	}
 }
 
+
+void ABlackholeGameState::AddDeadPlayer(APlayerController* PlayerController)
+{
+	if (HasAuthority())
+	{
+		DeadPlayers.AddUnique(PlayerController);
+		OnRep_PlayerDeathStates(); // 서버에서 즉시 실행
+	}
+}
+
+void ABlackholeGameState::OnRep_PlayerDeathStates()
+{
+	for (APlayerController* PC : DeadPlayers)
+	{
+		if (PC && PC->IsLocalController()) // 로컬 플레이어만 처리
+		{
+			DeathEffects(PC);
+		}
+	}
+}
+
 void ABlackholeGameState::DetermineWinner()
 {
-	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
-	for (auto& it : InfoMap)
+	for (APlayerState* PS : PlayerArray)
 	{
-		FPlayerInfo& PlayerInfo = it.Value;
-		PlayerInfo.bIsWin = PlayerInfo.bIsAlive;
+		if (PS && !DeadPlayers.Contains(PS->GetPlayerController()))
+		{
+			if (gi)
+			{
+				gi->SetPlayerWinInfo(PS->GetUniqueId()->ToString(), true);
+			}
+		}
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Game Over! Winner determined."));
@@ -128,13 +155,18 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
 	if (!HasAuthority()) return;
 	
+	CheckGameEndConditions();
+	// 서버에서 사망 플레이어를 추가한다
+	AddDeadPlayer(PlayerController);
+
+	// 사망 처리 로직
 	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
 	UE_LOG(LogTemp, Warning, TEXT("Player Death"));
 
-	// 클라이언트에 RPC 호출
-	ClinetRPC_OnPlayerDeath(PlayerController);
-	
 	// 사망 처리 로직
+	PlayerController->SetIgnoreLookInput(true);
+	PlayerController->SetIgnoreMoveInput(true);
+	
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([Player, PlayerController, this]()
 	{
@@ -146,9 +178,6 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 		  Player->SetActorEnableCollision(false);
 	   }
 	}), 3.0f, false);
-
-	// 클라
-	ClinetRPC_OnPlayerDeath(PlayerController);
 }
 
 void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
@@ -162,38 +191,8 @@ void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
 		Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
 		UE_LOG(LogTemp, Warning, TEXT("카메라 전환합니다"));
 	}
-    
-	// 입력 차단
-	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->SetIgnoreMoveInput(true);
-    
-	// 플레이어 정보 업데이트 확인
-	gi = GetGameInstance<UBanimalsGameInstance>();
-
-	// 플레이어 키값 가져오기
-	const FUniqueNetIdRepl& NetIdRepl = Player->GetPlayerState<APlayerState>()->GetUniqueId();
-	FString playerKey;
-	if (NetIdRepl.IsValid())
-	{
-		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-		playerKey = NetId->ToString();
-		UE_LOG(LogTemp, Warning, TEXT("키는 유효합니다"));
-	}
-    
-	FPlayerInfo* PlayerInfo = gi->GetPlayerInfo().Find(playerKey);
-	if (PlayerInfo)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player info key: %s"), *playerKey);
-	}
 }
 
-void ABlackholeGameState::ClinetRPC_OnPlayerDeath_Implementation(APlayerController* PlayerController)
-{
-	if (HasAuthority()) return;
-	DeathEffects(PlayerController);
-}
-
-	
 
 
 
