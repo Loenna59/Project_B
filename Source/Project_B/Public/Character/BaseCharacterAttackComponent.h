@@ -130,7 +130,7 @@ public:
 	void Server_OnHitTraceChannel(EAttackType Type, FName BoneName, float Radius, float Damage);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnHitTraceChannel(EAttackType Type, bool bHit, FHitResult HitResult, float Damage);
+	void Multicast_OnHitTraceChannel(EAttackType Type, bool bHit, const TArray<FHitResult>& HitResults, float Damage);
 
 	UFUNCTION()
 	void PlayWeaponAttackAnimMontage(FString SelectionName);

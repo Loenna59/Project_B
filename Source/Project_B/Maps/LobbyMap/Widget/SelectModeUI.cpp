@@ -31,6 +31,6 @@ void USelectModeUI::CreateLuggageSession()
 	gi->SetCurrentMapInfo(1);
 	
 	// 생성
-	gi->CreateLobbySession(FString(TEXT("Luggage")), 9;
+	gi->CreateLobbySession(FString(TEXT("Luggage")), 9);
 	RemoveFromParent();
 }
