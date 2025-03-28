@@ -108,18 +108,23 @@ void UBaseCharacterAttackComponent::Punch()
 	}
 
 	bIsAttacking = true;
+
+	if (Character->bHasWeapon)
+	{
+		//TODO: 다른 무기도 만들면 수정해야함
+		PlayWeaponAttackAnimMontage(TEXT("TwoHanded"));
+		return;
+	}
 	
 	FString BoneName = ArmDirection == EArmDirection::LEFT? TEXT("UpperArm_L") : TEXT("UpperArm_R");
-	
-	if (GetOwner()->HasAuthority())
+
+	if (!Character->IsLocallyControlled())
 	{
-		Multicast_PlayAnimMontage(PunchAnimMontage, 1.f, *BoneName);
-	}
-	else
-	{
-		Server_PlayAnimMontage(PunchAnimMontage, 1.f, *BoneName);
+		return;
 	}
 	
+	Server_PlayAnimMontage(PunchAnimMontage, 1.f, *BoneName);
+
 	ArmDirection = ArmDirection == EArmDirection::LEFT? EArmDirection::RIGHT : EArmDirection::LEFT;
 }
 
@@ -136,10 +141,9 @@ void UBaseCharacterAttackComponent::HeadButt()
 	}
 
 	bIsAttacking = true;
-	
-	if (GetOwner()->HasAuthority())
+
+	if (!Character->IsLocallyControlled())
 	{
-		Multicast_PlayAnimMontage(HeadButtAnimMontage, 1.5f);
 		return;
 	}
 
@@ -161,13 +165,12 @@ void UBaseCharacterAttackComponent::Kick()
 		}
 
 		bIsAttacking = true;
-		
-		if (GetOwner()->HasAuthority())
+
+		if (!Character->IsLocallyControlled())
 		{
-			Multicast_PlayAnimMontage(KickAnimMontage, 1.5f);
 			return;
 		}
-
+		
 		Server_PlayAnimMontage(KickAnimMontage, 1.5f);
 	}
 	
@@ -207,17 +210,52 @@ void UBaseCharacterAttackComponent::OnPunchTraceChannel()
 {
 	FName BoneName = ArmDirection == EArmDirection::LEFT? TEXT("Hand_R") : TEXT("Hand_L");
 
+	if (!Character->IsLocallyControlled())
+	{
+		return;
+	}
+
 	Server_OnHitTraceChannel(EAttackType::PUNCH, BoneName, 20.f, PunchDamage);
 }
 
 void UBaseCharacterAttackComponent::OnKickTraceChannel()
 {
+	if (!Character->IsLocallyControlled())
+	{
+		return;
+	}
+	
 	Server_OnHitTraceChannel(EAttackType::KICK, TEXT("FootToe1_R"), 25.f, KickDamage);
 }
 
 void UBaseCharacterAttackComponent::OnHeadButtTraceChannel()
 {
+	if (!Character->IsLocallyControlled())
+	{
+		return;
+	}
+	
 	Server_OnHitTraceChannel(EAttackType::HEAD_BUTT, TEXT("Head"), 50.f, HeadButtDamage);
+}
+
+void UBaseCharacterAttackComponent::PlayWeaponAttackAnimMontage(FString SelectionName)
+{
+	if (!Character->IsLocallyControlled())
+	{
+		return;
+	}
+
+	Server_PlayWeaponAttackAnimMontage(SelectionName);
+}
+
+void UBaseCharacterAttackComponent::Server_PlayWeaponAttackAnimMontage_Implementation(const FString& SelectionName)
+{
+	Multicast_PlayWeaponAttackAnimMontage(SelectionName);
+}
+
+void UBaseCharacterAttackComponent::Multicast_PlayWeaponAttackAnimMontage_Implementation(const FString& SelectionName)
+{
+	Character->PlayAnimMontage(WeaponAttackAnimMontage, 1.f, *SelectionName);
 }
 
 void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAttackType Type, FName BoneName, float Radius, float Damage)

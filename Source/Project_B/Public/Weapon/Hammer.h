@@ -16,16 +16,22 @@ public:
 	AHammer();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* Mesh;
 
 	UPROPERTY(VisibleAnywhere)
 	class UCapsuleComponent* Trigger;
 
+	UPROPERTY(VisibleAnywhere)
+	class USceneComponent* HitPoint;
+
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDrawDebug = false;
+
+	virtual void ToggleSimulatePhysics(bool bSimulate) override;
+
+	virtual EWeaponType GetWeaponType() const override { return EWeaponType::TwoHanded; }
+
+	virtual void OnAttackTraceChannel() override;
 };

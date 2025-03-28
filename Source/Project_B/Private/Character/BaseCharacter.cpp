@@ -14,9 +14,11 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Project_B/Maps/BlackHole/Public/GravityComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
+#include "Weapon/Weapon.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -83,6 +85,9 @@ ABaseCharacter::ABaseCharacter()
 	GravityComp->SetIsReplicated(true);
 	GravityComp->SetNetAddressable();
 
+	TwoHandedSocket = CreateDefaultSubobject<USceneComponent>(TEXT("TwoHandedSocket"));
+	TwoHandedSocket->SetupAttachment(GetMesh(), TEXT("TwoHanded"));
+
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
 	if (tmp_imc.Succeeded())
@@ -118,6 +123,13 @@ void ABaseCharacter::BeginPlay()
 	AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 }
 
+void ABaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABaseCharacter, OwnedWeapon);
+}
+
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -147,14 +159,63 @@ void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
 
 	float SideDot = FVector::DotProduct(GetActorRightVector(), NormalPoint);
 
-	if (HasAuthority())
+	if (!IsLocallyControlled())
 	{
-		Multicast_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+		return;
 	}
-	else
+
+	Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+}
+
+void ABaseCharacter::TakeWeapon(class AWeapon* Weapon)
+{
+	Server_TakeWeapon(Weapon);
+}
+
+void ABaseCharacter::Server_TakeWeapon_Implementation(class AWeapon* Weapon)
+{
+	if (bHasWeapon)
 	{
-		Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+		return;
 	}
+
+	OwnedWeapon = Weapon;
+	OwnedWeapon->SetOwner(this);
+	
+	AttachWeapon();
+}
+
+void ABaseCharacter::AttachWeapon()
+{
+	bHasWeapon = true;
+
+	OwnedWeapon->ToggleSimulatePhysics(false);
+	OwnedWeapon->AttachToComponent(TwoHandedSocket, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	
+	// 애니메이션 변경
+	if (AnimInstance)
+	{
+		AnimInstance->CurrentWeaponType = OwnedWeapon->GetWeaponType();
+	}
+
+	// 팔의 physics를 꺼줘야함
+	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(false);
+	RightArmPhysicsAnimComp->TogglePhysicalAnimation(false);
+}
+
+void ABaseCharacter::OnWeaponAttackTraceChannel()
+{
+	if (!bHasWeapon)
+	{
+		return;
+	}
+
+	if (OwnedWeapon == nullptr)
+	{
+		return;
+	}
+
+	OwnedWeapon->OnAttackTraceChannel();
 }
 
 void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)

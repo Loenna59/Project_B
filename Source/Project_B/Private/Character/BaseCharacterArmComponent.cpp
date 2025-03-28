@@ -88,7 +88,10 @@ void UBaseCharacterArmComponent::Grabbing()
 
 void UBaseCharacterArmComponent::ReleaseGrab()
 {
-	TogglePhysicalAnimation(true);
+	if (!Character->bHasWeapon)
+	{
+		TogglePhysicalAnimation(true);
+	}
 
 	if (AnimInstance)
 	{
@@ -116,9 +119,14 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, FHitResult HitResult)
 	{
 		AActor* Actor = HitResult.GetActor();
 
-		if (Actor->IsA<AWeapon>())
+		if (Character->bHasWeapon)
 		{
-			LOG_SCREEN("무기");
+			return;
+		}
+
+		if (Actor->IsA<AWeapon>() && Actor->GetOwner() == nullptr)
+		{
+			Character->TakeWeapon(Cast<AWeapon>(Actor));
 			return;
 		}
 
