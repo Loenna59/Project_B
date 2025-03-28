@@ -43,9 +43,21 @@ public:
 	UFUNCTION()
 	void OnWeaponAttackTraceChannel();
 
+	UFUNCTION()
+	void Unequip();
+
+	UFUNCTION(Server, Reliable)
+	void Server_UnequipWeapon();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UnequipWeapon(AWeapon* Weapon);
+	
 protected:
 	UPROPERTY()
 	class UInputMappingContext* IMC = nullptr;
+
+	UPROPERTY()
+	class UInputAction* InputActionUnequip = nullptr;
 
 	float CurrentHealth;
 

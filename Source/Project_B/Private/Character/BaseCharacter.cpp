@@ -2,6 +2,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Camera/CameraComponent.h"
 #include "Character/BaseCharacterAnimInstance.h"
@@ -94,6 +95,13 @@ ABaseCharacter::ABaseCharacter()
 	{
 		IMC = tmp_imc.Object;
 	}
+
+	ConstructorHelpers::FObjectFinder<UInputAction> temp_ia(TEXT("/Game/Input/Actions/IA_Unequip.IA_Unequip"));
+
+	if (temp_ia.Succeeded())
+	{
+		InputActionUnequip = temp_ia.Object;
+	}
 }
 
 void ABaseCharacter::BeginPlay()
@@ -147,8 +155,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		MoveComp->SetupInputBiding(pi);
 		AttackComp->SetupInputBiding(pi);
 		PickComp->SetupInputBiding(pi);
-	}
 
+		pi->BindAction(InputActionUnequip, ETriggerEvent::Started, this, &ABaseCharacter::Unequip);
+	}
 }
 
 void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
@@ -187,6 +196,11 @@ void ABaseCharacter::Server_TakeWeapon_Implementation(class AWeapon* Weapon)
 
 void ABaseCharacter::AttachWeapon()
 {
+	if (OwnedWeapon == nullptr)
+	{
+		return;
+	}
+	
 	bHasWeapon = true;
 
 	OwnedWeapon->ToggleSimulatePhysics(false);
@@ -216,6 +230,42 @@ void ABaseCharacter::OnWeaponAttackTraceChannel()
 	}
 
 	OwnedWeapon->OnAttackTraceChannel();
+}
+
+void ABaseCharacter::Unequip()
+{
+	Server_UnequipWeapon();
+}
+
+void ABaseCharacter::Server_UnequipWeapon_Implementation()
+{
+	if (!bHasWeapon)
+	{
+		return;
+	}
+
+	AWeapon* Weapon = OwnedWeapon;
+	OwnedWeapon->SetOwner(nullptr);
+	OwnedWeapon = nullptr;
+
+	Multicast_UnequipWeapon(Weapon);
+}
+
+void ABaseCharacter::Multicast_UnequipWeapon_Implementation(AWeapon* Weapon)
+{
+	Weapon->ToggleSimulatePhysics(true);
+	Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	
+	bHasWeapon = false;
+
+	// 애니메이션 변경
+	if (AnimInstance)
+	{
+		AnimInstance->CurrentWeaponType = EWeaponType::None;
+	}
+	
+	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(true);
+	RightArmPhysicsAnimComp->TogglePhysicalAnimation(true);
 }
 
 void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
