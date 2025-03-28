@@ -54,7 +54,7 @@ void UBanimalsGameInstance::CreateLobbySession(FString displayName, int32 player
 	// 세션 검색을 허용할 지 여부
 	sessionSettings.bShouldAdvertise = true;
 	// 세션 최대 인원 설정
-	sessionSettings.NumPublicConnections = playerCount;
+	sessionSettings.NumPublicConnections = 8;
 	
 	sessionSettings.Set(FName(TEXT("DP_NAME")), displayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	
