@@ -40,6 +40,9 @@ public:
 	UFUNCTION()
 	void AttachWeapon();
 
+	UFUNCTION()
+	void OnWeaponAttackTraceChannel();
+
 protected:
 	UPROPERTY()
 	class UInputMappingContext* IMC = nullptr;

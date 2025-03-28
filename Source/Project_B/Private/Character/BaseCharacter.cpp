@@ -159,14 +159,12 @@ void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
 
 	float SideDot = FVector::DotProduct(GetActorRightVector(), NormalPoint);
 
-	if (HasAuthority())
+	if (!IsLocallyControlled())
 	{
-		Multicast_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+		return;
 	}
-	else
-	{
-		Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
-	}
+
+	Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
 }
 
 void ABaseCharacter::TakeWeapon(class AWeapon* Weapon)
@@ -203,6 +201,21 @@ void ABaseCharacter::AttachWeapon()
 	// 팔의 physics를 꺼줘야함
 	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(false);
 	RightArmPhysicsAnimComp->TogglePhysicalAnimation(false);
+}
+
+void ABaseCharacter::OnWeaponAttackTraceChannel()
+{
+	if (!bHasWeapon)
+	{
+		return;
+	}
+
+	if (OwnedWeapon == nullptr)
+	{
+		return;
+	}
+
+	OwnedWeapon->OnAttackTraceChannel();
 }
 
 void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
