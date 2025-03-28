@@ -99,8 +99,8 @@ protected:
 public:
 	/**모든 클라이언트에서 호출되어야 함*/
 	void AddScore(ETeamType team ,const uint8 point);
-	void InitPlayerLoc(APawn* pawn);
-
+	void InitPlayerLoc(APawn* pawn,FString key);
+ 
 protected:
 	void GameReady();
 	
