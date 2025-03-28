@@ -137,7 +137,7 @@ void ABlackholeGameState::DetermineWinner()
 }
 
 
-void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTime)
+/*void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTime)
 {
 	// 게임 시작 로직
 	GameStartTime = StartTime;
@@ -149,7 +149,7 @@ void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
 	
 	// 승패 가르기
 	DetermineWinner();
-}
+}*/
 
 void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
@@ -166,6 +166,7 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 	// 사망 처리 로직
 	PlayerController->SetIgnoreLookInput(true);
 	PlayerController->SetIgnoreMoveInput(true);
+	DeathEffects(PlayerController);
 	
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([Player, PlayerController, this]()
