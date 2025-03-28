@@ -42,26 +42,35 @@ void ALuggageChaosGameState::GameReady()
 	else
 	{
 		PlayersInfo= gi->GetPlayerInfo();
-
-		const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
-
-		if (NetIdRepl.IsValid())
+		
+		FTimerHandle LambdaTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(LambdaTimerHandle, [this]()
 		{
-			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-			MyKey = NetId->ToString();
-			UE_LOG(LogTemp,Error,TEXT("나의 키: %s"), *MyKey);
-
-			FPlayerInfo* Info = PlayersInfo.Find(MyKey);
-			if (Info->Team == ETeamType::Blue)
+			const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
+			if (NetIdRepl.IsValid())
 			{
-				UE_LOG(LogTemp,Error,TEXT("나의 팀: Blue"));
+				TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+				MyKey = NetId->ToString();
+				UE_LOG(LogTemp, Error, TEXT("나의 키: %s"), *MyKey);
+
+				FPlayerInfo* Info = PlayersInfo.Find(MyKey);
+				if (Info)
+				{
+					if (Info->Team == ETeamType::Blue)
+					{
+						UE_LOG(LogTemp, Error, TEXT("나의 팀: Blue"));
+					}
+					else
+					{
+						UE_LOG(LogTemp, Error, TEXT("나의 팀: Red"));
+					}
+				}
 			}
 			else
 			{
-				UE_LOG(LogTemp,Error,TEXT("나의 팀: Red"));
+				UE_LOG(LogTemp, Warning, TEXT("NetIdRepl is invalid"));
 			}
-			
-		}
+		}, 0.8f, false);
 	}
 	
 	if (HasAuthority())
