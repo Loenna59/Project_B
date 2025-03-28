@@ -18,16 +18,20 @@ class PROJECT_B_API APodiumGameState : public AGameStateBase
 	GENERATED_BODY()
 public:
 	APodiumGameState();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	bool isDummyPlayer = false;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
+	UPROPERTY()
 	class APodiumCamera* PodiumCamera = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
 	float ReadyTime = 12.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | WinPrize")
+	TSubclassOf<class AWinnerPrize> WinnerPrizeClass;
+
 private:
 	TMap<FString,FPlayerInfo> PlayersInfo;
-	
 
 	UPROPERTY()
 	TArray<AActor*> WinnerPoints1;
@@ -49,6 +53,12 @@ protected:
 
 public:
 	void InitPlayerLoc(APawn* pawn);
+
+	void AddWinPrize(APawn* pawn);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_AddWinPrize(APawn* pawn);
+	
 	void InitPodiumCamera(APlayerController* pc);
 
 private:

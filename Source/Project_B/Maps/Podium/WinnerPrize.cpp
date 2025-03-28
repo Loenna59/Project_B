@@ -10,6 +10,9 @@ AWinnerPrize::AWinnerPrize()
 
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
 	RootComponent = SkeletalMesh;
+
+	bReplicates = true;
+	SetReplicates(true);
 }
 
 void AWinnerPrize::BeginPlay()

@@ -4,6 +4,8 @@
 #include "PodiumGameState.h"
 
 #include "PodiumCamera.h"
+#include "WinnerPrize.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
@@ -21,17 +23,22 @@ void APodiumGameState::BeginPlay()
 
 	if (HasAuthority())
 	{
-		UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+		if (isDummyPlayer)
+		{
+			PlayersInfo = DummyPlayersInfo();
+		}
+		else
+		{
+			UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 
-		PlayersInfo = gi->GetPlayerInfo();
-		
+			PlayersInfo = gi->GetPlayerInfo();
+		}
 		
 		FTimerHandle OnStartTimerHandle;
 		
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &APodiumGameState::Shoot,ReadyTime,false);
 		InitSpawnPoints();
 
-		PlayersInfo = DummyPlayersInfo();
 	}
 }
 
@@ -81,18 +88,23 @@ void APodiumGameState::InitPlayerLoc(APawn* pawn)
 	{
 		return;
 	}
+
+	if (isDummyPlayer)
+	{
+		mykey = FString::FromInt(dummyKey);
+		++dummyKey;
+	}
+	else
+	{
+		const FUniqueNetIdRepl& NetIdRepl = pawn->GetPlayerState<APlayerState>()->GetUniqueId();
 	
-	mykey = FString::FromInt(dummyKey);
-	++dummyKey;
-	
-	// const FUniqueNetIdRepl& NetIdRepl = pawn->GetPlayerState<APlayerState>()->GetUniqueId();
-	//
-	// if (NetIdRepl.IsValid())
-	// {
-	// 	TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-	// 	myKey = NetId->ToString();
-	// 	LOG_PRINT(TEXT("나의 키: %s"), *myKey);
-	// }
+		if (NetIdRepl.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			mykey = NetId->ToString();
+			LOG_PRINT(TEXT("나의 키: %s"), *mykey);
+		}
+	}
 
 	if (FPlayerInfo* Info = PlayersInfo.Find(mykey))
 	{
@@ -100,11 +112,15 @@ void APodiumGameState::InitPlayerLoc(APawn* pawn)
 		{
 			pawn->SetActorLocation(WinnerPoints1[WinIndex]->GetActorLocation());
 			pawn->SetActorRotation(WinnerPoints1[WinIndex]->GetActorRotation());
+			
+			AddWinPrize(pawn);
 		}
 		else if (Info->bIsWin && WinIndex >= 2)
 		{
 			pawn->SetActorLocation(WinnerPoints2[WinIndex-2]->GetActorLocation());
 			pawn->SetActorRotation(WinnerPoints2[WinIndex-2]->GetActorRotation());
+			
+			AddWinPrize(pawn);
 		}
 		else if (Info->bIsWin == false && NorIndex < 2)
 		{
@@ -120,6 +136,28 @@ void APodiumGameState::InitPlayerLoc(APawn* pawn)
 	else
 	{
 		LOG_ERROR(this,TEXT("존재하지 않는 Key"));
+	}
+}
+
+void APodiumGameState::AddWinPrize(APawn* pawn)
+{
+	AWinnerPrize* prize = GetWorld()->SpawnActor<AWinnerPrize>(WinnerPrizeClass, pawn->GetTransform());
+	
+	if (prize)
+	{
+		prize->AttachToComponent(pawn->GetController()->GetCharacter()->GetMesh(), 
+								 FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+}
+
+void APodiumGameState::Net_AddWinPrize_Implementation(APawn* pawn)
+{
+	AWinnerPrize* prize = GetWorld()->SpawnActor<AWinnerPrize>(WinnerPrizeClass, pawn->GetTransform());
+	
+	if (prize)
+	{
+		prize->AttachToComponent(pawn->GetController()->GetCharacter()->GetMesh(), 
+								 FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	}
 }
 
@@ -158,7 +196,7 @@ TMap<FString, FPlayerInfo> APodiumGameState::DummyPlayersInfo()
 	Player0.Team = ETeamType::Blue; 
 	Player0.bIsReady = true;
 	Player0.bIsAlive = true;
-	Player0.bIsWin = false;
+	Player0.bIsWin = true;
 	dummyPlayers.Add(TEXT("0"), Player0);
 
 	FPlayerInfo Player1;
@@ -167,7 +205,7 @@ TMap<FString, FPlayerInfo> APodiumGameState::DummyPlayersInfo()
 	Player1.Team = ETeamType::Red;
 	Player1.bIsReady = true;
 	Player1.bIsAlive = true;
-	Player1.bIsWin = false;
+	Player1.bIsWin = true;
 	dummyPlayers.Add(TEXT("1"), Player1);
 
 	FPlayerInfo Player2;
@@ -176,7 +214,7 @@ TMap<FString, FPlayerInfo> APodiumGameState::DummyPlayersInfo()
 	Player2.Team = ETeamType::Blue;
 	Player2.bIsReady = true;
 	Player2.bIsAlive = true;
-	Player2.bIsWin = false;
+	Player2.bIsWin = true;
 	dummyPlayers.Add(TEXT("2"), Player2);
 	
 	return dummyPlayers;

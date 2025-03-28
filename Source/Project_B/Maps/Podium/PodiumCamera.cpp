@@ -37,6 +37,7 @@ void APodiumCamera::Shoot()
 	);
 
 	CaptureComponent->CaptureScene();
+	CaptureComponent->bCaptureEveryFrame = false;
 	
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	if (pc)
