@@ -227,6 +227,11 @@ void ALuggageChaosGameState::GameEnd()
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	gi->WinnerKeys = WinnerKeys;
 	
+	for (int i = 0; i<WinnerKeys.Num(); i++)
+	{
+		LOG_PRINT(TEXT("gi에 승리자 키: %s 저장"), *WinnerKeys[i]);
+	}
+	
 	Net_GameEnd();
 }
 

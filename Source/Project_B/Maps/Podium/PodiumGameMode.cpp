@@ -36,6 +36,15 @@ void APodiumGameMode::OnPostLogin(AController* NewPlayer)
 					{
 						TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 						key = NetId->ToString();
+						LOG_PRINT(TEXT("접속한 플레이어 키: %s"), *key);
+					}
+
+					UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+
+					WinnerKeys = gi->WinnerKeys;
+					for (int i = 0; i<WinnerKeys.Num(); i++)
+					{
+						LOG_PRINT(TEXT("승리자 %d번 키: %s"), i, *WinnerKeys[i]);
 					}
 					
 					if (WinnerKeys.Find(key))
