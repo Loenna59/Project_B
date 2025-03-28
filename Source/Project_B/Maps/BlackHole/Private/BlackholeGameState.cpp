@@ -126,20 +126,17 @@ void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
 
 void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
+	// 서버에서만 실행!
+	if (!HasAuthority()) return;
+	
 	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
 	
-	// 플레이어 키값 가져올것
-	FString Key;
-	const FUniqueNetIdRepl& NetIdRepl = PlayerController->GetPlayerState<APlayerState>()->GetUniqueId();
-	if (NetIdRepl.IsValid())
-	{
-		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-		Key = NetId->ToString();
-	}
-
 	// 플레이어 상태가 죽음일 때만 이 로직이 실행될 것이다
 	// 즉, Info[Key].bIsAlive = false; 라고 가정
 	UE_LOG(LogTemp,Warning,TEXT("Player Death"));
+
+	// 죽은 플레이어는 같은 로직 실행
+	ClinetRPC_OnPlayerDeath(PlayerController);
 
 	// 플레이어의 화면을 흑백으로 전환하자
 	// 이때, 조작은 클릭만 받게 해야함
@@ -160,5 +157,26 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 		}
 	}), 3.0f, false);
 }
+
+void ABlackholeGameState::ClinetRPC_OnPlayerDeath_Implementation(APlayerController* PlayerController)
+{
+	// 본인만 실행
+	if (PlayerController->IsLocalController())
+	{
+		ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
+
+		// 화면을 흑백으로 변경
+		if (Player->CameraComp)
+		{
+			Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0,0,0,1);
+		}
+
+		// 입력 차단
+		PlayerController->SetIgnoreLookInput(true);
+		PlayerController->SetIgnoreMoveInput(true);
+	}
+}
+
+
 
 
