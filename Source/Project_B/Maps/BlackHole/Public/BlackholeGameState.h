@@ -52,8 +52,9 @@ public:
 	void DetermineWinner();
 	// 죽음 처리
 	void OnPlayerDeath(APlayerController* PlayerController);
+	void DeathEffects(APlayerController* PlayerController);
 	UFUNCTION(Client, Reliable)
-	void ClinetRPC_OnPlayerDeath(ABaseCharacter* Player);
+	void ClinetRPC_OnPlayerDeath(APlayerController* PlayerController);
 
 	// 게임 시작
 	UPROPERTY(Replicated)

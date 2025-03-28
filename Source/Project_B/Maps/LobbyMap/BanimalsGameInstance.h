@@ -72,5 +72,8 @@ public:
 	int32 CurrentMapID;
 	void SetCurrentMapInfo(int32 MapID) { CurrentMapID = MapID; }
 	FMapInfo* GetCurrentMapInfo() {	return MapInfoList.Find(CurrentMapID); }
+
+	// 승리 판별 (bIsWin값 변경)
+	void SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin);
 };
 
