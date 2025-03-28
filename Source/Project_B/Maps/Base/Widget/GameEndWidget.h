@@ -18,12 +18,12 @@ class PROJECT_B_API UGameEndWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 	
-	UPROPERTY(meta = (BindWidget))
-	UImage* Victory;
-	UPROPERTY(meta = (BindWidget))
-	UImage* Defeat;
-	UPROPERTY(meta = (BindWidget))
-	UImage* Draw;
+	UPROPERTY(Transient,meta = (BindWidgetAnim))
+	UWidgetAnimation* AnimVictory;
+	UPROPERTY(Transient,meta = (BindWidgetAnim))
+	UWidgetAnimation* AnimDefeat;
+	UPROPERTY(Transient,meta = (BindWidgetAnim))
+	UWidgetAnimation* AnimDraw;
 
 public:
 	UFUNCTION()
