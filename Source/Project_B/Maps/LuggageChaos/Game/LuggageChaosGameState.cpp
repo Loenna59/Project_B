@@ -36,10 +36,21 @@ void ALuggageChaosGameState::GameReady()
 	if (isDummyPlayerInfo)
 	{
 		PlayersInfo = DummyPlayersInfo();
+		MyKey = FString::FromInt(dummyIdx);
+		UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *MyKey);
 	}
 	else
 	{
 		PlayersInfo= gi->GetPlayerInfo();
+
+		const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
+
+		if (NetIdRepl.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			MyKey = NetId->ToString();
+			UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *MyKey);
+		}
 	}
 	
 	if (HasAuthority())
@@ -57,31 +68,6 @@ void ALuggageChaosGameState::GameReady()
 
 void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn)
 {
-	if (isDummyPlayerInfo)
-	{
-		MyKey = FString::FromInt(dummyIdx);
-		LOG_PRINT(TEXT("나의 키: %s"), *MyKey);
-		++dummyIdx;
-	}
-	else
-	{
-		const FUniqueNetIdRepl& NetIdRepl = pawn->GetPlayerState<APlayerState>()->GetUniqueId();
-		
-	
-		if (NetIdRepl.IsValid())
-		{
-			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-			MyKey = NetId->ToString();
-			LOG_PRINT(TEXT("나의 키: %s"), *MyKey);
-			UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *MyKey);
-		}
-	}
-
-	if (HasAuthority() == false)
-	{
-		return;
-	}
-
 	if (FPlayerInfo* Info = PlayersInfo.Find(MyKey))
 	{
 		if (Info->Team == ETeamType::Blue)
