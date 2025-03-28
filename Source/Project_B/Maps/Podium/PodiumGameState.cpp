@@ -21,15 +21,26 @@ void APodiumGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+	
 	if (isDummyPlayer)
 	{
 		PlayersInfo = DummyPlayersInfo();
+		mykey = FString::FromInt(dummyKey);
+		UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *mykey);
 	}
 	else
 	{
-		UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+		PlayersInfo= gi->GetPlayerInfo();
 
-		PlayersInfo = gi->GetPlayerInfo();
+		const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
+
+		if (NetIdRepl.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			mykey = NetId->ToString();
+			UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *mykey);
+		}
 	}
 	
 	if (HasAuthority())
