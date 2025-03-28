@@ -196,3 +196,13 @@ void UBanimalsGameInstance::InitializeMapInfo()
 	MapInfoList.Add(BlackholeMap.MapID, BlackholeMap);
 	MapInfoList.Add(LuggageMap.MapID, LuggageMap);
 }
+
+void UBanimalsGameInstance::SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin)
+{
+	if (PlayerMap.Contains(PlayerNetID))
+	{
+		// 승리 상태 업데이트
+		FPlayerInfo& PlayerInfo = PlayerMap[PlayerNetID];
+		PlayerInfo.bIsWin = bIsWin;
+	}
+}

@@ -21,15 +21,36 @@ void APodiumGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+	
 	if (isDummyPlayer)
 	{
 		PlayersInfo = DummyPlayersInfo();
+		mykey = FString::FromInt(dummyKey);
+		UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *FString::FromInt(dummyKey));
 	}
 	else
 	{
-		UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+		PlayersInfo= gi->GetPlayerInfo();
 
-		PlayersInfo = gi->GetPlayerInfo();
+		const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
+
+		if (NetIdRepl.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			mykey = NetId->ToString();
+			UE_LOG(LogTemp,Error,TEXT("나의 키: %s"), *mykey);
+
+			FPlayerInfo* Info = PlayersInfo.Find(mykey);
+			if (Info->Team == ETeamType::Blue)
+			{
+				UE_LOG(LogTemp,Error,TEXT("나의 팀: Blue"));
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("나의 팀: Red"));
+			}
+		}
 	}
 	
 	if (HasAuthority())
@@ -82,31 +103,9 @@ void APodiumGameState::InitPodiumCamera(APlayerController* pc)
 	pc->SetViewTarget(PodiumCamera);
 }
 
-void APodiumGameState::InitPlayerLoc(APawn* pawn)
+void APodiumGameState::InitPlayerLoc(APawn* pawn,FString key)
 {
-	if (HasAuthority() == false)
-	{
-		return;
-	}
-
-	if (isDummyPlayer)
-	{
-		mykey = FString::FromInt(dummyKey);
-		++dummyKey;
-	}
-	else
-	{
-		const FUniqueNetIdRepl& NetIdRepl = pawn->GetPlayerState<APlayerState>()->GetUniqueId();
-	
-		if (NetIdRepl.IsValid())
-		{
-			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-			mykey = NetId->ToString();
-			LOG_PRINT(TEXT("나의 키: %s"), *mykey);
-		}
-	}
-
-	if (FPlayerInfo* Info = PlayersInfo.Find(mykey))
+	if (FPlayerInfo* Info = PlayersInfo.Find(key))
 	{
 		if (Info->bIsWin && WinIndex < 2)
 		{

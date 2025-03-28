@@ -75,19 +75,20 @@ void ADestroyZone::OnDestroyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	// TODO: 플레이어 죽음
 	LOG_PRINT(TEXT("플레이어 죽음!"));
 	// overlap된 액터가 플레이어면
-	ABaseCharacter* player = Cast<ABaseCharacter>(OtherActor);
-	if (player)
+	ABaseCharacter* Player = Cast<ABaseCharacter>(OtherActor);
+	if (Player)
 	{
-		// 플레이어 키값 가져올것
-		const FUniqueNetIdRepl& NetIdRepl = player->GetPlayerState<APlayerState>()->GetUniqueId();
+		// 플레이어 키값 가져오기
+		const FUniqueNetIdRepl& NetIdRepl = Player->GetPlayerState<APlayerState>()->GetUniqueId();
+		FString playerKey;
 		if (NetIdRepl.IsValid())
 		{
 			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-			Key = NetId->ToString();
+			playerKey = NetId->ToString();
 		}
 
-		// 서버에서 플레이어 상태 업데이트
-		ServerRPC_UpdatePlayerState(Key);
+		// 플레이어 상태 업데이트 RPC 호출
+		ServerRPC_UpdatePlayerState(playerKey);
 	}
 }
 
@@ -113,16 +114,49 @@ void ADestroyZone::ServerRPC_UpdatePlayerState_Implementation(const FString& pla
 	// TODO: 죽었을 때 실행될 로직 만들기
 	// 모든 클라이언트에 상태 전달
 	Multicast_UpdatePlayerState(playerKey);
-	
+    
 }
 
 void ADestroyZone::Multicast_UpdatePlayerState_Implementation(const FString& playerKey)
 {
 	UpdatePlayerState(playerKey);
 	ABlackholeGameState* gs = Cast<ABlackholeGameState>(GetWorld()->GetGameState());
-	gs->OnPlayerDeath(GetWorld()->GetFirstPlayerController());
-}
+	
+	UGameInstance* GameInstance = GetWorld()->GetGameInstance();
+	if (!GameInstance) return;
 
+	// 게임 인스턴스를 통해 플레이어 찾기
+	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GameInstance);
+	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
+
+	// 해당 키를 가진 플레이어 찾기
+	if (InfoMap.Contains(playerKey))
+	{
+		// 모든 플레이어 컨트롤러 순회
+		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		{
+			APlayerController* PlayerController = Iterator->Get();
+			ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
+            
+			// 플레이어 고유 ID 확인
+			if (Player)
+			{
+				const FUniqueNetIdRepl& NetIdRepl = Player->GetPlayerState<APlayerState>()->GetUniqueId();
+				if (NetIdRepl.IsValid())
+				{
+					TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+					if (NetId->ToString() == playerKey)
+					{
+						// 해당 플레이어의 사망 로직 실행
+						gs = Cast<ABlackholeGameState>(GetWorld()->GetGameState());
+						gs->OnPlayerDeath(PlayerController);
+						break;
+					}
+				}
+			}
+		}
+	}
+}
 
 // Called when the game starts or when spawned
 void ADestroyZone::BeginPlay()
