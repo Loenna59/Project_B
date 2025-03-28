@@ -57,11 +57,6 @@ void ALuggageChaosGameState::GameReady()
 
 void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn)
 {
-	if (HasAuthority() == false)
-	{
-		return;
-	}
-	
 	if (isDummyPlayerInfo)
 	{
 		MyKey = FString::FromInt(dummyIdx);
@@ -71,13 +66,20 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn)
 	else
 	{
 		const FUniqueNetIdRepl& NetIdRepl = pawn->GetPlayerState<APlayerState>()->GetUniqueId();
+		
 	
 		if (NetIdRepl.IsValid())
 		{
 			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 			MyKey = NetId->ToString();
 			LOG_PRINT(TEXT("나의 키: %s"), *MyKey);
+			UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *MyKey);
 		}
+	}
+
+	if (HasAuthority() == false)
+	{
+		return;
 	}
 
 	if (FPlayerInfo* Info = PlayersInfo.Find(MyKey))
