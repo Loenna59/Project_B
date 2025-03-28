@@ -64,10 +64,10 @@ public:
 	// 게임 시작
 	UPROPERTY(Replicated)
 	float GameStartTime = 0.0f;
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPC_SetGameStart(float StartTime);
+	// UFUNCTION(NetMulticast, Reliable)
+	// void MulticastRPC_SetGameStart(float StartTime);
 	
 	// 게임 종료
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPC_SetGameOver();
+	// UFUNCTION(NetMulticast, Reliable)
+	// void MulticastRPC_SetGameOver();
 };
