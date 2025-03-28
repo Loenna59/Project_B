@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/BaseCharacter.h"
 #include "GameFramework/GameStateBase.h"
 #include "BlackholeGameState.generated.h"
 
@@ -51,8 +52,8 @@ public:
 	void DetermineWinner();
 	// 죽음 처리
 	void OnPlayerDeath(APlayerController* PlayerController);
-	// 관전자 모드 전환
-	// void SetSpectatorMode(APlayerController* PlayerController);
+	UFUNCTION(Client, Reliable)
+	void ClinetRPC_OnPlayerDeath(APlayerController* PlayerController);
 
 	// 게임 시작
 	UPROPERTY(Replicated)
