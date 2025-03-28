@@ -42,7 +42,14 @@ void APodiumGameState::BeginPlay()
 			UE_LOG(LogTemp,Error,TEXT("나의 키: %s"), *mykey);
 
 			FPlayerInfo* Info = PlayersInfo.Find(mykey);
-			UE_LOG(LogTemp,Error,TEXT("나의 팀: %"), *Info->Team);
+			if (Info->Team == ETeamType::Blue)
+			{
+				UE_LOG(LogTemp,Error,TEXT("나의 팀: Blue"));
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("나의 팀: Red"));
+			}
 		}
 	}
 	
