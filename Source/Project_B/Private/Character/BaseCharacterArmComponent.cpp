@@ -171,7 +171,7 @@ void UBaseCharacterArmComponent::AttachTo(UPrimitiveComponent* Comp, FVector Loc
 		FTransform CompTransform = Comp->GetComponentTransform();
 		
 		GrabConstraintComp = NewObject<UPhysicsConstraintComponent>(this);
-		// GrabConstraintComp->RegisterComponent();
+		GrabConstraintComp->RegisterComponent();
 		GrabConstraintComp->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform, BoneName);
 
 		Comp->SetWorldTransform(CompTransform, false, nullptr, ETeleportType::TeleportPhysics);

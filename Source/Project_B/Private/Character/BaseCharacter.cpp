@@ -22,6 +22,7 @@ ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	bAlwaysRelevant = true;
 
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(100.f);
@@ -48,40 +49,39 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
-	MoveComp->RegisterComponent();
 	MoveComp->SetIsReplicated(true);
+	MoveComp->SetNetAddressable();
 	
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
-	AttackComp->RegisterComponent();
 	AttackComp->SetIsReplicated(true);
+	AttackComp->SetNetAddressable();
 
 	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
-	PickComp->RegisterComponent();
 	PickComp->SetIsReplicated(true);
+	PickComp->SetNetAddressable();
 	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
-	PhysicalAnimationComp->RegisterComponent();
+	PhysicalAnimationComp->SetNetAddressable();
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
-	HeadPhysicsAnimComp->RegisterComponent();
 	HeadPhysicsAnimComp->SetIsReplicated(true);
+	HeadPhysicsAnimComp->SetNetAddressable();
 	
 	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("LeftArmPhysicsAnimComp"));
-	LeftArmPhysicsAnimComp->RegisterComponent();
 	LeftArmPhysicsAnimComp->SetIsReplicated(true);
+	LeftArmPhysicsAnimComp->SetNetAddressable();
 	
 	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("RightArmPhysicsAnimComp"));
-	RightArmPhysicsAnimComp->RegisterComponent();
 	RightArmPhysicsAnimComp->SetIsReplicated(true);
+	RightArmPhysicsAnimComp->SetNetAddressable();
 
 	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
-	RightFootPhysicsAnimComp->RegisterComponent();
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
+	RightArmPhysicsAnimComp->SetNetAddressable();
 	
 	GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
-	GravityComp->RegisterComponent();
-	// GravityComp->SetNetAddressable();
 	GravityComp->SetIsReplicated(true);
+	GravityComp->SetNetAddressable();
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
@@ -89,7 +89,6 @@ ABaseCharacter::ABaseCharacter()
 	{
 		IMC = tmp_imc.Object;
 	}
-
 }
 
 void ABaseCharacter::BeginPlay()
