@@ -20,7 +20,16 @@ void APodiumGameMode::OnPostLogin(AController* NewPlayer)
 				APodiumGameState* gs = Cast<APodiumGameState>(GetWorld()->GetGameState());
 				if (gs)
 				{
-					gs->InitPlayerLoc(NewPlayer->GetPawn());
+					const FUniqueNetIdRepl& NetIdRepl = NewPlayer->GetPlayerState<APlayerState>()->GetUniqueId();
+					FString key;
+
+					if (NetIdRepl.IsValid())
+					{
+						TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+						key = NetId->ToString();
+					}
+					
+					gs->InitPlayerLoc(NewPlayer->GetPawn(), key);
 					gs->InitPodiumCamera(NewPlayer->GetPlayerState<APlayerState>()->GetPlayerController());
 				}
 			}
