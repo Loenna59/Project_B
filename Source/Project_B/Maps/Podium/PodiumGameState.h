@@ -52,7 +52,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void InitPlayerLoc(APawn* pawn);
+	void InitPlayerLoc(APawn* pawn,FString key);
 
 	void AddWinPrize(APawn* pawn);
 	

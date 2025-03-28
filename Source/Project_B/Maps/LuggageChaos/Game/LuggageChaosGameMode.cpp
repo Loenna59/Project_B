@@ -4,6 +4,7 @@
 #include "LuggageChaosGameMode.h"
 
 #include "LuggageChaosGameState.h"
+#include "GameFramework/PlayerState.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 
@@ -22,7 +23,16 @@ void ALuggageChaosGameMode::OnPostLogin(AController* NewPlayer)
 				ALuggageChaosGameState* gs = Cast<ALuggageChaosGameState>(GetWorld()->GetGameState());
 				if (gs)
 				{
-					gs->InitPlayerLoc(NewPlayer->GetPawn());
+					const FUniqueNetIdRepl& NetIdRepl = NewPlayer->GetPlayerState<APlayerState>()->GetUniqueId();
+					FString key;
+					
+					if (NetIdRepl.IsValid())
+					{
+						TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+						key = NetId->ToString();
+					}
+					
+					gs->InitPlayerLoc(NewPlayer->GetPawn(),key);
 				}
 			}
 		}, 0.5f, false); 
