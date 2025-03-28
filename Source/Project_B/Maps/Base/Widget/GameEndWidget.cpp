@@ -12,15 +12,15 @@ void UGameEndWidget::NativeConstruct()
 
 void UGameEndWidget::ShowVictory()
 {
-	Victory->SetVisibility(ESlateVisibility::Visible);
+	PlayAnimation(AnimVictory);
 }
 
 void UGameEndWidget::ShowDefeat()
 {
-	Defeat->SetVisibility(ESlateVisibility::Visible);
+	PlayAnimation(AnimDefeat);
 }
 
 void UGameEndWidget::ShowDraw()
 {
-	Draw->SetVisibility(ESlateVisibility::Visible);
+	PlayAnimation(AnimDefeat);
 }

@@ -10,7 +10,7 @@
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
 #include "Project_B/Utilities/TraceChannelHelper.h"
-
+#include "Weapon/Weapon.h"
 
 UBaseCharacterArmComponent::UBaseCharacterArmComponent()
 {
@@ -116,6 +116,12 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, FHitResult HitResult)
 	{
 		AActor* Actor = HitResult.GetActor();
 
+		if (Actor->IsA<AWeapon>())
+		{
+			LOG_SCREEN("무기");
+			return;
+		}
+
 		UPrimitiveComponent* Comp = HitResult.GetComponent();
 		if (Comp)
 		{
@@ -165,7 +171,7 @@ void UBaseCharacterArmComponent::AttachTo(UPrimitiveComponent* Comp, FVector Loc
 		FTransform CompTransform = Comp->GetComponentTransform();
 		
 		GrabConstraintComp = NewObject<UPhysicsConstraintComponent>(this);
-		// GrabConstraintComp->RegisterComponent();
+		GrabConstraintComp->RegisterComponent();
 		GrabConstraintComp->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform, BoneName);
 
 		Comp->SetWorldTransform(CompTransform, false, nullptr, ETeleportType::TeleportPhysics);

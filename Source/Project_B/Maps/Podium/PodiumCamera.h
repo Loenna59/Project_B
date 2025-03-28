@@ -21,9 +21,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	TSubclassOf<UPictureWidget> PictureWidgetClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class")
+	TSubclassOf<class UPodiumMainWidget> PodiumWidgetClass;
+private:
+	UPROPERTY()
 	UPictureWidget* PictureWidget;
+	
+	UPROPERTY()
+	UPodiumMainWidget* PodiumWidget;
 
 protected:
 	virtual void BeginPlay() override;

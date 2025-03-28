@@ -22,6 +22,7 @@ ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	bAlwaysRelevant = true;
 
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(100.f);
@@ -49,35 +50,38 @@ ABaseCharacter::ABaseCharacter()
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
 	MoveComp->SetIsReplicated(true);
+	MoveComp->SetNetAddressable();
 	
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
 	AttackComp->SetIsReplicated(true);
+	AttackComp->SetNetAddressable();
 
 	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
 	PickComp->SetIsReplicated(true);
+	PickComp->SetNetAddressable();
 	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
+	PhysicalAnimationComp->SetNetAddressable();
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
-	HeadPhysicsAnimComp->RegisterComponent();
 	HeadPhysicsAnimComp->SetIsReplicated(true);
+	HeadPhysicsAnimComp->SetNetAddressable();
 	
 	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("LeftArmPhysicsAnimComp"));
-	LeftArmPhysicsAnimComp->RegisterComponent();
 	LeftArmPhysicsAnimComp->SetIsReplicated(true);
+	LeftArmPhysicsAnimComp->SetNetAddressable();
 	
 	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("RightArmPhysicsAnimComp"));
-	RightArmPhysicsAnimComp->RegisterComponent();
 	RightArmPhysicsAnimComp->SetIsReplicated(true);
+	RightArmPhysicsAnimComp->SetNetAddressable();
 
 	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
-	RightFootPhysicsAnimComp->RegisterComponent();
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
+	RightArmPhysicsAnimComp->SetNetAddressable();
 	
 	GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
-	GravityComp->RegisterComponent();
-	// GravityComp->SetNetAddressable();
 	GravityComp->SetIsReplicated(true);
+	GravityComp->SetNetAddressable();
 
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
@@ -85,7 +89,6 @@ ABaseCharacter::ABaseCharacter()
 	{
 		IMC = tmp_imc.Object;
 	}
-
 }
 
 void ABaseCharacter::BeginPlay()
@@ -136,16 +139,62 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
-void ABaseCharacter::OnHit(FVector NormalPoint, float damage)
+void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
 {
-	float Dot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
-	FVector DotVector = GetActorForwardVector() * Dot;
+	float ForwardDot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
 
-	if (AnimInstance)
+	float clampedForwardDot = FMath::Clamp(ForwardDot, -1.f, 1.f);
+
+	float SideDot = FVector::DotProduct(GetActorRightVector(), NormalPoint);
+
+	if (HasAuthority())
 	{
-		AnimInstance->StartHitProcess(FVector2D(DotVector));
+		Multicast_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
 	}
+	else
+	{
+		Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+	}
+}
 
-	LOG_SCREEN("damaged %f", damage);
+void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
+{
+	Multicast_OnPlayHitMontage(Type, ForwardDot, SideDot);
+}
+
+void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
+{
+	switch (Type)
+	{
+	case EAttackType::PUNCH:
+	case EAttackType::BOTTLE:
+	case EAttackType::CROSS_BOW:
+		if (AnimInstance)
+		{
+			AnimInstance->StartHitProcess(ForwardDot, SideDot);
+		}
+		break;
+	default:
+		if (ForwardDot > 0.6f)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Forward"));
+			return;
+		}
+	
+		if (ForwardDot < -0.6f)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Backward"));
+			return;
+		}
+	
+		if (SideDot > 0)
+		{
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Left"));
+			return;
+		}
+	
+		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Right"));
+		break;
+	}
 }
 

@@ -18,6 +18,12 @@ class PROJECT_B_API ALuggageChaosGameState : public ABanimalsGameState
 	
 public:
 	ALuggageChaosGameState();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug")
+	bool isDummyPlayerInfo = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug")
+	bool isAddScoreBlue = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug")
+	bool isAddScoreRed = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
 	float ReadyTime = 2.0f;
@@ -65,7 +71,8 @@ private:
 	// 플레이어 unique ID, Info
 	TMap<FString,FPlayerInfo> PlayersInfo;
 
-
+	FString MyKey = "";
+	
 	// 플레이어 초기 위치 초기화를 위한 함수
 	TArray<AActor*> BlueSpawnPoints;
 	TArray<AActor*> RedSpawnPoints;
@@ -119,14 +126,6 @@ protected:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_GameEnd();
-
-	UFUNCTION()
-	void OnLevelLoadComplete(UWorld* loadedWorld);
-
-	void LevelLoadComplete();
-	
-	UFUNCTION(Server, Reliable)
-	void Server_LevelLoadComplete();
 	
 	void ChangeLevelPodium();
 

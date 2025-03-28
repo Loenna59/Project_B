@@ -2,3 +2,14 @@
 
 
 #include "PodiumMainWidget.h"
+
+void UPodiumMainWidget::PlayAnimFrame()
+{
+	PlayAnimation(FrameAnim);
+}
+
+void UPodiumMainWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	PlayAnimation(FrameAnim);
+}
