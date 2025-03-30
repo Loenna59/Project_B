@@ -13,7 +13,5 @@ UCLASS()
 class PROJECT_B_API ALobbyPlayerState : public APlayerState
 {
 	GENERATED_BODY()
-public:
-	// virtual void OnRep_UniqueId() override;
-	virtual void OnSetUniqueId() override;
+
 };

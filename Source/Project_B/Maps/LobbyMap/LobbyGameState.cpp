@@ -5,7 +5,6 @@
 
 #include "BanimalsGameInstance.h"
 #include "Blueprint/UserWidget.h"
-#include "GameFramework/PlayerState.h"
 #include "Widget/BlackholeLobbyUI.h"
 #include "Widget/LuggageLobbyUI.h"
 
@@ -77,5 +76,6 @@ void ALobbyGameState::MulticastRPC_UpdatePlayerTeam_Implementation(const FString
 		}
 	}
 
+	// 현재는 서버가 불필요하게 여러번 실행중
 	BlackholeLobbyWidget->UpdateImage();
 }
