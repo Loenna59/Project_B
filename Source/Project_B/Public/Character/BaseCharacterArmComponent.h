@@ -19,9 +19,6 @@ protected:
 
 	UPROPERTY()
 	class UBaseCharacterPickComponent* PickComp = nullptr;
-	
-	UPROPERTY()
-	bool bIsAttached = false;
 
 	UPROPERTY()
 	class UPrimitiveComponent* GrabComponent = nullptr;
@@ -34,22 +31,13 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
-	void BeginGrab();
-
-	UFUNCTION()
 	void Grabbing();
 
 	UFUNCTION()
 	void ReleaseGrab();
 
 	UFUNCTION()
-	void DetectNearby(bool bHit, FHitResult HitResult);
-
-	UFUNCTION()
-	void AttachTo(UPrimitiveComponent* Comp, FVector Location, FRotator Rotation);
-
-	UFUNCTION()
-	FVector FindNearestSurfacePoint(const FVector& Point, UPrimitiveComponent* Comp);
+	void DetectNearby(bool bHit, TArray<FHitResult> HitResults);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Radius = 20;
@@ -62,4 +50,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName BoneName = TEXT("Hand_R");
+
+	UPROPERTY()
+	class AActor* GrabbedActor;
+
+	UPROPERTY()
+	class UPhysicsHandleComponent* PhysicsHandleComp; // 붙잡은 액터와 연결해주는 handle
 };

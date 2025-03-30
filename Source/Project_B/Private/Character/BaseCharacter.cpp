@@ -13,10 +13,13 @@
 #include "Character/BaseCharacterPickComponent.h"
 #include "Character/HeadPhysicsAnimComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
+#include "Engine/OverlapResult.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Project_B/Maps/BlackHole/Public/GravityComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
 #include "Weapon/Weapon.h"
@@ -102,6 +105,7 @@ ABaseCharacter::ABaseCharacter()
 	{
 		InputActionUnequip = temp_ia.Object;
 	}
+	
 }
 
 void ABaseCharacter::BeginPlay()
@@ -141,7 +145,6 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

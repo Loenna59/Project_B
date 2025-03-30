@@ -18,19 +18,6 @@ UBaseCharacterPickComponent::UBaseCharacterPickComponent()
 	}
 }
 
-void UBaseCharacterPickComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (!Character)
-	{
-		return;
-	}
-	
-	LeftArmComp = Cast<UBaseCharacterArmComponent>(Character->GetDefaultSubobjectByName(TEXT("LeftArmPhysicsAnimComp")));
-	RightArmComp = Cast<UBaseCharacterArmComponent>(Character->GetDefaultSubobjectByName(TEXT("RightArmPhysicsAnimComp")));
-}
-
 void UBaseCharacterPickComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -39,48 +26,24 @@ void UBaseCharacterPickComponent::GetLifetimeReplicatedProps(TArray<class FLifet
 void UBaseCharacterPickComponent::SetupInputBiding(class UEnhancedInputComponent* input)
 {
 	Super::SetupInputBiding(input);
-
-	input->BindAction(PickInputAction, ETriggerEvent::Started, this, &UBaseCharacterPickComponent::BeginPick);
+	
 	input->BindAction(PickInputAction, ETriggerEvent::Triggered, this, &UBaseCharacterPickComponent::Picking);
 	input->BindAction(PickInputAction, ETriggerEvent::Completed, this, &UBaseCharacterPickComponent::ReleasePick);
 }
 
-void UBaseCharacterPickComponent::BeginPick()
-{
-	if (RightArmComp)
-	{
-		RightArmComp->BeginGrab();
-	}
-
-	if (LeftArmComp)
-	{
-		LeftArmComp->BeginGrab();
-	}
-}
-
 void UBaseCharacterPickComponent::Picking()
 {
-	if (RightArmComp)
+	if (OnGrabbing.IsBound())
 	{
-		RightArmComp->Grabbing();
-	}
-
-	if (LeftArmComp)
-	{
-		LeftArmComp->Grabbing();
+		OnGrabbing.Broadcast();
 	}
 }
 
 void UBaseCharacterPickComponent::ReleasePick()
 {
-	if (RightArmComp)
+	if (OnRelease.IsBound())
 	{
-		RightArmComp->ReleaseGrab();
-	}
-
-	if (LeftArmComp)
-	{
-		LeftArmComp->ReleaseGrab();
+		OnRelease.Broadcast();
 	}
 }
 

@@ -6,15 +6,16 @@
 #include "Character/BaseCharacter.h"
 #include "Character/BaseCharacterAnimInstance.h"
 #include "Character/BaseCharacterPickComponent.h"
-#include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
-#include "Project_B/Utilities/LogMacro.h"
 #include "Project_B/Utilities/TraceChannelHelper.h"
 #include "Weapon/Weapon.h"
 
 UBaseCharacterArmComponent::UBaseCharacterArmComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	// Physics Handle
+	PhysicsHandleComp = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandle"));
 
 }
 
@@ -29,6 +30,8 @@ void UBaseCharacterArmComponent::BeginPlay()
 	}
 	
 	PickComp = Cast<UBaseCharacterPickComponent>(Character->GetDefaultSubobjectByName(TEXT("PickComp")));
+	PickComp->OnGrabbing.AddUObject(this, &UBaseCharacterArmComponent::Grabbing);
+	PickComp->OnRelease.AddUObject(this, &UBaseCharacterArmComponent::ReleaseGrab);
 }
 
 
@@ -36,15 +39,12 @@ void UBaseCharacterArmComponent::TickComponent(float DeltaTime, ELevelTick TickT
                                                FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
 
-void UBaseCharacterArmComponent::BeginGrab()
-{
-	if (!Character || !AnimInstance)
+	if (PhysicsHandleComp && PhysicsHandleComp->GrabbedComponent)
 	{
-		return;
+		FVector TargetLocation = Mesh->GetSocketLocation(SocketName);
+		PhysicsHandleComp->SetTargetLocation(TargetLocation);
 	}
-
 }
 
 void UBaseCharacterArmComponent::Grabbing()
@@ -53,19 +53,14 @@ void UBaseCharacterArmComponent::Grabbing()
 	{
 		return;
 	}
-
-	if (bIsAttached)
-	{
-		return;
-	}
-
+	
 	AnimInstance->bPicking = true;
 	
 	TWeakObjectPtr<UBaseCharacterArmComponent> ThisWeak = this;
-
+	
 	FVector Location = Mesh->GetSocketLocation(SocketName);
 	
-	TraceChannelHelper::SphereSingleByChannel
+	TraceChannelHelper::SphereMultiByChannel
 	(
 		GetWorld(),
 		Character,
@@ -76,14 +71,15 @@ void UBaseCharacterArmComponent::Grabbing()
 		Radius,
 		true,
 		true,
-		[ThisWeak] (bool bHit, FHitResult HitResult)
+		[ThisWeak] (bool bHit, TArray<FHitResult> HitResults)
 		{
 			if (ThisWeak.IsValid())
 			{
-				ThisWeak->DetectNearby(bHit, HitResult);
+				ThisWeak->DetectNearby(bHit, HitResults);
 			}
 		}
 	);
+	
 }
 
 void UBaseCharacterArmComponent::ReleaseGrab()
@@ -92,120 +88,60 @@ void UBaseCharacterArmComponent::ReleaseGrab()
 	{
 		TogglePhysicalAnimation(true);
 	}
-
+	
 	if (AnimInstance)
 	{
 		AnimInstance->IKTargetLocation = FVector::ZeroVector;
 		AnimInstance->bPicking = false;
 	}
 
-	bIsAttached = false;
-	if (GrabConstraintComp)
+	if (PhysicsHandleComp->GrabbedComponent)
 	{
-		GrabConstraintComp->BreakConstraint();
-		GrabConstraintComp->DestroyComponent();
-		GrabConstraintComp = nullptr;
+		PhysicsHandleComp->ReleaseComponent();
+		GrabbedActor = nullptr;
 	}
 }
 
-void UBaseCharacterArmComponent::DetectNearby(bool bHit, FHitResult HitResult)
+void UBaseCharacterArmComponent::DetectNearby(bool bHit, TArray<FHitResult> HitResults)
 {
-	if (!Character)
-	{
-		return;
-	}
-
 	if (bHit)
 	{
-		AActor* Actor = HitResult.GetActor();
-
 		if (Character->bHasWeapon)
 		{
 			return;
 		}
 
-		if (Actor->IsA<AWeapon>() && Actor->GetOwner() == nullptr)
+		if (GrabbedActor != nullptr)
 		{
-			Character->TakeWeapon(Cast<AWeapon>(Actor));
 			return;
 		}
-
-		UPrimitiveComponent* Comp = HitResult.GetComponent();
-		if (Comp)
+		
+		for (FHitResult& Result : HitResults)
 		{
-			// 손과 물체의 표면이 가까운지 거리 계산
-			FVector HandClosestPoint;
-
-			Mesh->GetClosestPointOnCollision(HitResult.Location, HandClosestPoint);
-
-			FVector OtherClosestPoint = FindNearestSurfacePoint(HandClosestPoint, Comp);
-			
-
-			float Distance = FVector::Distance(HandClosestPoint, OtherClosestPoint);
-
-			if (Distance < AttachDistanceThreshold)
+			UPrimitiveComponent* HitComp = Result.GetComponent();
+			if (HitComp && HitComp->IsSimulatingPhysics())
 			{
-				TogglePhysicalAnimation(false);
-				//LOG_SCREEN("%f", Distance);
-				AttachTo(Comp, HitResult.Location, HitResult.Normal.Rotation());
+				FVector GrabLocation;
+				float Distance = HitComp->GetClosestPointOnCollision(
+					Mesh->GetSocketLocation(SocketName),
+					GrabLocation
+				);
+
+				if (Distance >= 0.f)
+				{
+					AActor* HitActor = HitComp->GetOwner();
+					if (HitActor->IsA<AWeapon>() && HitActor->GetOwner() == nullptr)
+					{
+						Character->TakeWeapon(Cast<AWeapon>(HitActor));
+						break;
+					}
+					
+					PhysicsHandleComp->GrabComponentAtLocation(HitComp, NAME_None, GrabLocation);
+					GrabbedActor = HitActor;
+					break;
+				}
 			}
 		}
-		
-		FVector TargetLocation = Actor->GetActorLocation();
-			
-		// AnimInstance->IKTargetLocation = FMath::VInterpTo(
-		// 	AnimInstance->IKTargetLocation,
-		// 	TargetLocation, GetWorld()->DeltaTimeSeconds,
-		// 	2.5f
-		// );
-
-		// LOG_SCREEN("DetectNearby %s - %s", *HitResult.Location.ToString(), *HitResult.Normal.ToString());
-
-		AnimInstance->IKTargetLocation = TargetLocation;
-		return;
 	}
-	// LOG_SCREEN("DetectNearby None");
-			
-	AnimInstance->IKTargetLocation = FVector::ZeroVector;
-	TogglePhysicalAnimation(true);
-}
-
-void UBaseCharacterArmComponent::AttachTo(UPrimitiveComponent* Comp, FVector Location, FRotator Rotation)
-{
-	bIsAttached = true;
-
-	if (Comp && !GrabConstraintComp)
-	{
-		FTransform CompTransform = Comp->GetComponentTransform();
-		
-		GrabConstraintComp = NewObject<UPhysicsConstraintComponent>(this);
-		GrabConstraintComp->RegisterComponent();
-		GrabConstraintComp->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform, BoneName);
-
-		Comp->SetWorldTransform(CompTransform, false, nullptr, ETeleportType::TeleportPhysics);
-		
-		GrabConstraintComp->SetConstrainedComponents(Mesh, BoneName, Comp, NAME_None);
-
-		// 회전/이동을 제한하여 부드럽게 따라가도록 설정
-		GrabConstraintComp->SetAngularSwing1Limit(ACM_Limited, 45.0f);
-		GrabConstraintComp->SetAngularSwing2Limit(ACM_Limited, 45.0f);
-		GrabConstraintComp->SetAngularTwistLimit(ACM_Limited, 45.f);
-		GrabConstraintComp->SetLinearXLimit(LCM_Locked, 0);
-		GrabConstraintComp->SetLinearYLimit(LCM_Locked, 0);
-		GrabConstraintComp->SetLinearZLimit(LCM_Locked, 0);
-	}
-}
-
-FVector UBaseCharacterArmComponent::FindNearestSurfacePoint(const FVector& Point, UPrimitiveComponent* Comp)
-{
-	FVector LocalPoint = Comp->GetComponentTransform().InverseTransformPosition(Point);
-	FVector BoxExtent = Comp->GetLocalBounds().BoxExtent;
-
-	FVector SurfaceLocal;
-	SurfaceLocal.X = FMath::Clamp(LocalPoint.X, -BoxExtent.X, BoxExtent.X);
-	SurfaceLocal.Y = FMath::Clamp(LocalPoint.Y, -BoxExtent.Y, BoxExtent.Y);
-	SurfaceLocal.Z = FMath::Clamp(LocalPoint.Z, -BoxExtent.Z, BoxExtent.Z);
-
-	return Comp->GetComponentTransform().TransformPosition(SurfaceLocal);
 }
 

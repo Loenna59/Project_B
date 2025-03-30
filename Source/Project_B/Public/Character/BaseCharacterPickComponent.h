@@ -6,7 +6,9 @@
 #include "BaseCharacterInputComponent.h"
 #include "BaseCharacterPickComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnGrabbing, FString);
+DECLARE_MULTICAST_DELEGATE(FOnGrabbing);
+DECLARE_MULTICAST_DELEGATE(FOnRelease);
+
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECT_B_API UBaseCharacterPickComponent : public UBaseCharacterInputComponent
@@ -17,15 +19,10 @@ public:
 	UBaseCharacterPickComponent();
 
 protected:
-	virtual void BeginPlay() override;
-	
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	virtual void SetupInputBiding(class UEnhancedInputComponent* input) override;
-
-	UFUNCTION()
-	void BeginPick();
 
 	UFUNCTION()
 	void Picking();
@@ -37,13 +34,8 @@ protected:
 	UPROPERTY()
 	class UInputAction* PickInputAction;
 
-	UPROPERTY()
-	class UBaseCharacterArmComponent* LeftArmComp;
+public:
+	FOnGrabbing OnGrabbing;
 
-	UPROPERTY()
-	class UBaseCharacterArmComponent* RightArmComp;
-
-// public:
-// 	UPROPERTY()
-// 	FOnGrabbing OnGrabbing;
+	FOnRelease OnRelease;
 };
