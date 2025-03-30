@@ -76,4 +76,6 @@ void ALobbyGameState::MulticastRPC_UpdatePlayerTeam_Implementation(const FString
 			UE_LOG(LogTemp, Warning, TEXT("%s, %d"), *it.Key, it.Value.Team);
 		}
 	}
+
+	BlackholeLobbyWidget->UpdateImage();
 }

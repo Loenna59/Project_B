@@ -5,6 +5,7 @@
 
 #include "BanimalsGameInstance.h"
 #include "LobbyGameState.h"
+#include "LobbyPlayerState.h"
 #include "GameFramework/PlayerState.h"
 #include "Online/CoreOnline.h"
 #include "GameFramework/OnlineReplStructs.h"
@@ -12,6 +13,7 @@
 ALobbyGameMode::ALobbyGameMode()
 {
 	GameStateClass = ALobbyGameState::StaticClass();
+	PlayerStateClass = ALobbyPlayerState::StaticClass();
 }
 
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)

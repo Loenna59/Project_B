@@ -23,6 +23,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_EnterPlayer;
 
+
 	int32 roomIdx;
 	
 	UFUNCTION()

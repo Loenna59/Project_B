@@ -3,13 +3,15 @@
 
 #include "SessionItemUI.h"
 
+#include "BlackholeLobbyUI.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 
 void USessionItemUI::NativeConstruct()
 {
-	Super::NativeConstruct();
+	Super::NativeConstruct(); 
 
 	Btn_JoinSession->OnClicked.AddDynamic(this,&USessionItemUI::Btn_JoinSession_Clicked);
 }
@@ -18,6 +20,8 @@ void USessionItemUI::Btn_JoinSession_Clicked()
 {
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	gi->JoinOtherSession(roomIdx);
+
+	// LobbyB->UpdateImage();
 }
 
 void USessionItemUI::SetInfo(int32 idx, FString info)
