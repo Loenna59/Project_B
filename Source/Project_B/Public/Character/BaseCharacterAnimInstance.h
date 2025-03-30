@@ -52,10 +52,13 @@ public:
 	FVector2D HitDirection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bPicking;
+	TMap<FString, FVector> HandIKTarget = { { "GrabSocket_L", FVector::ZeroVector }, { "GrabSocket_R", FVector::ZeroVector } };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector IKTargetLocation;
+	TMap<FString, float> HandIKAlpha = { { "GrabSocket_L", 0 }, { "GrabSocket_R", 0 } };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FString, bool> bIsGrabbing = { { "GrabSocket_L", false }, { "GrabSocket_R", false } };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EWeaponType CurrentWeaponType = EWeaponType::None;

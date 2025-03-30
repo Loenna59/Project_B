@@ -54,7 +54,7 @@ void UBaseCharacterArmComponent::Grabbing()
 		return;
 	}
 	
-	AnimInstance->bPicking = true;
+	AnimInstance->bIsGrabbing[SocketName.ToString()] = true;
 	
 	TWeakObjectPtr<UBaseCharacterArmComponent> ThisWeak = this;
 	
@@ -91,8 +91,8 @@ void UBaseCharacterArmComponent::ReleaseGrab()
 	
 	if (AnimInstance)
 	{
-		AnimInstance->IKTargetLocation = FVector::ZeroVector;
-		AnimInstance->bPicking = false;
+		AnimInstance->HandIKTarget[SocketName.ToString()] = FVector::ZeroVector;
+		AnimInstance->bIsGrabbing[SocketName.ToString()] = false;
 	}
 
 	if (PhysicsHandleComp->GrabbedComponent)
@@ -138,6 +138,15 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, TArray<FHitResult> HitR
 					
 					PhysicsHandleComp->GrabComponentAtLocation(HitComp, NAME_None, GrabLocation);
 					GrabbedActor = HitActor;
+
+					if (AnimInstance)
+					{
+						AnimInstance->bIsGrabbing[SocketName.ToString()] = true;
+						AnimInstance->HandIKTarget[SocketName.ToString()] = GrabLocation;
+					}
+
+					// 붙으면 physics 끄쟈
+					TogglePhysicalAnimation(false);
 					break;
 				}
 			}

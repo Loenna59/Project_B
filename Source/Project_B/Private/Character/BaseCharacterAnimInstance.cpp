@@ -33,4 +33,10 @@ void UBaseCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	
 	bShouldMove = Acceleration != FVector::ZeroVector && GroundSpeed > 3.f;
 	bIsFalling = MovementComponent->IsFalling();
+
+	float TargetAlpha_L = bIsGrabbing["GrabSocket_L"]? 1.f : 0.f;
+	HandIKAlpha["GrabSocket_L"] = FMath::FInterpTo(HandIKAlpha["GrabSocket_L"], TargetAlpha_L, DeltaSeconds, 5.f);
+
+	float TargetAlpha_R = bIsGrabbing["GrabSocket_R"]? 1.f : 0.f;
+	HandIKAlpha["GrabSocket_R"] = FMath::FInterpTo(HandIKAlpha["GrabSocket_R"], TargetAlpha_R, DeltaSeconds, 5.f);
 }
