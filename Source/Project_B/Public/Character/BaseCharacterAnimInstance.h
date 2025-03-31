@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseCharacterPickComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Character/AttackType.h"
 #include "BaseCharacterAnimInstance.generated.h"
@@ -52,14 +53,17 @@ public:
 	FVector2D HitDirection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<FString, FVector> HandIKTarget = { { "GrabSocket_L", FVector::ZeroVector }, { "GrabSocket_R", FVector::ZeroVector } };
+	TMap<EGrabState, FVector> HandIKTarget = { { EGrabState::Right, FVector::ZeroVector }, { EGrabState::Left, FVector::ZeroVector } };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<FString, float> HandIKAlpha = { { "GrabSocket_L", 0 }, { "GrabSocket_R", 0 } };
+	TMap<EGrabState, float> HandIKAlpha = { { EGrabState::Right, 0 }, { EGrabState::Left, 0 } };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<FString, bool> bIsGrabbing = { { "GrabSocket_L", false }, { "GrabSocket_R", false } };
+	TMap<EGrabState, bool> bIsGrabbing = { { EGrabState::Right, false }, { EGrabState::Left, false } };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<EGrabState, FVector> HandIKJoint = { { EGrabState::Right, FVector::ZeroVector }, { EGrabState::Left, FVector::ZeroVector } };
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EWeaponType CurrentWeaponType = EWeaponType::None;
 

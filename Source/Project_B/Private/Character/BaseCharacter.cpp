@@ -13,13 +13,10 @@
 #include "Character/BaseCharacterPickComponent.h"
 #include "Character/HeadPhysicsAnimComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/SphereComponent.h"
-#include "Engine/OverlapResult.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
-#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Project_B/Maps/BlackHole/Public/GravityComponent.h"
 #include "Project_B/Utilities/LogMacro.h"
 #include "Weapon/Weapon.h"
@@ -67,6 +64,7 @@ ABaseCharacter::ABaseCharacter()
 	PickComp->SetNetAddressable();
 	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
+	PhysicalAnimationComp->SetIsReplicated(true);
 	PhysicalAnimationComp->SetNetAddressable();
 	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
@@ -83,7 +81,7 @@ ABaseCharacter::ABaseCharacter()
 
 	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
 	RightFootPhysicsAnimComp->SetIsReplicated(true);
-	RightArmPhysicsAnimComp->SetNetAddressable();
+	RightFootPhysicsAnimComp->SetNetAddressable();
 	
 	GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
 	GravityComp->SetIsReplicated(true);
