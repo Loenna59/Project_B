@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 #include "Project_B/Utilities/LogMacro.h"
 
@@ -15,6 +16,12 @@ class UBanimalsGameInstance;
 
 APodiumGameState::APodiumGameState()
 {
+}
+
+void APodiumGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(APodiumGameState, PodiumCamera);
 }
 
 void APodiumGameState::BeginPlay()
@@ -27,6 +34,8 @@ void APodiumGameState::BeginPlay()
 		
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &APodiumGameState::Net_Shoot,ReadyTime,false);
 		InitSpawnPoints();
+		
+		PodiumCamera = Cast<APodiumCamera>(UGameplayStatics::GetActorOfClass(GetWorld(),APodiumCamera::StaticClass()));
 	}
 
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
@@ -40,8 +49,7 @@ void APodiumGameState::BeginPlay()
 
 void APodiumGameState::InitPlayer(APlayerController* pc, bool bIsWin)
 {
-	APodiumCamera* cam = Cast<APodiumCamera>(UGameplayStatics::GetActorOfClass(GetWorld(),APodiumCamera::StaticClass()));
-	pc->SetViewTarget(cam);
+	pc->SetViewTarget(PodiumCamera);
 	
 	APawn* pawn = pc->GetPawn();
 
@@ -155,23 +163,14 @@ void APodiumGameState::AddWinPrize(APawn* pawn)
 
 void APodiumGameState::Net_Shoot_Implementation()
 {
-	APodiumCamera* podiumCam = FindPodiumCamera();
-	
-	if (podiumCam)
+	if (PodiumCamera)
 	{
-		podiumCam->Shoot();
+		PodiumCamera->Shoot();
 	}
 	else
 	{
 		LOG_ERROR(this, TEXT("포디엄 카메라 is Null"));
 	}
-}
-
-
-APodiumCamera* APodiumGameState::FindPodiumCamera()
-{
-	APodiumCamera* cam = Cast<APodiumCamera>(UGameplayStatics::GetActorOfClass(GetWorld(),APodiumCamera::StaticClass()));
-	return cam;
 }
 
 TMap<FString, FPlayerInfo> APodiumGameState::DummyPlayersInfo()
