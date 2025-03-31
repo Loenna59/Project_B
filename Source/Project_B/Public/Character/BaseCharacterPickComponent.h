@@ -47,6 +47,9 @@ public:
 	UFUNCTION()
 	void ValidateGrabState();
 
+	// Getter 만들게요 언니...
+	const EGrabState& GetGrabState() const {return GrabState;}
+
 protected:
 	UPROPERTY()
 	class UInputAction* PickInputAction;

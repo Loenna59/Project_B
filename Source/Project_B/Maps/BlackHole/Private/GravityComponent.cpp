@@ -3,6 +3,7 @@
 
 #include "Project_B/Maps/BlackHole/Public/GravityComponent.h"
 
+#include "Character/BaseCharacterPickComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Field/FieldSystem.h"
 #include "Kismet/GameplayStatics.h"
@@ -305,6 +306,9 @@ void UGravityComponent::MulticastRPC_SetOrbit_Implementation(FVector AngularVelo
 
 void UGravityComponent::SpawnCount()
 {
+	ABaseCharacter* player = Cast<ABaseCharacter>(GetOwner());
+	EGrabState state = player->PickComp->GetGrabState();
+	if (state != EGrabState::None) // 뭔갈 잡고 있으면
 	if (gs)
 	{
 		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
