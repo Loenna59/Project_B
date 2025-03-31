@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
 	float ReadyTime = 12.0f;
 
-	UPROPERTY(Replicated)
+	//UPROPERTY(Replicated)
 	class APodiumCamera* PodiumCamera = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | WinPrize")
@@ -49,14 +49,13 @@ private:
 	uint8 dummyKey = 0;
 	
 protected:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	//virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	
 	void InitPlayerInfo();
 
 public:
 	void InitPlayer(APlayerController* pc, bool bIsWin);
-
 	void AddWinPrize(APawn* pawn);
 
 private:

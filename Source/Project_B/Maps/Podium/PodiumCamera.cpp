@@ -4,6 +4,7 @@
 #include "PodiumCamera.h"
 
 #include "PictureWidget.h"
+#include "PodiumGameState.h"
 #include "PodiumMainWidget.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "GameFramework/PlayerState.h"
@@ -20,6 +21,14 @@ APodiumCamera::APodiumCamera()
 void APodiumCamera::BeginPlay()
 {
 	Super::BeginPlay();
+
+	FTimerHandle timeHandle;
+	GetWorld()->GetTimerManager().SetTimer(timeHandle,this,&APodiumCamera::SetPodiumCamera,BeginDelay,false);
+}
+
+void APodiumCamera::SetPodiumCamera()
+{
+	Cast<APodiumGameState>(GetWorld()->GetGameState())->PodiumCamera = this;
 }
 
 void APodiumCamera::Shoot()

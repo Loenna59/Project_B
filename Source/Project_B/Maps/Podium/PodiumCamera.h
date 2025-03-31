@@ -15,6 +15,8 @@ class PROJECT_B_API APodiumCamera : public ACameraActor
 
 public:
 	APodiumCamera();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BeginDelay = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	USceneCaptureComponent2D* CaptureComponent;
@@ -34,6 +36,8 @@ private:
 protected:
 	virtual void BeginPlay() override;
 
+	void SetPodiumCamera();
+	
 public:
 	void Shoot();
 };

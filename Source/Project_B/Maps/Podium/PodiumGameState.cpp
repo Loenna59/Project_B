@@ -16,14 +16,14 @@ class UBanimalsGameInstance;
 
 APodiumGameState::APodiumGameState()
 {
-	bReplicates = true;
+	//bReplicates = true;
 }
 
-void APodiumGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(APodiumGameState, PodiumCamera);
-}
+// void APodiumGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+// {
+// 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+// 	DOREPLIFETIME(APodiumGameState, PodiumCamera);
+// }
 
 void APodiumGameState::BeginPlay()
 {
@@ -35,8 +35,6 @@ void APodiumGameState::BeginPlay()
 		
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &APodiumGameState::Net_Shoot,ReadyTime,false);
 		InitSpawnPoints();
-		
-		PodiumCamera = Cast<APodiumCamera>(UGameplayStatics::GetActorOfClass(GetWorld(),APodiumCamera::StaticClass()));
 	}
 
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
