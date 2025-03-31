@@ -131,6 +131,8 @@ void ABaseCharacter::BeginPlay()
 	CurrentHealth = MaxHealth;
 
 	AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+
+	OnCalculateSpeedByMass.BindUObject(this, &ABaseCharacter::CalculateSpeedByMass);
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -231,6 +233,14 @@ void ABaseCharacter::OnWeaponAttackTraceChannel()
 void ABaseCharacter::Unequip()
 {
 	Server_UnequipWeapon();
+}
+
+void ABaseCharacter::CalculateSpeedByMass(float Mass)
+{
+	if (MoveComp)
+	{
+		MoveComp->CalculateSpeedByMass(Mass);
+	}
 }
 
 void ABaseCharacter::Server_UnequipWeapon_Implementation()

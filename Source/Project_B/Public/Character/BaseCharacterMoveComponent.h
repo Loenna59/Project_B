@@ -47,7 +47,7 @@ protected:
 	float MaxMass = 1000.f;
 
 	UPROPERTY(Replicated)
-	float ReplicatedSpeed;
+	float SpeedRatio = 1.f;
 
 public:
 	virtual void BeginPlay() override;
@@ -82,6 +82,7 @@ protected:
 	UFUNCTION()
 	void UpdateSpeed(float Speed);
 
-	// UFUNCTION()
-	// float CaculateSpeedByMass();
+public:
+	UFUNCTION()
+	void CalculateSpeedByMass(float Mass);
 };

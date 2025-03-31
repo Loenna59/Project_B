@@ -7,7 +7,6 @@
 #include "Character/BaseCharacterAnimInstance.h"
 #include "Character/BaseCharacterPickComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
-#include "Project_B/Utilities/LogMacro.h"
 #include "Project_B/Utilities/TraceChannelHelper.h"
 #include "Weapon/Weapon.h"
 
@@ -35,6 +34,8 @@ void UBaseCharacterArmComponent::BeginPlay()
 	PickComp->OnRelease.AddUObject(this, &UBaseCharacterArmComponent::ReleaseGrab);
 	PickComp->OffPhysics.AddUObject(this, &UBaseCharacterArmComponent::CheckAndOffPhysics);
 	OnUpdateGrabState.BindUObject(PickComp, &UBaseCharacterPickComponent::UpdateGrabState);
+
+	PhysicsHandleComp->SetInterpolationSpeed(1000.f);
 }
 
 
@@ -117,7 +118,8 @@ void UBaseCharacterArmComponent::ReleaseGrab()
 	{
 		PhysicsHandleComp->ReleaseComponent();
 		GrabbedActor = nullptr;
-		bool _ = OnUpdateGrabState.ExecuteIfBound(GrabState, false);
+		bool _ = Character->OnCalculateSpeedByMass.ExecuteIfBound(0);
+		bool __ = OnUpdateGrabState.ExecuteIfBound(GrabState, false);
 	}
 }
 
@@ -178,8 +180,9 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, TArray<FHitResult> HitR
 					
 					PhysicsHandleComp->GrabComponentAtLocation(HitComp, NAME_None, GrabLocation);
 					GrabbedActor = HitActor;
-					LOG_SCREEN("물제 무게 : %f", HitComp->GetMass());
-					bool _ = OnUpdateGrabState.ExecuteIfBound(GrabState, true);
+
+					bool _ = Character->OnCalculateSpeedByMass.ExecuteIfBound(HitComp->GetMass());
+					bool __ = OnUpdateGrabState.ExecuteIfBound(GrabState, true);
 
 					if (AnimInstance)
 					{
