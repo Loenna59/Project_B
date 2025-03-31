@@ -79,7 +79,7 @@ private:
 	// 플레이어 초기 위치 초기화를 위한 함수
 	TArray<AActor*> BlueSpawnPoints;
 	TArray<AActor*> RedSpawnPoints;
-	int32 dummyIdx = 0;
+	int32 dummyKey = 0;
 
 	int32 blueIdx = 0;
 	int32 redIdx = 0;

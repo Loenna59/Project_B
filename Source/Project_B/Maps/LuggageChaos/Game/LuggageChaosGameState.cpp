@@ -41,7 +41,6 @@ void ALuggageChaosGameState::GameReady()
 	}
 
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
-	
 	InitUI(pc);
 }
 
@@ -53,8 +52,6 @@ void ALuggageChaosGameState::InitPlayerInfo()
 	if (isDummyPlayerInfo)
 	{
 		PlayersInfo = DummyPlayersInfo();
-		MyKey = FString::FromInt(dummyIdx);
-		UE_LOG(LogTemp,Warning,TEXT("나의 키: %s"), *MyKey);
 	}
 	else
 	{
@@ -94,6 +91,27 @@ void ALuggageChaosGameState::InitPlayerInfo()
 
 void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 {
+	if (isDummyPlayerInfo)
+	{
+		FPlayerInfo* Info = PlayersInfo.Find(FString::FromInt(dummyKey));
+		dummyKey++;
+		
+		if (Info->Team == ETeamType::Blue)
+		{
+			LOG_PRINT(TEXT("저는 파랑팀"));
+			pawn->SetActorLocation(BlueSpawnPoints[blueIdx]->GetActorLocation());
+			pawn->SetActorRotation(BlueSpawnPoints[blueIdx]->GetActorRotation());
+			++blueIdx;
+		}
+		else
+		{
+			LOG_PRINT(TEXT("저는 레드팀"));
+			pawn->SetActorLocation(RedSpawnPoints[redIdx]->GetActorLocation());
+			pawn->SetActorRotation(RedSpawnPoints[blueIdx]->GetActorRotation());
+			++redIdx;
+		}
+	}
+	
 	UE_LOG(LogTemp,Error,TEXT("키: %s 를 가진 플레이어는"), *key);
 	if (FPlayerInfo* Info = PlayersInfo.Find(key))
 	{
@@ -180,7 +198,6 @@ void ALuggageChaosGameState::InitSpawnPoint()
 void ALuggageChaosGameState::GameStart()
 {
 	Net_GameStart();
-	
 	GetWorld()->GetTimerManager().SetTimer(GameTimerHandle, this, &ALuggageChaosGameState::TimeOut,GameTime,false);
 }
 

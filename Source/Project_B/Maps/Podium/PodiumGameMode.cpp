@@ -10,7 +10,7 @@
 void APodiumGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	//TODO: WinnerKey gi로부터 가져오기
+
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	WinnerKeys = gi->WinnerKeys;
 }
@@ -27,39 +27,30 @@ void APodiumGameMode::OnPostLogin(AController* NewPlayer)
 			if (NewPlayer && NewPlayer->GetPawn())
 			{
 				APodiumGameState* gs = Cast<APodiumGameState>(GetWorld()->GetGameState());
-				if (gs)
+				
+				const FUniqueNetIdRepl& NetIdRepl = NewPlayer->GetPlayerState<APlayerState>()->GetUniqueId();
+				FString key;
+				
+				if (NetIdRepl.IsValid())
 				{
-					const FUniqueNetIdRepl& NetIdRepl = NewPlayer->GetPlayerState<APlayerState>()->GetUniqueId();
-					FString key;
-					
-					if (NetIdRepl.IsValid())
-					{
-						TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-						key = NetId->ToString();
-						LOG_PRINT(TEXT("접속한 플레이어 키: %s"), *key);
-					}
-
-					UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
-
-					WinnerKeys = gi->WinnerKeys;
-					for (int i = 0; i<WinnerKeys.Num(); i++)
-					{
-						LOG_PRINT(TEXT("승리자 %d번 키: %s"), i, *WinnerKeys[i]);
-					}
-					
-					if (WinnerKeys.Find(key))
-					{
-						UE_LOG(LogTemp, Error, TEXT("이겼다!!!!!!!"));
-						gs->InitPlayerLoc(NewPlayer->GetPawn(), true);
-					}
-					else
-					{
-						UE_LOG(LogTemp, Error, TEXT("졌어ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ"));
-						gs->InitPlayerLoc(NewPlayer->GetPawn(), false);
-					}
-					
-					gs->InitPodiumCamera(NewPlayer->GetPlayerState<APlayerState>()->GetPlayerController());
+					TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+					key = NetId->ToString();
+					LOG_PRINT(TEXT("접속한 플레이어 키: %s"), *key);
 				}
+				
+				if (WinnerKeys.Find(key))
+				{
+					UE_LOG(LogTemp, Error, TEXT("%s번 이겼다!!!!!!!"), *key);
+					gs->InitPlayerLoc(NewPlayer->GetPawn(), true);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("%s번 졌어ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ"),*key);
+					gs->InitPlayerLoc(NewPlayer->GetPawn(), false);
+				}
+				
+				gs->InitPodiumCamera(NewPlayer->GetPlayerState<APlayerState>()->GetPlayerController());
+			
 			}
 		}, BeginDelay, false); 
 	}

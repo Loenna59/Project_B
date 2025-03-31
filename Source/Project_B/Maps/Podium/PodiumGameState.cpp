@@ -30,6 +30,14 @@ void APodiumGameState::BeginPlay()
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &APodiumGameState::Net_Shoot,ReadyTime,false);
 		InitSpawnPoints();
 	}
+
+	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
+	TArray<FString> WinnerKeys = gi->WinnerKeys;
+	
+	for (int i = 0; i<WinnerKeys.Num(); i++)
+	{
+		LOG_PRINT(TEXT("승리자 %d번 키: %s"), i, *WinnerKeys[i]);
+	}
 }
 
 void APodiumGameState::InitPlayerInfo()
@@ -57,18 +65,6 @@ void APodiumGameState::InitPlayerInfo()
 				mykey = NetId->ToString();
 				UE_LOG(LogTemp, Error, TEXT("나의 키: %s"), *mykey);
 				
-				// FPlayerInfo* Info = PlayersInfo.Find(mykey);
-				// if (Info)
-				// {
-				// 	if (Info->bIsWin)
-				// 	{
-				// 		UE_LOG(LogTemp, Error, TEXT("이겼다!!!!!!!"));
-				// 	}
-				// 	else
-				// 	{
-				// 		UE_LOG(LogTemp, Error, TEXT("졌어ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ"));
-				// 	}
-				// }
 			}
 			else
 			{
