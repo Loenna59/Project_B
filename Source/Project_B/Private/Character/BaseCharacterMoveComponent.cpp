@@ -44,7 +44,7 @@ void UBaseCharacterMoveComponent::GetLifetimeReplicatedProps(TArray<class FLifet
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UBaseCharacterMoveComponent, ReplicatedSpeed);
+	DOREPLIFETIME(UBaseCharacterMoveComponent, SpeedRatio);
 }
 
 void UBaseCharacterMoveComponent::BeginPlay()
@@ -80,7 +80,7 @@ void UBaseCharacterMoveComponent::Move(const FInputActionValue& actionValue)
 		FVector toVector(value.Y, value.X, 0);
 		FTransform controlTransform(Character->GetControlRotation());
 		
-		Character->AddMovementInput(controlTransform.TransformVector(toVector));
+		Character->AddMovementInput(controlTransform.TransformVector(toVector), SpeedRatio);
 	}
 }
 
@@ -136,12 +136,13 @@ void UBaseCharacterMoveComponent::Multicast_UpdateSpeed_Implementation(float Spe
 
 void UBaseCharacterMoveComponent::UpdateSpeed(float Speed)
 {
-	if (GetOwner()->HasAuthority())
-	{
-		Multicast_UpdateSpeed(Speed);
-		return;
-	}
-
 	Server_UpdateSpeed(Speed);
+}
+
+void UBaseCharacterMoveComponent::CalculateSpeedByMass(float Mass)
+{
+	float MassRatio = 1 - FMath::Clamp(Mass / MaxMass, 0.f, 0.9f);
+	
+	SpeedRatio = MassRatio;
 }
 

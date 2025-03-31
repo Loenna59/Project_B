@@ -32,6 +32,10 @@ void UBaseCharacterArmComponent::BeginPlay()
 	PickComp = Cast<UBaseCharacterPickComponent>(Character->GetDefaultSubobjectByName(TEXT("PickComp")));
 	PickComp->OnGrabbing.AddUObject(this, &UBaseCharacterArmComponent::Grabbing);
 	PickComp->OnRelease.AddUObject(this, &UBaseCharacterArmComponent::ReleaseGrab);
+	PickComp->OffPhysics.AddUObject(this, &UBaseCharacterArmComponent::CheckAndOffPhysics);
+	OnUpdateGrabState.BindUObject(PickComp, &UBaseCharacterPickComponent::UpdateGrabState);
+
+	PhysicsHandleComp->SetInterpolationSpeed(1000.f);
 }
 
 
@@ -39,6 +43,11 @@ void UBaseCharacterArmComponent::TickComponent(float DeltaTime, ELevelTick TickT
                                                FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (Character && Character->bHasWeapon)
+	{
+		return;
+	}
 
 	if (PhysicsHandleComp && PhysicsHandleComp->GrabbedComponent)
 	{
@@ -54,7 +63,17 @@ void UBaseCharacterArmComponent::Grabbing()
 		return;
 	}
 	
-	AnimInstance->bIsGrabbing[SocketName.ToString()] = true;
+	if (Character->bHasWeapon)
+	{
+		return;
+	}
+
+	if (PickComp->BlockGrabState == GrabState)
+	{
+		return;
+	}
+	
+	AnimInstance->bIsGrabbing[GrabState] = true;
 	
 	TWeakObjectPtr<UBaseCharacterArmComponent> ThisWeak = this;
 	
@@ -91,14 +110,16 @@ void UBaseCharacterArmComponent::ReleaseGrab()
 	
 	if (AnimInstance)
 	{
-		AnimInstance->HandIKTarget[SocketName.ToString()] = FVector::ZeroVector;
-		AnimInstance->bIsGrabbing[SocketName.ToString()] = false;
+		AnimInstance->HandIKTarget[GrabState] = FVector::ZeroVector;
+		AnimInstance->bIsGrabbing[GrabState] = false;
 	}
 
 	if (PhysicsHandleComp->GrabbedComponent)
 	{
 		PhysicsHandleComp->ReleaseComponent();
 		GrabbedActor = nullptr;
+		bool _ = Character->OnCalculateSpeedByMass.ExecuteIfBound(0);
+		bool __ = OnUpdateGrabState.ExecuteIfBound(GrabState, false);
 	}
 }
 
@@ -119,6 +140,12 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, TArray<FHitResult> HitR
 		for (FHitResult& Result : HitResults)
 		{
 			UPrimitiveComponent* HitComp = Result.GetComponent();
+
+			if (HitComp == Mesh)
+			{
+				continue;
+			}
+			
 			if (HitComp && HitComp->IsSimulatingPhysics())
 			{
 				FVector GrabLocation;
@@ -126,6 +153,21 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, TArray<FHitResult> HitR
 					Mesh->GetSocketLocation(SocketName),
 					GrabLocation
 				);
+
+				// 어깨 위치
+				FVector ShoulderLocation = Mesh->GetSocketLocation(JointBoneName);
+				FVector DirectionToHit = (Result.ImpactPoint - ShoulderLocation).GetSafeNormal();
+
+				// 손 위치 보정 (최대 거리 제한)
+				float MaxReach = GrabTraceDistance;
+				FVector ClampedTarget = ShoulderLocation + DirectionToHit * FMath::Min(MaxReach, FVector::Dist(Result.ImpactPoint, ShoulderLocation));
+
+				// 팔꿈치가 몸 바깥으로 꺾이도록 JointTarget 설정
+				
+				FVector ArmVector = GrabState == EGrabState::Left? -Character->GetActorRightVector() : Character->GetActorRightVector();
+
+				FVector JointOffset = ArmVector * JointOffsetAmount + Character->GetActorForwardVector() * 10.f;  // 오른손 기준 오른쪽
+				FVector JointTarget = ClampedTarget + JointOffset;
 
 				if (Distance >= 0.f)
 				{
@@ -139,10 +181,14 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, TArray<FHitResult> HitR
 					PhysicsHandleComp->GrabComponentAtLocation(HitComp, NAME_None, GrabLocation);
 					GrabbedActor = HitActor;
 
+					bool _ = Character->OnCalculateSpeedByMass.ExecuteIfBound(HitComp->GetMass());
+					bool __ = OnUpdateGrabState.ExecuteIfBound(GrabState, true);
+
 					if (AnimInstance)
 					{
-						AnimInstance->bIsGrabbing[SocketName.ToString()] = true;
-						AnimInstance->HandIKTarget[SocketName.ToString()] = GrabLocation;
+						AnimInstance->bIsGrabbing[GrabState] = true;
+						AnimInstance->HandIKTarget[GrabState] = GrabLocation;
+						AnimInstance->HandIKJoint[GrabState] = JointTarget;
 					}
 
 					// 붙으면 physics 끄쟈
@@ -151,6 +197,15 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, TArray<FHitResult> HitR
 				}
 			}
 		}
+	}
+}
+
+void UBaseCharacterArmComponent::CheckAndOffPhysics(EGrabState BlockState)
+{
+	if (GrabState == BlockState)
+	{
+		AnimInstance->bIsGrabbing[GrabState] = false;
+		TogglePhysicalAnimation(false);
 	}
 }
 

@@ -32,13 +32,22 @@ protected:
 	class UInputAction* RunInputAction = nullptr;
 
 	UPROPERTY(EditAnywhere, Category=Movement)
+	float MinWalkSpeed = 10.f;
+
+	UPROPERTY(EditAnywhere, Category=Movement)
 	float WalkSpeed = 500.f;
 
 	UPROPERTY(EditAnywhere, Category=Movement)
+	float MinRunSpeed = 20.f;
+	
+	UPROPERTY(EditAnywhere, Category=Movement)
 	float RunSpeed = 1000.f;
 
+	UPROPERTY(EditAnywhere, Category=Movement)
+	float MaxMass = 1000.f;
+
 	UPROPERTY(Replicated)
-	float ReplicatedSpeed;
+	float SpeedRatio = 1.f;
 
 public:
 	virtual void BeginPlay() override;
@@ -70,5 +79,10 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdateSpeed(float Speed);
 
+	UFUNCTION()
 	void UpdateSpeed(float Speed);
+
+public:
+	UFUNCTION()
+	void CalculateSpeedByMass(float Mass);
 };

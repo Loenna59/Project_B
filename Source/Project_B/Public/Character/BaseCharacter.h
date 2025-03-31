@@ -5,6 +5,8 @@
 #include "Character/AttackType.h"
 #include "BaseCharacter.generated.h"
 
+DECLARE_DELEGATE_OneParam(FOnCalculateSpeedByMass, float);
+
 UCLASS()
 class PROJECT_B_API ABaseCharacter : public ACharacter
 {
@@ -51,6 +53,9 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UnequipWeapon(AWeapon* Weapon);
+
+	UFUNCTION()
+	void CalculateSpeedByMass(float Mass);
 	
 protected:
 	UPROPERTY()
@@ -115,5 +120,6 @@ public:
 
 	UPROPERTY(ReplicatedUsing=AttachWeapon)
 	class AWeapon* OwnedWeapon = nullptr;
-	
+
+	FOnCalculateSpeedByMass OnCalculateSpeedByMass;
 };

@@ -5,6 +5,7 @@
 #include "KismetTraceUtils.h"
 #include "Character/BaseCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "Project_B/Utilities/LogMacro.h"
 #include "Project_B/Utilities/TraceChannelHelper.h"
 
 // Sets default values
@@ -64,18 +65,17 @@ void AHammer::OnAttackTraceChannel()
 		Location,
 		FQuat::Identity,
 		ECC_Camera,
-		FCollisionShape::MakeBox(FVector(100.f)),
+		FCollisionShape::MakeSphere(50.f),
 		CollisionParams
 	);
 
 	if (bDrawDebug)
 	{
-		DrawDebugBoxTraceMulti(
+		DrawDebugSphereTraceMulti(
 			GetWorld(),
 			Location,
 			Location,
-			FVector(100.f),
-			FRotator::ZeroRotator,
+			50.f,
 			EDrawDebugTrace::ForDuration,
 			bHit,
 			HitResult,
@@ -91,6 +91,7 @@ void AHammer::OnAttackTraceChannel()
 		{
 			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
 			{
+				LOG_SCREEN("%s", *GetVelocity().ToString());
 				Character->OnHit(EAttackType::HAMMER, Result.Normal.GetSafeNormal(), 0);
 				break;
 			}
