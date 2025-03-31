@@ -40,7 +40,9 @@ void APodiumGameState::BeginPlay()
 
 void APodiumGameState::InitPlayer(APlayerController* pc, bool bIsWin)
 {
-	pc->SetViewTarget(FindPodiumCamera());
+	APodiumCamera* cam = Cast<APodiumCamera>(UGameplayStatics::GetActorOfClass(GetWorld(),APodiumCamera::StaticClass()));
+	pc->SetViewTarget(cam);
+	
 	APawn* pawn = pc->GetPawn();
 
 	if (bIsWin && WinIndex < 2)

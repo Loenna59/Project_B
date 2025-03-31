@@ -54,7 +54,7 @@ public:
 
 	void AddWinPrize(APawn* pawn);
 	
-	APodiumCamera* FindPodiumCamera();
+	class APodiumCamera* FindPodiumCamera();
 
 private:
 	void InitSpawnPoints();
