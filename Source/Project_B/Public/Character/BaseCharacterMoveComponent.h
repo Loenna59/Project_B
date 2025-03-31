@@ -32,10 +32,19 @@ protected:
 	class UInputAction* RunInputAction = nullptr;
 
 	UPROPERTY(EditAnywhere, Category=Movement)
+	float MinWalkSpeed = 10.f;
+
+	UPROPERTY(EditAnywhere, Category=Movement)
 	float WalkSpeed = 500.f;
 
 	UPROPERTY(EditAnywhere, Category=Movement)
+	float MinRunSpeed = 20.f;
+	
+	UPROPERTY(EditAnywhere, Category=Movement)
 	float RunSpeed = 1000.f;
+
+	UPROPERTY(EditAnywhere, Category=Movement)
+	float MaxMass = 1000.f;
 
 	UPROPERTY(Replicated)
 	float ReplicatedSpeed;
@@ -70,5 +79,9 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdateSpeed(float Speed);
 
+	UFUNCTION()
 	void UpdateSpeed(float Speed);
+
+	// UFUNCTION()
+	// float CaculateSpeedByMass();
 };

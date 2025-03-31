@@ -7,6 +7,7 @@
 #include "Character/BaseCharacterAnimInstance.h"
 #include "Character/BaseCharacterPickComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Project_B/Utilities/LogMacro.h"
 #include "Project_B/Utilities/TraceChannelHelper.h"
 #include "Weapon/Weapon.h"
 
@@ -177,6 +178,7 @@ void UBaseCharacterArmComponent::DetectNearby(bool bHit, TArray<FHitResult> HitR
 					
 					PhysicsHandleComp->GrabComponentAtLocation(HitComp, NAME_None, GrabLocation);
 					GrabbedActor = HitActor;
+					LOG_SCREEN("물제 무게 : %f", HitComp->GetMass());
 					bool _ = OnUpdateGrabState.ExecuteIfBound(GrabState, true);
 
 					if (AnimInstance)
