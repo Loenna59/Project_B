@@ -202,22 +202,26 @@ void ABlackholeGameState::ConvertToSpectator(APlayerController* PlayerController
 
 	PlayerController->UnPossess();
 
+	if (PlayerController == GetWorld()->GetFirstPlayerController())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SamePlayerController!!!!!!! : %p || %p"), PlayerController, GetWorld()->GetFirstPlayerController());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Different Controller : %p || %p"), PlayerController, GetWorld()->GetFirstPlayerController());
+	}
+	
 	AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
 	if (Target)
 	{
 		// SpectatorPawn 생성 및 전환
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = PlayerController;
-		ASpectatorPawn* Spectator = GetWorld()->SpawnActor<ASpectatorPawn>(SpectatorPawnClass, Target->GetActorLocation(), Target->GetActorRotation(), SpawnParams);
+		ASpectatorPawn* Spectator = GetWorld()->SpawnActorDeferred<ASpectatorPawn>(SpectatorPawnClass, Target->GetActorTransform(), PlayerController, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
 		if (Spectator)
 		{
+			UGameplayStatics::FinishSpawningActor(Spectator, Target->GetActorTransform());
 			PlayerController->Possess(Spectator);
 			UE_LOG(LogTemp, Warning, TEXT("Spectator Possessed"));
 		}
 	}
 }
-
-
-
-

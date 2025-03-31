@@ -32,4 +32,10 @@ public:
 	APlayerController* pc;
 	UPROPERTY()
 	class UCameraComponent* SpectatorCam;
+
+	// 인풋
+	UPROPERTY()
+	class UInputMappingContext* IMC_Spectator;
+	UPROPERTY()
+	class UInputAction* IA_Fire;
 };
