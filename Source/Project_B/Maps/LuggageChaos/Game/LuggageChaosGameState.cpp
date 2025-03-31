@@ -242,14 +242,13 @@ void ALuggageChaosGameState::GameEnd()
 {
 	FTimerHandle OnEndTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(OnEndTimerHandle, this, &ALuggageChaosGameState::ChangeLevelPodium,EndTime*SlowTime,false);
-
-	//TODO: gi의 winnerkey 설정
+	
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	gi->WinnerKeys = WinnerKeys;
 	
 	for (int i = 0; i<WinnerKeys.Num(); i++)
 	{
-		LOG_PRINT(TEXT("gi에 승리자 키: %s 저장"), *WinnerKeys[i]);
+		UE_LOG(LogTemp,Error,TEXT("gi에 승리자 키: %s 저장"), *WinnerKeys[i]);
 	}
 	
 	Net_GameEnd();
