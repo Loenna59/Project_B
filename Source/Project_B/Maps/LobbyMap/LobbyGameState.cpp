@@ -5,6 +5,7 @@
 
 #include "BanimalsGameInstance.h"
 #include "Blueprint/UserWidget.h"
+#include "Net/UnrealNetwork.h"
 #include "Widget/BlackholeLobbyUI.h"
 #include "Widget/LuggageLobbyUI.h"
 
