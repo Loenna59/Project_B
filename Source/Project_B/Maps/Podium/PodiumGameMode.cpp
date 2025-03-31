@@ -52,14 +52,16 @@ void APodiumGameMode::OnPostLogin(AController* NewPlayer)
 				}
 
 				APodiumGameState* gs = Cast<APodiumGameState>(GetWorld()->GetGameState());
-				if (WinnerKeys.Find(key))
+				int32 foundIdx = WinnerKeys.Find(key);
+				
+				if (foundIdx != INDEX_NONE)
 				{
-					UE_LOG(LogTemp, Error, TEXT("%s번 이겼다!!!!!!!"), *key);
+					UE_LOG(LogTemp, Error, TEXT("%s번, 승리자 목록에 존재함"), *key);
 					gs->InitPlayer(Cast<APlayerController>(NewPlayer), true);
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("%s번 졌어ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ"),*key);
+					UE_LOG(LogTemp, Error, TEXT("%s번, 승리자 목록에 없음"),*key);
 					gs->InitPlayer(Cast<APlayerController>(NewPlayer), false);
 				}
 			}

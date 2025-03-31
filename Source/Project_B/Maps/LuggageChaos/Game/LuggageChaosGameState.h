@@ -58,8 +58,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
 	TSubclassOf<class UUserWidget> TransitionWidgetClass;
 	
-	UPROPERTY(Replicated)
-	TArray<FString> WinnerKeys;
 
 private:
 	FTimerHandle GameTimerHandle;
@@ -73,6 +71,8 @@ private:
 	// 플레이어 unique ID, Info
 	TMap<FString,FPlayerInfo> PlayersInfo;
 
+	UPROPERTY(Replicated)
+	TArray<FString> WinnerKeys;
 
 	FString MyKey = "";
 	
@@ -102,6 +102,7 @@ protected:
 public:
 	/**모든 클라이언트에서 호출되어야 함*/
 	void AddScore(ETeamType team ,const uint8 point);
+	void AddWinner(FString playerKey);
 	void InitPlayerLoc(APawn* pawn,FString key);
  
 protected:
