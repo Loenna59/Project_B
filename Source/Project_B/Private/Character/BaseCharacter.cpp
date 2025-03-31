@@ -318,6 +318,8 @@ void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type,
 		}
 	
 		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Right"));
+
+		//LaunchCharacter()
 		break;
 	}
 }
