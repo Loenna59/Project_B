@@ -21,9 +21,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool isDummyPlayer = false;
 	
-	UPROPERTY()
-	class APodiumCamera* PodiumCamera = nullptr;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
 	float ReadyTime = 12.0f;
 
@@ -53,19 +50,17 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void InitPlayerLoc(APawn* pawn, bool bIsWin);
+	void InitPlayer(APlayerController* pc, bool bIsWin);
 
 	void AddWinPrize(APawn* pawn);
 	
-	void InitPodiumCamera(APlayerController* pc);
+	APodiumCamera* FindPodiumCamera();
 
 private:
 	void InitSpawnPoints();
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_Shoot();
-
-	void Shoot();
 
 	TMap<FString,FPlayerInfo> DummyPlayersInfo();
 };

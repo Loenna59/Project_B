@@ -31,8 +31,6 @@ void APodiumGameMode::OnPostLogin(AController* NewPlayer)
 		{
 			if (NewPlayer && NewPlayer->GetPawn())
 			{
-				APodiumGameState* gs = Cast<APodiumGameState>(GetWorld()->GetGameState());
-				
 				const FUniqueNetIdRepl& NetIdRepl = NewPlayer->GetPlayerState<APlayerState>()->GetUniqueId();
 				FString key;
 				
@@ -43,32 +41,27 @@ void APodiumGameMode::OnPostLogin(AController* NewPlayer)
 					LOG_PRINT(TEXT("접속한 플레이어 키: %s"), *key);
 				}
 
-				UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
-				WinnerKeys = gi->WinnerKeys;
-
 				if (WinnerKeys.IsEmpty())
 				{
-					LOG_PRINT(TEXT("승리자 없습"));
+					LOG_PRINT(TEXT("승리자 없음"));
 				}
 				
 				for (int i = 0; i<WinnerKeys.Num(); i++)
 				{
 					UE_LOG(LogTemp,Error,TEXT("gi에 저장된 승리자: %s"), *WinnerKeys[i]);
 				}
-				
+
+				APodiumGameState* gs = Cast<APodiumGameState>(GetWorld()->GetGameState());
 				if (WinnerKeys.Find(key))
 				{
 					UE_LOG(LogTemp, Error, TEXT("%s번 이겼다!!!!!!!"), *key);
-					gs->InitPlayerLoc(NewPlayer->GetPawn(), true);
+					gs->InitPlayer(Cast<APlayerController>(NewPlayer), true);
 				}
 				else
 				{
 					UE_LOG(LogTemp, Error, TEXT("%s번 졌어ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ"),*key);
-					gs->InitPlayerLoc(NewPlayer->GetPawn(), false);
+					gs->InitPlayer(Cast<APlayerController>(NewPlayer), false);
 				}
-				
-				gs->InitPodiumCamera(NewPlayer->GetPlayerState<APlayerState>()->GetPlayerController());
-			
 			}
 		}, BeginDelay, false); 
 	}

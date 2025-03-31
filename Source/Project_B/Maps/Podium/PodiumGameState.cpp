@@ -20,8 +20,6 @@ APodiumGameState::APodiumGameState()
 void APodiumGameState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//InitPlayerInfo();
 	
 	if (HasAuthority())
 	{
@@ -37,6 +35,41 @@ void APodiumGameState::BeginPlay()
 	for (int i = 0; i<WinnerKeys.Num(); i++)
 	{
 		LOG_PRINT(TEXT("승리자 %d번 키: %s"), i, *WinnerKeys[i]);
+	}
+}
+
+void APodiumGameState::InitPlayer(APlayerController* pc, bool bIsWin)
+{
+	pc->SetViewTarget(FindPodiumCamera());
+	APawn* pawn = pc->GetPawn();
+
+	if (bIsWin && WinIndex < 2)
+	{
+		pawn->SetActorLocation(WinnerPoints1[WinIndex]->GetActorLocation());
+		pawn->SetActorRotation(WinnerPoints1[WinIndex]->GetActorRotation());
+		WinIndex++;
+		
+		AddWinPrize(pawn);
+	}
+	else if (bIsWin && WinIndex >= 2)
+	{
+		pawn->SetActorLocation(WinnerPoints2[WinIndex-2]->GetActorLocation());
+		pawn->SetActorRotation(WinnerPoints2[WinIndex-2]->GetActorRotation());
+		WinIndex++;
+		
+		AddWinPrize(pawn);
+	}
+	else if (bIsWin == false && NorIndex < 2)
+	{
+		pawn->SetActorLocation(NormalPoints1[NorIndex]->GetActorLocation());
+		pawn->SetActorRotation(NormalPoints1[NorIndex]->GetActorRotation());
+		NorIndex++;
+	}
+	else if (bIsWin == false && NorIndex >= 2)
+	{
+		pawn->SetActorLocation(NormalPoints2[NorIndex-2]->GetActorLocation());
+		pawn->SetActorRotation(NormalPoints2[NorIndex-2]->GetActorRotation());
+		NorIndex++;
 	}
 }
 
@@ -107,45 +140,6 @@ void APodiumGameState::InitSpawnPoints()
 	}
 }
 
-void APodiumGameState::InitPodiumCamera(APlayerController* pc)
-{
-	PodiumCamera = Cast<APodiumCamera>(UGameplayStatics::GetActorOfClass(GetWorld(),APodiumCamera::StaticClass()));
-	
-	pc->SetViewTarget(PodiumCamera);
-}
-
-void APodiumGameState::InitPlayerLoc(APawn* pawn, bool bIsWin)
-{
-	if (bIsWin && WinIndex < 2)
-	{
-		pawn->SetActorLocation(WinnerPoints1[WinIndex]->GetActorLocation());
-		pawn->SetActorRotation(WinnerPoints1[WinIndex]->GetActorRotation());
-		WinIndex++;
-		
-		AddWinPrize(pawn);
-	}
-	else if (bIsWin && WinIndex >= 2)
-	{
-		pawn->SetActorLocation(WinnerPoints2[WinIndex-2]->GetActorLocation());
-		pawn->SetActorRotation(WinnerPoints2[WinIndex-2]->GetActorRotation());
-		WinIndex++;
-		
-		AddWinPrize(pawn);
-	}
-	else if (bIsWin == false && NorIndex < 2)
-	{
-		pawn->SetActorLocation(NormalPoints1[NorIndex]->GetActorLocation());
-		pawn->SetActorRotation(NormalPoints1[NorIndex]->GetActorRotation());
-		NorIndex++;
-	}
-	else if (bIsWin == false && NorIndex >= 2)
-	{
-		pawn->SetActorLocation(NormalPoints2[NorIndex-2]->GetActorLocation());
-		pawn->SetActorRotation(NormalPoints2[NorIndex-2]->GetActorRotation());
-		NorIndex++;
-	}
-}
-
 void APodiumGameState::AddWinPrize(APawn* pawn)
 {
 	AWinnerPrize* prize = GetWorld()->SpawnActor<AWinnerPrize>(WinnerPrizeClass, pawn->GetTransform());
@@ -157,23 +151,13 @@ void APodiumGameState::AddWinPrize(APawn* pawn)
 	}
 }
 
-void APodiumGameState::Shoot()
-{
-	if (PodiumCamera)
-	{
-		PodiumCamera->Shoot();
-	}
-	else
-	{
-		LOG_ERROR(this, TEXT("포디엄 카메라 is Null"));
-	}
-}
-
 void APodiumGameState::Net_Shoot_Implementation()
 {
-	if (PodiumCamera)
+	APodiumCamera* podiumCam = FindPodiumCamera();
+	
+	if (podiumCam)
 	{
-		PodiumCamera->Shoot();
+		podiumCam->Shoot();
 	}
 	else
 	{
@@ -181,6 +165,12 @@ void APodiumGameState::Net_Shoot_Implementation()
 	}
 }
 
+
+APodiumCamera* APodiumGameState::FindPodiumCamera()
+{
+	APodiumCamera* cam = Cast<APodiumCamera>(UGameplayStatics::GetActorOfClass(GetWorld(),APodiumCamera::StaticClass()));
+	return cam;
+}
 
 TMap<FString, FPlayerInfo> APodiumGameState::DummyPlayersInfo()
 {
