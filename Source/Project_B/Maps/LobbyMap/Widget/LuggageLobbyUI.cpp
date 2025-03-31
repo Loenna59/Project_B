@@ -4,6 +4,7 @@
 #include "LuggageLobbyUI.h"
 
 #include "Components/Button.h"
+#include "Components/Image.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 
 void ULuggageLobbyUI::NativeConstruct()
@@ -12,6 +13,29 @@ void ULuggageLobbyUI::NativeConstruct()
 
 	gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	Btn_Start->OnClicked.AddDynamic(this, &ULuggageLobbyUI::GameStart);
+}
+
+void ULuggageLobbyUI::UpdateImage()
+{
+	// 이미지 배열 저장
+	TArray<UImage*> DefaultImages = { red01_on, blue01_on, red02_on, blue02_on, red03_on, blue03_on, red04_on, blue04_on };
+	
+	// APlayerController* player = GetWorld()->GetFirstPlayerController(); // 내꺼만 들고옴
+	TMap<FString, FPlayerInfo> info = gi->GetPlayerInfo();
+	FString Key;
+	
+	for (int i = 0; i < DefaultImages.Num(); i++)
+	{
+		for (auto& it : info)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Stored Key : %s"), *it.Key);
+			if (it.Value.PlayerID == i)
+			{
+				// 플레이어 인덱스와 같은 이미지를 보이게 하자
+				DefaultImages[i]->SetRenderOpacity(1);
+			}
+		}
+	}
 }
 
 void ULuggageLobbyUI::GameStart()
