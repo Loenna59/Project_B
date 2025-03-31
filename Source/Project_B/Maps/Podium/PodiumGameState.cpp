@@ -16,6 +16,7 @@ class UBanimalsGameInstance;
 
 APodiumGameState::APodiumGameState()
 {
+	bReplicates = true;
 }
 
 void APodiumGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
