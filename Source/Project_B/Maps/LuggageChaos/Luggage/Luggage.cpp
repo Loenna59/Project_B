@@ -23,7 +23,10 @@ ALuggage::ALuggage()
 void ALuggage::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (HasAuthority() == false)
+	{
+		SetActorEnableCollision(false);
+	}
 }
 
 void ALuggage::Tick(float DeltaTime)
