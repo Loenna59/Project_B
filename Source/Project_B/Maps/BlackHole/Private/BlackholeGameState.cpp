@@ -136,21 +136,6 @@ void ABlackholeGameState::DetermineWinner()
 	UE_LOG(LogTemp, Warning, TEXT("Game Over! Winner determined."));
 }
 
-
-/*void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTime)
-{
-	// 게임 시작 로직
-	GameStartTime = StartTime;
-}
-
-void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
-{
-	UE_LOG(LogTemp, Warning, TEXT("End Game!!!!"));
-	
-	// 승패 가르기
-	DetermineWinner();
-}*/
-
 void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
 	if (!HasAuthority()) return;
@@ -164,8 +149,7 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 	UE_LOG(LogTemp, Warning, TEXT("Player Death"));
 
 	// 사망 처리 로직
-	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->SetIgnoreMoveInput(true);
+	PlayerController->DisableInput(PlayerController);
 	DeathEffects(PlayerController);
 	
 	FTimerHandle TimerHandle;
@@ -184,13 +168,12 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
 {
 	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
-
-	UE_LOG(LogTemp, Warning, TEXT("카메라 흑백효과입니다"));
+	
 	// 카메라 흑백 효과
 	if (Player->CameraComp)
 	{
 		Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
-		UE_LOG(LogTemp, Warning, TEXT("카메라 전환합니다"));
+		UE_LOG(LogTemp, Warning, TEXT("카메라 흑백 전환합니다"));
 	}
 }
 
