@@ -37,8 +37,6 @@ public:
 	class UScrollBox* ScrollBox;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_FindSession; // 세션찾기 (새로고침)
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* TextBtn_FindSession;
 	UPROPERTY(editanywhere)
 	TSubclassOf<class USessionItemUI> sessionItemFactory;
 	UPROPERTY(meta = (BindWidget))

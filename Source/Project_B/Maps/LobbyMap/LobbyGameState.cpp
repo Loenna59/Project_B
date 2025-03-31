@@ -5,7 +5,6 @@
 
 #include "BanimalsGameInstance.h"
 #include "Blueprint/UserWidget.h"
-#include "GameFramework/PlayerState.h"
 #include "Widget/BlackholeLobbyUI.h"
 #include "Widget/LuggageLobbyUI.h"
 
@@ -75,5 +74,18 @@ void ALobbyGameState::MulticastRPC_UpdatePlayerTeam_Implementation(const FString
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s, %d"), *it.Key, it.Value.Team);
 		}
+	}
+
+	// 현재는 서버가 불필요하게 여러번 실행
+	// ==> 나중에 위로 옮기던가 하기
+	// 블랙홀 맵이면
+	if (gi->CurrentMapID == 0)
+	{
+		BlackholeLobbyWidget->UpdateImage();
+	}
+	// 러기지 맵이면
+	if (gi->CurrentMapID == 1)
+	{
+		LuggageLobbyWidget->UpdateImage();
 	}
 }
