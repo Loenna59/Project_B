@@ -61,6 +61,9 @@ public:
 	UPROPERTY(Replicated)
 	TArray<FString> WinnerKeys;
 
+	UPROPERTY(Replicated)
+	class AWeaponSpawnManager* WeaponSpawnManager;
+
 private:
 	FTimerHandle GameTimerHandle;
 	

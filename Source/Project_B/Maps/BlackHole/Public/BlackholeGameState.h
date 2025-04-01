@@ -70,4 +70,7 @@ public:
 	// 게임 종료
 	// UFUNCTION(NetMulticast, Reliable)
 	// void MulticastRPC_SetGameOver();
+
+	UPROPERTY(Replicated)
+	class AWeaponSpawnManager* WeaponSpawnManager;
 };

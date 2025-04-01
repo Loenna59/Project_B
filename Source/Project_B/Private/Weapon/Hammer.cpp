@@ -94,3 +94,11 @@ void AHammer::OnAttackTraceChannel()
 	}
 }
 
+void AHammer::SetVisible(bool bVisible)
+{
+	Mesh->SetVisibility(bVisible);
+	HitPoint->SetActive(bVisible);
+	
+	Super::SetVisible(bVisible);
+}
+

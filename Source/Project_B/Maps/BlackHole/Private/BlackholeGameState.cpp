@@ -11,6 +11,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Project_B/Maps/WeaponSpawnManager.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 #include "Project_B/Maps/BlackHole/Public/TargetActor.h"
@@ -32,6 +33,11 @@ void ABlackholeGameState::BeginPlay()
 	// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다
 	// TODO: 실제 시연때는 30초로 변경하기
 	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
+
+	if (HasAuthority())
+	{
+		WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
+	}
 }
 
 void ABlackholeGameState::Tick(float DeltaTime)
@@ -47,6 +53,7 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 	DOREPLIFETIME(ABlackholeGameState, GameStartTime);
 	DOREPLIFETIME(ABlackholeGameState, AlivePlayers);
 	DOREPLIFETIME(ABlackholeGameState, DeadPlayers);
+	DOREPLIFETIME(ABlackholeGameState, WeaponSpawnManager);
 }
 
 

@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Project_B/Maps/WeaponSpawnManager.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 #include "Project_B/Maps/LuggageChaos/Widget/LuggageScoreWidget.h"
 #include "Project_B/Maps/Base/Widget/GameReadyWidget.h"
@@ -123,6 +124,7 @@ void ALuggageChaosGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(ALuggageChaosGameState, WinnerKeys);
+	DOREPLIFETIME(ALuggageChaosGameState, WeaponSpawnManager);
 }
 
 void ALuggageChaosGameState::InitUI(APlayerController* pc)
@@ -174,6 +176,11 @@ void ALuggageChaosGameState::InitSpawnPoint()
 	for (AActor* actor : actorsR)
 	{
 		RedSpawnPoints.Add(actor);
+	}
+
+	if (HasAuthority())
+	{
+		WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
 	}
 }
 

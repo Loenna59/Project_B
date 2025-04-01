@@ -84,3 +84,10 @@ void AWineBottle::OnAttackTraceChannel()
 		}
 	}
 }
+
+void AWineBottle::SetVisible(bool bVisible)
+{
+	Mesh->SetVisibility(bVisible);
+	
+	Super::SetVisible(bVisible);
+}
