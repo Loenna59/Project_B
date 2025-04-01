@@ -200,6 +200,10 @@ void UBaseCharacterAttackComponent::Finish()
 	bIsAttacking = false;
 
 	AlreadyHitActorsDuringAttack.Empty();
+	if (Character && Character->bHasWeapon && Character->OwnedWeapon)
+	{
+		Character->OwnedWeapon->FinishAttack();
+	}
 }
 
 void UBaseCharacterAttackComponent::Server_PlayAnimMontage_Implementation(UAnimMontage* Montage, float PlayRate,

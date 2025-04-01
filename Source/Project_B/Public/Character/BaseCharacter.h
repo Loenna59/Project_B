@@ -31,7 +31,7 @@ public:
 	void Server_OnPlayHitMontage(EAttackType Type, FVector NormalPoint);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot, FVector LaunchVelocity);
+	void Multicast_OnPlayHitMontage(bool bIsKnockdownHit, float ForwardDot, float SideDot, FVector LaunchVelocity);
 
 	UFUNCTION(Client, Reliable)
 	void Client_SetEnableInput(bool bEnable);
@@ -139,6 +139,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float KnockdownTime = 5.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HitCountResetTime = 3.f;;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 KnockdownHitCount = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 KnockdownPunchCount = 6;
+	
+	UPROPERTY()
+	int32 CurrentNormalHitCount = 0;
+
 	UPROPERTY()
 	bool IsDead = false;
 
@@ -157,4 +169,6 @@ public:
 	FOnCalculateSpeedByMass OnCalculateSpeedByMass;
 
 	FTimerHandle KnockdownTimerHandle;
+	
+	FTimerHandle ResetHitCountTimerHandle;
 };

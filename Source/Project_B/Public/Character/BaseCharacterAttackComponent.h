@@ -52,7 +52,6 @@ protected:
 
 	UPROPERTY(Replicated)
 	TArray<AActor*> AlreadyHitActorsDuringAttack;
-	
 
 public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)

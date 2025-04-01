@@ -293,6 +293,11 @@ void ABaseCharacter::Server_UnequipWeapon_Implementation()
 
 void ABaseCharacter::Multicast_UnequipWeapon_Implementation(AWeapon* Weapon)
 {
+	if (!Weapon)
+	{
+		return;
+	}
+	
 	Weapon->ToggleSimulatePhysics(true);
 	Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	
@@ -325,25 +330,58 @@ void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, FV
 
 	float ForwardDot = FVector::DotProduct(LocalHitDir, FVector::ForwardVector);
 	float SideDot = FVector::DotProduct(LocalHitDir, FVector::RightVector);
-	
-	Multicast_OnPlayHitMontage(Type, ForwardDot, SideDot, LaunchVelocity);
-}
 
-void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot, FVector LaunchVelocity)
-{
+	bool bIsKnockdownHit = false;
+
 	switch (Type)
 	{
 	case EAttackType::PUNCH:
 	case EAttackType::BOTTLE:
 	case EAttackType::CROSS_BOW:
-		if (AnimInstance)
+	{
+		++CurrentNormalHitCount;
+
+		GetWorldTimerManager().ClearTimer(ResetHitCountTimerHandle);
+
+		int32 MaxCount = Type == EAttackType::PUNCH? KnockdownPunchCount : KnockdownHitCount;
+		
+		if (CurrentNormalHitCount >= MaxCount)
 		{
-			AnimInstance->StartHitProcess(ForwardDot, SideDot);
+			bIsKnockdownHit = true;
+			break;
 		}
+		
+		TWeakObjectPtr<ABaseCharacter> WeakThis = this;
+		
+		GetWorldTimerManager().SetTimer(
+			ResetHitCountTimerHandle,
+			[WeakThis]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->CurrentNormalHitCount = 0;
+				}
+			},
+			HitCountResetTime,
+			false
+		);
 		break;
+	}
 	default:
+		bIsKnockdownHit = true;
+		break;
+	}
+	
+	Multicast_OnPlayHitMontage(bIsKnockdownHit, ForwardDot, SideDot, LaunchVelocity);
+}
+
+void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(bool bIsKnockdownHit, float ForwardDot, float SideDot, FVector LaunchVelocity)
+{
+	if (bIsKnockdownHit)
+	{
 		// LOG_SCREEN("%s", *LaunchVelocity.GetSafeNormal().ToString());
 		bIsKnockdown = true;
+		CurrentNormalHitCount = 0;
 		Unequip();
 		LaunchCharacter(LaunchVelocity, true, true);
 
@@ -366,8 +404,12 @@ void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type,
 		}
 	
 		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Left"));
-
-		break;
+		return;
+	}
+	
+	if (AnimInstance)
+	{
+		AnimInstance->StartHitProcess(ForwardDot, SideDot);
 	}
 }
 

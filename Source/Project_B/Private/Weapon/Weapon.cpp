@@ -25,3 +25,8 @@ void AWeapon::SetVisible(bool bVisible)
 	SetHidden(!bVisible);
 }
 
+void AWeapon::FinishAttack()
+{
+	AlreadyHitActorsDuringAttack.Empty();
+}
+

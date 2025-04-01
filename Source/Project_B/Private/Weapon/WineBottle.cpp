@@ -75,9 +75,17 @@ void AWineBottle::OnAttackTraceChannel()
 	{
 		for (FHitResult Result : HitResult)
 		{
+			AActor* HitActor = Result.GetActor();
+			if (AlreadyHitActorsDuringAttack.Contains(HitActor))
+			{
+				continue;
+			}
+
+			AlreadyHitActorsDuringAttack.Add(HitActor);
+			
 			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
 			{
-				LOG_SCREEN("%s", *GetVelocity().ToString());
+				// LOG_SCREEN("%s", *GetVelocity().ToString());
 				Character->OnHit(EAttackType::BOTTLE, Result.Normal.GetSafeNormal(), 0);
 				break;
 			}

@@ -85,6 +85,14 @@ void AHammer::OnAttackTraceChannel()
 	{
 		for (FHitResult Result : HitResult)
 		{
+			AActor* HitActor = Result.GetActor();
+			if (AlreadyHitActorsDuringAttack.Contains(HitActor))
+			{
+				continue;
+			}
+
+			AlreadyHitActorsDuringAttack.Add(HitActor);
+			
 			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
 			{
 				Character->OnHit(EAttackType::HAMMER, Result.Normal.GetSafeNormal(), 0);

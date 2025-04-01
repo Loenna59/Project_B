@@ -16,6 +16,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY()
+	TArray<AActor*> AlreadyHitActorsDuringAttack;
+
 public:	
 	UPROPERTY(EditAnywhere)
 	int32 MaxCapacity = 10;
@@ -29,4 +32,6 @@ public:
 	virtual void OnAttackTraceChannel() {}
 
 	virtual void SetVisible(bool bVisible);
+
+	void FinishAttack();
 };
