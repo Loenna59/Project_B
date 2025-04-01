@@ -4,6 +4,8 @@
 #include "LuggagePlayerState.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Camera/CameraComponent.h"
+#include "Character/BaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -12,6 +14,7 @@
 #include "Project_B/Maps/LuggageChaos/Widget/LuggageScoreWidget.h"
 #include "Project_B/Maps/Base/Widget/GameReadyWidget.h"
 #include "Project_B/Maps/Base/Widget/GameEndWidget.h"
+#include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 #include "Project_B/Maps/Podium/WinnerPrize.h"
 #include "Project_B/Utilities/LogMacro.h"
 
@@ -345,6 +348,79 @@ void ALuggageChaosGameState::Net_JudgeWinner_Implementation()
 		Win(ETeamType::Blue);
 	}
 }
+
+void ALuggageChaosGameState::OnPlayerDeath(APlayerController* pc)
+{
+	Server_OnPlayerDeath(pc);
+}
+
+void ALuggageChaosGameState::Server_OnPlayerDeath_Implementation(APlayerController* pc)
+{
+	LOG_SCREEN("서버: 죽일게");
+	Net_OnPlayerDeath(pc);
+
+	AddDeadPlayer(pc);
+	
+	FTimerHandle respawnTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(respawnTimerHandle, this,&ALuggageChaosGameState::Respawn,RespawnTime, false);
+}
+
+void ALuggageChaosGameState::Net_OnPlayerDeath_Implementation(APlayerController* pc)
+{
+	LOG_SCREEN("클라: 죽을게");
+	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
+	
+	pc->DisableInput(pc);
+	DeathEffects(pc);
+	
+	FTimerHandle deadTimerHandle;
+	GetWorldTimerManager().SetTimer(deadTimerHandle, FTimerDelegate::CreateLambda([player, pc, this]()
+	{
+		LOG_SCREEN("관전자로 전환");
+		player->SetActorHiddenInGame(true);
+		player->SetActorEnableCollision(false);
+		pc->StartSpectatingOnly();
+	}), DeadTime, false);
+}
+
+void ALuggageChaosGameState::AddDeadPlayer(APlayerController* pc)
+{
+	DeadPlayers.Enqueue(pc->GetPlayerState<APlayerState>());
+}
+
+void ALuggageChaosGameState::DeathEffects(APlayerController* pc)
+{
+	ABaseCharacter* Player = Cast<ABaseCharacter>(pc->GetPawn());
+	
+	if (Player->CameraComp)
+	{
+		Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
+	}
+}
+
+void ALuggageChaosGameState::Respawn()
+{
+	LOG_SCREEN("서버: 살릴게");
+	APlayerState* ps;
+	DeadPlayers.Dequeue(ps);
+
+	Net_OnPlayerRespawn(ps->GetPlayerController());
+}
+
+void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerController* pc)
+{
+	LOG_SCREEN("클라: 리스폰!");
+	//ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
+
+	//TODO: 반대로 하기
+	// pc->DisableInput(pc);
+	// DeathEffects(pc);
+	//
+	// player->SetActorHiddenInGame(false);
+	// player->SetActorEnableCollision(true);
+	// pc->StartSpectatingOnly();
+}
+
 
 TMap<FString,FPlayerInfo> ALuggageChaosGameState::DummyPlayersInfo()
 {
