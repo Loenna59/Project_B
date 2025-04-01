@@ -28,10 +28,13 @@ public:
 	void OnHit(EAttackType Type, FVector NormalPoint, float damage);
 
 	UFUNCTION(Server, Reliable)
-	void Server_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot);
+	void Server_OnPlayHitMontage(EAttackType Type, FVector NormalPoint);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot);
+	void Multicast_OnPlayHitMontage(EAttackType Type, float ForwardDot, float SideDot, FVector LaunchVelocity);
+
+	UFUNCTION(Client, Reliable)
+	void Client_SetEnableInput(bool bEnable);
 
 	UFUNCTION()
 	void TakeWeapon(class AWeapon* Weapon);
@@ -56,6 +59,15 @@ public:
 
 	UFUNCTION()
 	void CalculateSpeedByMass(float Mass);
+
+	UFUNCTION()
+	bool CheckAndStopKnockdown();
+
+	UFUNCTION(Server, Reliable)
+	void Server_CheckAndStopKnockdown();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_CheckAndStopKnockdown();
 	
 protected:
 	UPROPERTY()
@@ -67,6 +79,9 @@ protected:
 	float CurrentHealth;
 
 public:
+	UPROPERTY()
+	class UEnhancedInputLocalPlayerSubsystem* InputSubsystem = nullptr;
+	
 	UPROPERTY()
 	class UBaseCharacterAnimInstance* AnimInstance = nullptr;
 	
@@ -112,11 +127,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UAnimMontage* GetupAnimMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float KnockdownTime = 5.f;
+
 	UPROPERTY()
 	bool IsDead = false;
 
 	UPROPERTY()
 	bool bHasWeapon = false;
+
+	UPROPERTY(Replicated)
+	bool bIsKnockdown = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UAnimMontage* KnockdownMontage;
@@ -125,4 +149,6 @@ public:
 	class AWeapon* OwnedWeapon = nullptr;
 
 	FOnCalculateSpeedByMass OnCalculateSpeedByMass;
+
+	FTimerHandle KnockdownTimerHandle;
 };

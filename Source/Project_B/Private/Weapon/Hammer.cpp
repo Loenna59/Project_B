@@ -87,7 +87,6 @@ void AHammer::OnAttackTraceChannel()
 		{
 			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
 			{
-				LOG_SCREEN("%s", *GetVelocity().ToString());
 				Character->OnHit(EAttackType::HAMMER, Result.Normal.GetSafeNormal(), 0);
 				break;
 			}

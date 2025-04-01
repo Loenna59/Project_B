@@ -6,8 +6,6 @@
 #include "Character/BaseCharacterAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Project_B/Utilities/LogMacro.h"
-#include "Project_B/Utilities/TraceChannelHelper.h"
 #include "Weapon/Weapon.h"
 
 UBaseCharacterAttackComponent::UBaseCharacterAttackComponent()
@@ -86,12 +84,22 @@ void UBaseCharacterAttackComponent::BeginPunch()
 		return;
 	}
 
+	if (Character->CheckAndStopKnockdown())
+	{
+		return;
+	}
+
 	PunchPressingTime = 0;
 	bBeginPunchInput = true;
 }
 
 void UBaseCharacterAttackComponent::Punch()
 {
+	if (Character->CheckAndStopKnockdown())
+	{
+		return;
+	}
+	
 	bBeginPunchInput = false;
 	
 	if (PunchPressingTime > PunchExecuteThreshold)
@@ -142,6 +150,11 @@ void UBaseCharacterAttackComponent::HeadButt()
 	}
 
 	if (bIsAttacking)
+	{
+		return;
+	}
+
+	if (Character->CheckAndStopKnockdown())
 	{
 		return;
 	}

@@ -1,5 +1,6 @@
 #include "Character/BaseCharacterPickComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Character/BaseCharacter.h"
 #include "Project_B/Utilities/LogMacro.h"
 
 UBaseCharacterPickComponent::UBaseCharacterPickComponent()
@@ -31,6 +32,11 @@ void UBaseCharacterPickComponent::SetupInputBiding(class UEnhancedInputComponent
 
 void UBaseCharacterPickComponent::Picking()
 {
+	if (Character->CheckAndStopKnockdown())
+	{
+		return;
+	}
+	
 	if (OnGrabbing.IsBound())
 	{
 		OnGrabbing.Broadcast();
@@ -39,6 +45,11 @@ void UBaseCharacterPickComponent::Picking()
 
 void UBaseCharacterPickComponent::ReleasePick()
 {
+	if (Character->CheckAndStopKnockdown())
+	{
+		return;
+	}
+	
 	if (OnRelease.IsBound())
 	{
 		OnRelease.Broadcast();
