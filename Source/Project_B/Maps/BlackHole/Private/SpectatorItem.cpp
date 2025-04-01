@@ -18,7 +18,11 @@ ASpectatorItem::ASpectatorItem()
 	SpectatorMesh->SetSimulatePhysics(true);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+	ProjectileMovement->SetUpdatedComponent(SpectatorMesh);
+	ProjectileMovement->InitialSpeed = 3000;
+	ProjectileMovement->MaxSpeed = 3000;
 	ProjectileMovement->bShouldBounce = true;
+	ProjectileMovement->Bounciness = 0.3f;
 }
 
 // Called when the game starts or when spawned

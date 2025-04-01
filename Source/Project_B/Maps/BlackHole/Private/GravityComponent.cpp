@@ -190,7 +190,7 @@ void UGravityComponent::DeactivateGravity()
 	// 현재 속도 가져오기
 	FVector CurrentVelocity = OwnerPhysicsComp->GetPhysicsLinearVelocity();
 	// X, Y축 속도를 0으로 만들고, Z축만 중력 방향으로 설정
-	FVector NewVelocity = FVector(0, 0, -500.0f);
+	FVector NewVelocity = FVector(0, 0, -600.0f);
 
 	// 서버에서만 실행
 	if (GetOwner()->HasAuthority())
@@ -290,58 +290,26 @@ void UGravityComponent::SpawnCount()
 	EGrabState state = PlayerCharacter->PickComp->GetGrabState();
 	bool bIsGrabbing = (state != EGrabState::None);
 	
-	if(gs)
+	if (gs)
 	{
 		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
 		switch (gs->BlackholeSpawnCount)
 		{
 		case 0:
-			if (PlayerCharacter && bIsGrabbing)
-			{
-				OrbitRadius = 1000;
-				OrbitSpeed = 25.0f;
-			}
-			else
-			{
-				OrbitRadius = 900;
-				OrbitSpeed = 30.0f;
-			}
+			OrbitRadius = 1000;
+			OrbitSpeed = 10.0f;
 			break;
 		case 1:
-			if (PlayerCharacter && bIsGrabbing)
-			{
-				OrbitRadius = 900;
-				OrbitSpeed = 25.0f;
-			}
-			else
-			{
-				OrbitRadius = 750;
-				OrbitSpeed = 30.0f;
-			}
+			OrbitRadius = 850;
+			OrbitSpeed = 20.0f;
 			break;
 		case 2:
-			if (PlayerCharacter && bIsGrabbing)
-			{
-				OrbitRadius = 750;
-				OrbitSpeed = 45.0f;
-			}
-			else
-			{
-				OrbitRadius = 550;
-				OrbitSpeed = 50.0f;
-			}
+			OrbitRadius = 550;
+			OrbitSpeed = 20.0f;
 			break;
 		default:
-			if (PlayerCharacter && bIsGrabbing)
-			{
-				OrbitRadius = 500;
-				OrbitSpeed = 55.0f;
-			}
-			else
-			{
-				OrbitRadius = 400;
-				OrbitSpeed = 60.0f;
-			}
+			OrbitRadius = 400;
+			OrbitSpeed = 20.0f;
 			break;
 		}
 	}

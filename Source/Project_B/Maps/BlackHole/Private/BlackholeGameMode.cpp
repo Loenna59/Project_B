@@ -17,7 +17,6 @@
 ABlackholeGameMode::ABlackholeGameMode()
 {
 	DefaultPawnClass = ABlackholeSpectator::StaticClass();
-	GameStateClass = ABlackholeGameState::StaticClass();
 }
 
 void ABlackholeGameMode::BeginPlay()
