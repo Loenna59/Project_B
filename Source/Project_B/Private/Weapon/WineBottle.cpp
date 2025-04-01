@@ -51,18 +51,17 @@ void AWineBottle::OnAttackTraceChannel()
 		Location,
 		FQuat::Identity,
 		ECC_Camera,
-		FCollisionShape::MakeCapsule(14.f, 78.f),
+		FCollisionShape::MakeSphere(25.f),
 		CollisionParams
 	);
 
 	if (bDrawDebug)
 	{
-		DrawDebugCapsuleTraceMulti(
+		DrawDebugSphereTraceMulti(
 			GetWorld(),
 			Location,
 			Location,
-			14.f,
-			78.f,
+			25.f,
 			EDrawDebugTrace::ForDuration,
 			bHit,
 			HitResult,
