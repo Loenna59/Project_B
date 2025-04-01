@@ -90,4 +90,7 @@ public:
 	void OnRep_TeamInfo();
 	UFUNCTION()
 	void OnRep_GameEnded();*/
+
+	UPROPERTY(Replicated)
+	class AWeaponSpawnManager* WeaponSpawnManager;
 };

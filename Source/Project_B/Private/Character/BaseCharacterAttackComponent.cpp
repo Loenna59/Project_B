@@ -3,10 +3,10 @@
 #include "EnhancedInputComponent.h"
 #include "KismetTraceUtils.h"
 #include "Character/BaseCharacter.h"
+#include "Character/BaseCharacterAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Project_B/Utilities/LogMacro.h"
-#include "Project_B/Utilities/TraceChannelHelper.h"
+#include "Weapon/Weapon.h"
 
 UBaseCharacterAttackComponent::UBaseCharacterAttackComponent()
 {
@@ -84,12 +84,22 @@ void UBaseCharacterAttackComponent::BeginPunch()
 		return;
 	}
 
+	if (Character->CheckAndStopKnockdown())
+	{
+		return;
+	}
+
 	PunchPressingTime = 0;
 	bBeginPunchInput = true;
 }
 
 void UBaseCharacterAttackComponent::Punch()
 {
+	if (Character->CheckAndStopKnockdown())
+	{
+		return;
+	}
+	
 	bBeginPunchInput = false;
 	
 	if (PunchPressingTime > PunchExecuteThreshold)
@@ -111,8 +121,12 @@ void UBaseCharacterAttackComponent::Punch()
 
 	if (Character->bHasWeapon)
 	{
-		//TODO: 다른 무기도 만들면 수정해야함
-		PlayWeaponAttackAnimMontage(TEXT("TwoHanded"));
+		if (Character->OwnedWeapon)
+		{
+			const UEnum* EnumPtr = StaticEnum<EWeaponType>();
+			FString SelectionName = EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(Character->OwnedWeapon->GetWeaponType())).ToString();
+			PlayWeaponAttackAnimMontage(SelectionName);
+		}
 		return;
 	}
 	
@@ -136,6 +150,11 @@ void UBaseCharacterAttackComponent::HeadButt()
 	}
 
 	if (bIsAttacking)
+	{
+		return;
+	}
+
+	if (Character->CheckAndStopKnockdown())
 	{
 		return;
 	}

@@ -90,6 +90,21 @@ ABaseCharacter::ABaseCharacter()
 	TwoHandedSocket = CreateDefaultSubobject<USceneComponent>(TEXT("TwoHandedSocket"));
 	TwoHandedSocket->SetupAttachment(GetMesh(), TEXT("TwoHanded"));
 
+	OneHandedSocket = CreateDefaultSubobject<USceneComponent>(TEXT("OneHandedSocket"));
+	OneHandedSocket->SetupAttachment(GetMesh(), TEXT("OneHanded"));
+
+	Sunglasses = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sunglasses"));
+	Sunglasses->SetupAttachment(GetMesh(), TEXT("Sunglasses"));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> SunglassesMesh(TEXT("/Game/Assets/_Objects/Sunglasses/Sunglasses.Sunglasses"));
+
+	if (SunglassesMesh.Succeeded())
+	{
+		Sunglasses->SetStaticMesh(SunglassesMesh.Object);
+	}
+
+	Sunglasses->SetVisibility(false);
+	
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
 	if (tmp_imc.Succeeded())
@@ -111,6 +126,7 @@ void ABaseCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	SetReplicateMovement(true);
+	SetSunglasses(false);
 
 	PhysicalAnimationComp->SetSkeletalMeshComponent(GetMesh());
 	
@@ -118,11 +134,12 @@ void ABaseCharacter::BeginPlay()
 
 	if (pc)
 	{
-		auto subSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
+		InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+			pc->GetLocalPlayer());
 
-		if (subSystem)
+		if (InputSubsystem)
 		{
-			subSystem->AddMappingContext(IMC, 0);
+			InputSubsystem->AddMappingContext(IMC, 0);
 		}
 	}
 
@@ -140,6 +157,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABaseCharacter, OwnedWeapon);
+	DOREPLIFETIME(ABaseCharacter, bIsKnockdown);
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -151,27 +169,36 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	UEnhancedInputComponent* pi = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	UEnhancedInputComponent* InputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
-	if (pi)
+	if (InputComp)
 	{
-		MoveComp->SetupInputBiding(pi);
-		AttackComp->SetupInputBiding(pi);
-		PickComp->SetupInputBiding(pi);
+		MoveComp->SetupInputBiding(InputComp);
+		AttackComp->SetupInputBiding(InputComp);
+		PickComp->SetupInputBiding(InputComp);
 
-		pi->BindAction(InputActionUnequip, ETriggerEvent::Started, this, &ABaseCharacter::Unequip);
+		InputComp->BindAction(InputActionUnequip, ETriggerEvent::Started, this, &ABaseCharacter::Unequip);
 	}
 }
 
 void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
 {
-	float ForwardDot = FVector::DotProduct(GetActorForwardVector(), NormalPoint);
-
-	float clampedForwardDot = FMath::Clamp(ForwardDot, -1.f, 1.f);
-
-	float SideDot = FVector::DotProduct(GetActorRightVector(), NormalPoint);
-
-	Server_OnPlayHitMontage(Type, clampedForwardDot, SideDot);
+	if (bIsKnockdown)
+	{
+		return;
+	}
+	
+	switch (Type)
+	{
+	case EAttackType::HAMMER:
+	case EAttackType::HEAD_BUTT:
+	case EAttackType::KICK:
+		Client_SetEnableInput(false);
+		break;
+	default:
+		break;
+	}
+	Server_OnPlayHitMontage(Type, NormalPoint);
 }
 
 void ABaseCharacter::TakeWeapon(class AWeapon* Weapon)
@@ -202,7 +229,9 @@ void ABaseCharacter::AttachWeapon()
 	bHasWeapon = true;
 
 	OwnedWeapon->ToggleSimulatePhysics(false);
-	OwnedWeapon->AttachToComponent(TwoHandedSocket, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+	USceneComponent* Socket = OwnedWeapon->GetWeaponType() == EWeaponType::OneHanded? OneHandedSocket : TwoHandedSocket;
+	OwnedWeapon->AttachToComponent(Socket, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	
 	// 애니메이션 변경
 	if (AnimInstance)
@@ -211,7 +240,7 @@ void ABaseCharacter::AttachWeapon()
 	}
 
 	// 팔의 physics를 꺼줘야함
-	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(false);
+	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(OwnedWeapon->GetWeaponType() == EWeaponType::OneHanded);
 	RightArmPhysicsAnimComp->TogglePhysicalAnimation(false);
 }
 
@@ -232,6 +261,11 @@ void ABaseCharacter::OnWeaponAttackTraceChannel()
 
 void ABaseCharacter::Unequip()
 {
+	if (CheckAndStopKnockdown())
+	{
+		return;
+	}
+	
 	Server_UnequipWeapon();
 }
 
@@ -274,7 +308,7 @@ void ABaseCharacter::Multicast_UnequipWeapon_Implementation(AWeapon* Weapon)
 	RightArmPhysicsAnimComp->TogglePhysicalAnimation(true);
 }
 
-void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
+void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, FVector NormalPoint)
 {
 	// if (!IsLocallyControlled())
 	// {
@@ -283,10 +317,19 @@ void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, fl
 	//
 	LOG_SCREEN("Hit");
 	
-	Multicast_OnPlayHitMontage(Type, ForwardDot, SideDot);
+	float Power = 1000.f;
+	FVector LaunchVelocity = NormalPoint * Power + FVector(0, 0, 100.f);
+
+	FVector WorldHitDir = LaunchVelocity.GetSafeNormal();
+	FVector LocalHitDir = GetActorTransform().InverseTransformVectorNoScale(WorldHitDir);
+
+	float ForwardDot = FVector::DotProduct(LocalHitDir, FVector::ForwardVector);
+	float SideDot = FVector::DotProduct(LocalHitDir, FVector::RightVector);
+	
+	Multicast_OnPlayHitMontage(Type, ForwardDot, SideDot, LaunchVelocity);
 }
 
-void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot)
+void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type, float ForwardDot, float SideDot, FVector LaunchVelocity)
 {
 	switch (Type)
 	{
@@ -299,13 +342,18 @@ void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type,
 		}
 		break;
 	default:
-		if (ForwardDot > 0.6f)
+		// LOG_SCREEN("%s", *LaunchVelocity.GetSafeNormal().ToString());
+		bIsKnockdown = true;
+		Unequip();
+		LaunchCharacter(LaunchVelocity, true, true);
+
+		if (ForwardDot > 0.7f)
 		{
 			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Forward"));
 			return;
 		}
 	
-		if (ForwardDot < -0.6f)
+		if (ForwardDot < -0.7f)
 		{
 			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Backward"));
 			return;
@@ -313,14 +361,69 @@ void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type,
 	
 		if (SideDot > 0)
 		{
-			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Left"));
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Right"));
 			return;
 		}
 	
-		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Right"));
+		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Left"));
 
-		//LaunchCharacter()
 		break;
 	}
 }
 
+void ABaseCharacter::Client_SetEnableInput_Implementation(bool bEnable)
+{
+	if (InputSubsystem)
+	{
+		if (bEnable)
+		{
+			InputSubsystem->AddMappingContext(IMC, 0);
+			return;
+		}
+		InputSubsystem->RemoveMappingContext(IMC);
+
+		TWeakObjectPtr<ABaseCharacter> WeakThis = this;
+
+		GetWorldTimerManager().SetTimer
+		(
+			KnockdownTimerHandle,
+			[WeakThis]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->Client_SetEnableInput(true);
+				}
+			},
+			KnockdownTime,
+			false
+		);
+	}	
+}
+
+bool ABaseCharacter::CheckAndStopKnockdown()
+{
+	if (AnimInstance->Montage_IsPlaying(KnockdownMontage))
+	{
+		Server_CheckAndStopKnockdown();
+
+		return true;
+	}
+
+	return false;
+}
+
+void ABaseCharacter::SetSunglasses(bool bEquip)
+{
+	Sunglasses->SetVisibility(bEquip);
+}
+
+void ABaseCharacter::Server_CheckAndStopKnockdown_Implementation()
+{
+	Multicast_CheckAndStopKnockdown();
+}
+
+void ABaseCharacter::Multicast_CheckAndStopKnockdown_Implementation()
+{
+	PlayAnimMontage(GetupAnimMontage, 1.f, "1");
+	bIsKnockdown = false;
+}

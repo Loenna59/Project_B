@@ -34,4 +34,6 @@ public:
 	virtual EWeaponType GetWeaponType() const override { return EWeaponType::TwoHanded; }
 
 	virtual void OnAttackTraceChannel() override;
+
+	virtual void SetVisible(bool bVisible) override;
 };

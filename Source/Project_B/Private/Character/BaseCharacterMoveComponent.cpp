@@ -73,10 +73,14 @@ void UBaseCharacterMoveComponent::SetupInputBiding(class UEnhancedInputComponent
 
 void UBaseCharacterMoveComponent::Move(const FInputActionValue& actionValue)
 {
-	FVector2D value = actionValue.Get<FVector2D>();
-
 	if (Character)
 	{
+		if (Character->CheckAndStopKnockdown())
+		{
+			return;
+		}
+		
+		FVector2D value = actionValue.Get<FVector2D>();
 		FVector toVector(value.Y, value.X, 0);
 		FTransform controlTransform(Character->GetControlRotation());
 		
@@ -86,10 +90,14 @@ void UBaseCharacterMoveComponent::Move(const FInputActionValue& actionValue)
 
 void UBaseCharacterMoveComponent::Rotate(const FInputActionValue& actionValue)
 {
-	FVector2D LookAxisVector = actionValue.Get<FVector2D>();
-
 	if (Character)
 	{
+		if (Character->CheckAndStopKnockdown())
+		{
+			return;
+		}
+		
+		FVector2D LookAxisVector = actionValue.Get<FVector2D>();
 		Character->AddControllerYawInput(LookAxisVector.X);
 		Character->AddControllerPitchInput(LookAxisVector.Y);
 	}
@@ -99,6 +107,11 @@ void UBaseCharacterMoveComponent::StartJump()
 {
 	if (Character)
 	{
+		if (Character->CheckAndStopKnockdown())
+		{
+			return;
+		}
+		
 		Character->Jump();
 	}
 }
@@ -107,18 +120,39 @@ void UBaseCharacterMoveComponent::EndJump()
 {
 	if (Character)
 	{
+		if (Character->CheckAndStopKnockdown())
+		{
+			return;
+		}
+		
 		Character->StopJumping();
 	}
 }
 
 void UBaseCharacterMoveComponent::StartRun()
 {
-	UpdateSpeed(RunSpeed);
+	if (Character)
+	{
+		if (Character->CheckAndStopKnockdown())
+		{
+			return;
+		}
+	
+		UpdateSpeed(RunSpeed);
+	}
 }
 
 void UBaseCharacterMoveComponent::EndRun()
 {
-	UpdateSpeed(WalkSpeed);
+	if (Character)
+	{
+		if (Character->CheckAndStopKnockdown())
+		{
+			return;
+		}
+	
+		UpdateSpeed(WalkSpeed);
+	}
 }
 
 void UBaseCharacterMoveComponent::Server_UpdateSpeed_Implementation(float Speed)
