@@ -288,26 +288,18 @@ void UGravityComponent::MulticastRPC_SetOrbit_Implementation(FVector AngularVelo
 void UGravityComponent::SpawnCount()
 {
 	EGrabState state = PlayerCharacter->PickComp->GetGrabState();
+	bool bIsGrabbing = (state != EGrabState::None);
 	
-	if (gs) //TODO: 여기.,..,
+	if(gs)
 	{
 		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
 		switch (gs->BlackholeSpawnCount)
 		{
 		case 0:
-			if (PlayerCharacter)
+			if (PlayerCharacter && bIsGrabbing)
 			{
-				if (state != EGrabState::None) 
-				{
-					// TODO: 뭔갈 잡고 있으면
-					OrbitRadius = 1000;
-					OrbitSpeed = 30.0f;
-				}
-				else
-				{
-					OrbitRadius = 900;
-					OrbitSpeed = 30.0f;
-				}
+				OrbitRadius = 1000;
+				OrbitSpeed = 25.0f;
 			}
 			else
 			{
@@ -316,58 +308,34 @@ void UGravityComponent::SpawnCount()
 			}
 			break;
 		case 1:
-			if (PlayerCharacter)
+			if (PlayerCharacter && bIsGrabbing)
 			{
-				if (state != EGrabState::None) 
-				{
-					OrbitRadius = 900;
-					OrbitSpeed = 30.0f;
-				}
-				else
-				{
-					OrbitRadius = 750;
-					OrbitSpeed = 40.0f;
-				}
+				OrbitRadius = 900;
+				OrbitSpeed = 25.0f;
 			}
 			else
 			{
 				OrbitRadius = 750;
-				OrbitSpeed = 40.0f;
+				OrbitSpeed = 30.0f;
 			}
 			break;
 		case 2:
-			if (PlayerCharacter)
+			if (PlayerCharacter && bIsGrabbing)
 			{
-				if (state != EGrabState::None) 
-				{
-					OrbitRadius = 750;
-					OrbitSpeed = 40.0f;
-				}
-				else
-				{
-					OrbitRadius = 500;
-					OrbitSpeed = 60.0f;
-				}
+				OrbitRadius = 750;
+				OrbitSpeed = 45.0f;
 			}
 			else
 			{
-				OrbitRadius = 500;
-				OrbitSpeed = 60.0f;
+				OrbitRadius = 550;
+				OrbitSpeed = 50.0f;
 			}
 			break;
 		default:
-			if (PlayerCharacter)
+			if (PlayerCharacter && bIsGrabbing)
 			{
-				if (state != EGrabState::None) 
-				{
-					OrbitRadius = 500;
-					OrbitSpeed = 60.0f;
-				}
-				else
-				{
-					OrbitRadius = 400;
-					OrbitSpeed = 60.0f;
-				}
+				OrbitRadius = 500;
+				OrbitSpeed = 55.0f;
 			}
 			else
 			{
