@@ -36,7 +36,9 @@ public:
 	float EndTime = 1.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
-	float RespawnTime = 3.0f;
+	float RespawnTime = 10.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
+	float DeadTime = 3.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Game")
 	uint8 MaxPoint = 24;
@@ -77,12 +79,17 @@ private:
 	UPROPERTY(Replicated)
 	TArray<FString> WinnerKeys;
 
+	TQueue<APlayerState*> DeadPlayers;
+
 	FString MyKey = "";
 	
-	// 플레이어 초기 위치 초기화를 위한 함수
-	TArray<AActor*> BlueSpawnPoints;
-	TArray<AActor*> RedSpawnPoints;
 	int32 dummyKey = 0;
+	
+	// 플레이어 초기 위치 초기화를 위한 변수
+	UPROPERTY()
+	TArray<AActor*> BlueSpawnPoints;
+	UPROPERTY()
+	TArray<AActor*> RedSpawnPoints;
 
 	int32 blueIdx = 0;
 	int32 redIdx = 0;
@@ -105,24 +112,26 @@ protected:
 public:
 	/**모든 클라이언트에서 호출되어야 함*/
 	void AddScore(ETeamType team ,const uint8 point);
+	
 	void AddWinner(FString playerKey);
+	
 	void InitPlayerLoc(APawn* pawn,FString key);
- 
+
+	UFUNCTION(BlueprintCallable)
+	void OnPlayerDeath(APlayerController* pc);
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	void GameReady();
 	
 	void InitPlayerInfo();
-	
 	void InitSpawnPoint();
-	
 	void InitUI(APlayerController* pc);
 
-	void GameStart();
-	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_GameStart();
+	void GameStart();
 	
 	void TimeOut();
 
@@ -130,15 +139,27 @@ protected:
 	void Net_JudgeWinner();
 	
 	void Win(ETeamType winner = ETeamType::None);
-	
 	void AddWinPrize(APlayerController* pc);
-	
-	void GameEnd();
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_GameEnd();
+	void GameEnd();
 	
 	void ChangeLevelPodium();
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnPlayerDeath(APlayerController* pc);
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_OnPlayerDeath(APlayerController* pc);
+
+	void AddDeadPlayer(APlayerController* pc);
+	
+	void DeathEffects(APlayerController* pc);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_OnPlayerRespawn(APlayerController* pc);
+
+	void Respawn();
 
 	TMap<FString,FPlayerInfo> DummyPlayersInfo();
 };
