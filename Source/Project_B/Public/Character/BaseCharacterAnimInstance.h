@@ -11,10 +11,10 @@
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
-	None,
-	OneHanded,
-	TwoHanded,
-	Ranged
+	None UMETA(DisplayName = "None"),
+	OneHanded UMETA(DisplayName = "OneHanded"),
+	TwoHanded UMETA(DisplayName = "TwoHanded"),
+	Ranged UMETA(DisplayName = "Ranged")
 };
 
 UCLASS()

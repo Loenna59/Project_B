@@ -106,6 +106,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* TwoHandedSocket = nullptr;
 
+	UPROPERTY(VisibleAnywhere)
+	class USceneComponent* OneHandedSocket = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100;
 

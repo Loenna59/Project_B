@@ -90,6 +90,9 @@ ABaseCharacter::ABaseCharacter()
 	TwoHandedSocket = CreateDefaultSubobject<USceneComponent>(TEXT("TwoHandedSocket"));
 	TwoHandedSocket->SetupAttachment(GetMesh(), TEXT("TwoHanded"));
 
+	OneHandedSocket = CreateDefaultSubobject<USceneComponent>(TEXT("OneHandedSocket"));
+	OneHandedSocket->SetupAttachment(GetMesh(), TEXT("OneHanded"));
+	
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
 	if (tmp_imc.Succeeded())
@@ -202,7 +205,9 @@ void ABaseCharacter::AttachWeapon()
 	bHasWeapon = true;
 
 	OwnedWeapon->ToggleSimulatePhysics(false);
-	OwnedWeapon->AttachToComponent(TwoHandedSocket, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+	USceneComponent* Socket = OwnedWeapon->GetWeaponType() == EWeaponType::OneHanded? OneHandedSocket : TwoHandedSocket;
+	OwnedWeapon->AttachToComponent(Socket, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	
 	// 애니메이션 변경
 	if (AnimInstance)
@@ -211,7 +216,7 @@ void ABaseCharacter::AttachWeapon()
 	}
 
 	// 팔의 physics를 꺼줘야함
-	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(false);
+	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(OwnedWeapon->GetWeaponType() == EWeaponType::OneHanded);
 	RightArmPhysicsAnimComp->TogglePhysicalAnimation(false);
 }
 
@@ -299,6 +304,7 @@ void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(EAttackType Type,
 		}
 		break;
 	default:
+		Unequip();
 		if (ForwardDot > 0.6f)
 		{
 			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Forward"));
