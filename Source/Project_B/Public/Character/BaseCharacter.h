@@ -130,6 +130,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* Sunglasses = nullptr;
 
+	// UPROPERTY(VisibleAnywhere)
+	// class UAudioComponent* VoiceComp = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100;
 
@@ -163,9 +166,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UAnimMontage* KnockdownMontage;
 
-	UPROPERTY(ReplicatedUsing=AttachWeapon)
+	UPROPERTY(ReplicatedUsing = AttachWeapon)
 	class AWeapon* OwnedWeapon = nullptr;
-
+	
+	UPROPERTY()
+	class USoundBase* HitSound = nullptr;
+	
 	FOnCalculateSpeedByMass OnCalculateSpeedByMass;
 
 	FTimerHandle KnockdownTimerHandle;

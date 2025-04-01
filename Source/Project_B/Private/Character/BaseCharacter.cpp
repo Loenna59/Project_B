@@ -12,9 +12,11 @@
 #include "Character/BaseCharacterPhysicsAnimComponent.h"
 #include "Character/BaseCharacterPickComponent.h"
 #include "Character/HeadPhysicsAnimComponent.h"
+#include "Components/AudioComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Project_B/Maps/BlackHole/Public/GravityComponent.h"
@@ -50,6 +52,10 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->SetRelativeRotation(FRotator(-25.f, 0, 0));
 	CameraComp->SetFieldOfView(90.f);
 	CameraComp->bUsePawnControlRotation = false;
+
+	// VoiceComp = CreateDefaultSubobject<UAudioComponent>(TEXT("VoiceComp"));
+	// VoiceComp->SetupAttachment(RootComponent);
+	// VoiceComp->bAutoActivate = false;
 
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
 	MoveComp->SetIsReplicated(true);
@@ -117,6 +123,14 @@ ABaseCharacter::ABaseCharacter()
 	if (temp_ia.Succeeded())
 	{
 		InputActionUnequip = temp_ia.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<USoundBase> temp_hitSound(TEXT("/Game/Assets/Sounds/Hit.Hit"));
+
+	if (temp_hitSound.Succeeded())
+	{
+		HitSound = temp_hitSound.Object;
+		// VoiceComp->SetSound(temp_hitSound.Object);
 	}
 	
 }
@@ -384,6 +398,10 @@ void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(bool bIsKnockdown
 		CurrentNormalHitCount = 0;
 		Unequip();
 		LaunchCharacter(LaunchVelocity, true, true);
+
+		UGameplayStatics::SpawnSoundAttached(HitSound, RootComponent);
+		
+		// VoiceComp->Play();
 
 		if (ForwardDot > 0.7f)
 		{
