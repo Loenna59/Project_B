@@ -102,7 +102,9 @@ protected:
 public:
 	/**모든 클라이언트에서 호출되어야 함*/
 	void AddScore(ETeamType team ,const uint8 point);
+	
 	void AddWinner(FString playerKey);
+	
 	void InitPlayerLoc(APawn* pawn,FString key);
  
 protected:
@@ -111,15 +113,12 @@ protected:
 	void GameReady();
 	
 	void InitPlayerInfo();
-	
 	void InitSpawnPoint();
-	
 	void InitUI(APlayerController* pc);
 
-	void GameStart();
-	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_GameStart();
+	void GameStart();
 	
 	void TimeOut();
 
@@ -127,13 +126,11 @@ protected:
 	void Net_JudgeWinner();
 	
 	void Win(ETeamType winner = ETeamType::None);
-	
 	void AddWinPrize(APlayerController* pc);
-	
-	void GameEnd();
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_GameEnd();
+	void GameEnd();
 	
 	void ChangeLevelPodium();
 
