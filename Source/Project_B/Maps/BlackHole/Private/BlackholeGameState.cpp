@@ -14,6 +14,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholePlayerState.h"
+#include "Project_B/Maps/BlackHole/Public/BlackholeSpectator.h"
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 #include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
@@ -215,12 +216,13 @@ void ABlackholeGameState::ConvertToSpectator(APlayerController* PlayerController
 	if (Target)
 	{
 		// SpectatorPawn 생성 및 전환
-		ASpectatorPawn* Spectator = GetWorld()->SpawnActorDeferred<ASpectatorPawn>(SpectatorPawnClass, Target->GetActorTransform(), PlayerController, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		ABlackholeSpectator* Spectator = GetWorld()->SpawnActorDeferred<ABlackholeSpectator>(SpectatorPawnClass, Target->GetActorTransform(), PlayerController, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
 		if (Spectator)
 		{
 			UGameplayStatics::FinishSpawningActor(Spectator, Target->GetActorTransform());
 			PlayerController->Possess(Spectator);
+			Spectator->CreateSpectatorUI();
 			UE_LOG(LogTemp, Warning, TEXT("Spectator Possessed"));
 		}
 	}

@@ -8,6 +8,8 @@
 #include "Camera/CameraComponent.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "Blueprint/UserWidget.h"
+#include "Project_B/Maps/BlackHole/Public/SpectatorUI.h"
 
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -31,13 +33,22 @@ ABlackholeSpectator::ABlackholeSpectator()
 	{
 		IA_Fire = TempIA.Object;
 	}
+	
+	UE_LOG(LogTemp, Display, TEXT("Spectator 생성자"));
+	// 위젯 넣기
+	ConstructorHelpers::FClassFinder<USpectatorUI> TempSpUI(TEXT("/Game/Maps/Blackhole/Spectator/UI/WBP_Spectator.WBP_Spectator_C"));
+	if (TempSpUI.Succeeded())
+	{
+		SpectatorUIFactory = TempSpUI.Class;
+		UE_LOG(LogTemp, Display, TEXT("SpectatorUIFactory"));
+	}
 }
 
 // Called when the game starts or when spawned
 void ABlackholeSpectator::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 }
 
 // Called every frame
@@ -50,7 +61,7 @@ void ABlackholeSpectator::Tick(float DeltaTime)
 void ABlackholeSpectator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	// bAddDefaultMovementBindings = false;
+
 	// 기존 플레이어 인풋 제거하자
 	if (UEnhancedInputLocalPlayerSubsystem* inputsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetWorld()->GetFirstPlayerController()->GetLocalPlayer()))
 	{
@@ -82,5 +93,19 @@ void ABlackholeSpectator::SpawnProjectile()
 
 	// Projectile 생성
 	// GetWorld()->SpawnActor<AProjectileClass>(ProjectileClass, SpawnLocation, Rotation, SpawnParams);
+}
+
+void ABlackholeSpectator::CreateSpectatorUI()
+{
+	if (SpectatorUIFactory) 
+	{
+		// 위젯 생성
+		SpectatorUI = CreateWidget<USpectatorUI>(GetWorld(), SpectatorUIFactory);
+		UE_LOG(LogTemp, Display, TEXT("Spectator UI created"));
+		if (SpectatorUI)
+		{
+			SpectatorUI->AddToViewport(); // UI 화면에 추가
+		}
+	}
 }
 

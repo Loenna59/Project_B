@@ -63,7 +63,7 @@ public:
 	
 	// 관전자
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ASpectatorPawn> SpectatorPawnClass;
+	TSubclassOf<class ABlackholeSpectator> SpectatorPawnClass;
 	void ConvertToSpectator(APlayerController* PlayerController);
 
 	// 게임 시작과 종료 관련

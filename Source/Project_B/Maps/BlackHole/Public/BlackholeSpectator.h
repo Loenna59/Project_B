@@ -38,4 +38,11 @@ public:
 	class UInputMappingContext* IMC_Spectator;
 	UPROPERTY()
 	class UInputAction* IA_Fire;
+
+	// 위젯을 띄우자
+	UPROPERTY()
+	TSubclassOf<class USpectatorUI> SpectatorUIFactory;
+	UPROPERTY()
+	class USpectatorUI* SpectatorUI;
+	void CreateSpectatorUI();
 };
