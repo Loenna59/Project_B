@@ -30,23 +30,6 @@ void UGravityComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*
-	// 소유자의 물리 컴포넌트 가져오기
-	OwnerPhysicsComp = Cast<UPrimitiveComponent>(GetOwner()->GetComponentByClass(UPrimitiveComponent::StaticClass()));
-
-	// 블랙홀 캐스팅
-	Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
-	Planet = Blackhole;
-	
-	// 플레이어 캐스팅
-	AActor* OwnerActor = GetOwner(); 
-	PlayerCharacter = Cast<ABaseCharacter>(OwnerActor);
-	
-	// 게임 스테이트 캐스팅
-	gs = Cast<ABlackholeGameState>(GetWorld()->GetGameState());
-
-	// 각 액터마다 랜덤한 초기 각도 부여
-	CurrentOrbitAngle = FMath::RandRange(0.0f, 360.0f);*/
 }
 
 void UGravityComponent::InitializeComponent()
@@ -85,7 +68,6 @@ void UGravityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		{
 			return;
 		}
-		
 		if (Blackhole->bIsActive)
 		{
 			ApplyGravity(DeltaTime);
@@ -107,7 +89,6 @@ void UGravityComponent::GetLifetimeReplicatedProps(
 	DOREPLIFETIME(UGravityComponent, RotationSpeed);
 	DOREPLIFETIME(UGravityComponent, OrbitSpeed);
 	DOREPLIFETIME(UGravityComponent, bPhysics);
-	
 }
 
 void UGravityComponent::ApplyGravity(float DeltaTime)
@@ -306,30 +287,93 @@ void UGravityComponent::MulticastRPC_SetOrbit_Implementation(FVector AngularVelo
 
 void UGravityComponent::SpawnCount()
 {
-	ABaseCharacter* player = Cast<ABaseCharacter>(GetOwner());
-	EGrabState state = player->PickComp->GetGrabState();
-	if (state != EGrabState::None) // TODO: 뭔갈 잡고 있으면
-		
-	if (gs)
+	EGrabState state = PlayerCharacter->PickComp->GetGrabState();
+	
+	if (gs) //TODO: 여기.,..,
 	{
 		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
 		switch (gs->BlackholeSpawnCount)
 		{
 		case 0:
-			OrbitRadius = 900;
-			OrbitSpeed = 30.0f;
+			if (PlayerCharacter)
+			{
+				if (state != EGrabState::None) 
+				{
+					// TODO: 뭔갈 잡고 있으면
+					OrbitRadius = 1000;
+					OrbitSpeed = 30.0f;
+				}
+				else
+				{
+					OrbitRadius = 900;
+					OrbitSpeed = 30.0f;
+				}
+			}
+			else
+			{
+				OrbitRadius = 900;
+				OrbitSpeed = 30.0f;
+			}
 			break;
 		case 1:
-			OrbitRadius = 750;
-			OrbitSpeed = 40.0f;
+			if (PlayerCharacter)
+			{
+				if (state != EGrabState::None) 
+				{
+					OrbitRadius = 900;
+					OrbitSpeed = 30.0f;
+				}
+				else
+				{
+					OrbitRadius = 750;
+					OrbitSpeed = 40.0f;
+				}
+			}
+			else
+			{
+				OrbitRadius = 750;
+				OrbitSpeed = 40.0f;
+			}
 			break;
 		case 2:
-			OrbitRadius = 500;
-			OrbitSpeed = 60.0f;
+			if (PlayerCharacter)
+			{
+				if (state != EGrabState::None) 
+				{
+					OrbitRadius = 750;
+					OrbitSpeed = 40.0f;
+				}
+				else
+				{
+					OrbitRadius = 500;
+					OrbitSpeed = 60.0f;
+				}
+			}
+			else
+			{
+				OrbitRadius = 500;
+				OrbitSpeed = 60.0f;
+			}
 			break;
 		default:
-			OrbitRadius = 400;
-			OrbitSpeed = 60.0f;
+			if (PlayerCharacter)
+			{
+				if (state != EGrabState::None) 
+				{
+					OrbitRadius = 500;
+					OrbitSpeed = 60.0f;
+				}
+				else
+				{
+					OrbitRadius = 400;
+					OrbitSpeed = 60.0f;
+				}
+			}
+			else
+			{
+				OrbitRadius = 400;
+				OrbitSpeed = 60.0f;
+			}
 			break;
 		}
 	}

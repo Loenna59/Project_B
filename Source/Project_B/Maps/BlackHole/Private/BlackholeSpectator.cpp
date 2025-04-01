@@ -88,8 +88,22 @@ void ABlackholeSpectator::SpawnProjectile()
 	UE_LOG(LogTemp, Warning, TEXT("Spawning Projectile"));
 	
 	// Projectile 발사 위치
-	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
-	FActorSpawnParameters SpawnParams;
+	// 카메라 위치기준으로 트레이스에서 날릴 위치를 찾자
+	FVector start = GetActorLocation();
+	FVector dir;
+	FVector end = start + dir * 100000;
+	bool bIsHit;
+	FHitResult hitInfo;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+	
+	// 마우스 클릭 위치를 3D 공간에서 좌표, 방향을 구하자
+	GetWorld()->GetFirstPlayerController()->DeprojectMousePositionToWorld(start, dir);
+	bIsHit = GetWorld()->LineTraceSingleByChannel(hitInfo, start, end, ECC_Visibility, params);
+	if (bIsHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("목적지: %s"), *hitInfo.GetActor()->GetActorNameOrLabel());
+	}
 
 	// Projectile 생성
 	// GetWorld()->SpawnActor<AProjectileClass>(ProjectileClass, SpawnLocation, Rotation, SpawnParams);

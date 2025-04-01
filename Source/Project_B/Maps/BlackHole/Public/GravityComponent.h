@@ -62,7 +62,7 @@ public:
 	AActor* Planet; // 중력을 적용할 행성 (외부에서 설정 가능)
 	ABlackHole* Blackhole;
 	ABlackholeGameState* gs;
-	ACharacter* PlayerCharacter;
+	ABaseCharacter* PlayerCharacter;
 
 	// 페이즈별 적절하게 조절 필요, 동기화 필요
 	// 목표 궤도 반지름
