@@ -92,6 +92,18 @@ ABaseCharacter::ABaseCharacter()
 
 	OneHandedSocket = CreateDefaultSubobject<USceneComponent>(TEXT("OneHandedSocket"));
 	OneHandedSocket->SetupAttachment(GetMesh(), TEXT("OneHanded"));
+
+	Sunglasses = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sunglasses"));
+	Sunglasses->SetupAttachment(GetMesh(), TEXT("Sunglasses"));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> SunglassesMesh(TEXT("/Game/Assets/_Objects/Sunglasses/Sunglasses.Sunglasses"));
+
+	if (SunglassesMesh.Succeeded())
+	{
+		Sunglasses->SetStaticMesh(SunglassesMesh.Object);
+	}
+
+	Sunglasses->SetVisibility(false);
 	
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmp_imc(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
 
@@ -114,6 +126,7 @@ void ABaseCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	SetReplicateMovement(true);
+	SetSunglasses(false);
 
 	PhysicalAnimationComp->SetSkeletalMeshComponent(GetMesh());
 	
@@ -397,6 +410,11 @@ bool ABaseCharacter::CheckAndStopKnockdown()
 	}
 
 	return false;
+}
+
+void ABaseCharacter::SetSunglasses(bool bEquip)
+{
+	Sunglasses->SetVisibility(bEquip);
 }
 
 void ABaseCharacter::Server_CheckAndStopKnockdown_Implementation()

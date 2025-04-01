@@ -68,6 +68,9 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_CheckAndStopKnockdown();
+
+	UFUNCTION()
+	void SetSunglasses(bool bEquip);
 	
 protected:
 	UPROPERTY()
@@ -123,6 +126,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* OneHandedSocket = nullptr;
+
+	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* Sunglasses = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100;
