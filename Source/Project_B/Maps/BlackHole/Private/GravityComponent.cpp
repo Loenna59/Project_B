@@ -308,7 +308,8 @@ void UGravityComponent::SpawnCount()
 {
 	ABaseCharacter* player = Cast<ABaseCharacter>(GetOwner());
 	EGrabState state = player->PickComp->GetGrabState();
-	if (state != EGrabState::None) // 뭔갈 잡고 있으면
+	if (state != EGrabState::None) // TODO: 뭔갈 잡고 있으면
+		
 	if (gs)
 	{
 		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
