@@ -3,16 +3,22 @@
 
 #include "SessionItemUI.h"
 
+#include "BlackholeLobbyUI.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
+#include "Project_B/Maps/LobbyMap/LobbyGameState.h"
+
+class ALobbyGameState;
 
 void USessionItemUI::NativeConstruct()
 {
-	Super::NativeConstruct();
+	Super::NativeConstruct(); 
 
 	Btn_JoinSession->OnClicked.AddDynamic(this,&USessionItemUI::Btn_JoinSession_Clicked);
 }
+
 
 void USessionItemUI::Btn_JoinSession_Clicked()
 {

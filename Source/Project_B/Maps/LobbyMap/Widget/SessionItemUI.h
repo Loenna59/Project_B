@@ -20,9 +20,7 @@ public:
 	class UButton* Btn_JoinSession;
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_SessionName;
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* Text_EnterPlayer;
-
+	
 	int32 roomIdx;
 	
 	UFUNCTION()

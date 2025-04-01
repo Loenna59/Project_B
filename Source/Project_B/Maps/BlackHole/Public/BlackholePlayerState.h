@@ -6,9 +6,8 @@
 #include "GameFramework/PlayerState.h"
 #include "BlackholePlayerState.generated.h"
 
-/**
- * 
- */
+DECLARE_DELEGATE_OneParam(FUpdateName, FString);
+
 UCLASS()
 class PROJECT_B_API ABlackholePlayerState : public APlayerState
 {

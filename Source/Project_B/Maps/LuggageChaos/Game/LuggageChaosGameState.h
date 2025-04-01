@@ -58,8 +58,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
 	TSubclassOf<class UUserWidget> TransitionWidgetClass;
 	
-	UPROPERTY(Replicated)
-	TArray<FString> WinnerKeys;
 
 	UPROPERTY(Replicated)
 	class AWeaponSpawnManager* WeaponSpawnManager;
@@ -76,13 +74,15 @@ private:
 	// 플레이어 unique ID, Info
 	TMap<FString,FPlayerInfo> PlayersInfo;
 
+	UPROPERTY(Replicated)
+	TArray<FString> WinnerKeys;
 
 	FString MyKey = "";
 	
 	// 플레이어 초기 위치 초기화를 위한 함수
 	TArray<AActor*> BlueSpawnPoints;
 	TArray<AActor*> RedSpawnPoints;
-	int32 dummyIdx = 0;
+	int32 dummyKey = 0;
 
 	int32 blueIdx = 0;
 	int32 redIdx = 0;
@@ -105,6 +105,7 @@ protected:
 public:
 	/**모든 클라이언트에서 호출되어야 함*/
 	void AddScore(ETeamType team ,const uint8 point);
+	void AddWinner(FString playerKey);
 	void InitPlayerLoc(APawn* pawn,FString key);
  
 protected:

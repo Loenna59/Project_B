@@ -10,8 +10,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholePlayerState.h"
+#include "Project_B/Maps/BlackHole/Public/BlackholeSpectator.h"
 #include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
+
+ABlackholeGameMode::ABlackholeGameMode()
+{
+	DefaultPawnClass = ABlackholeSpectator::StaticClass();
+}
 
 void ABlackholeGameMode::BeginPlay()
 {

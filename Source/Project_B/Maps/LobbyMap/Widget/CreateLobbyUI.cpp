@@ -40,7 +40,7 @@ void UCreateLobbyUI::Btn_FindSession_Clicked()
 
 	// 찾는 도중엔 버튼을 비활성화
 	// 검색 버튼 문구 바꿔주고
-	TextBtn_FindSession->SetText(FText::FromString("Search..."));
+	// TextBtn_FindSession->SetText(FText::FromString("Search..."));
 	// 검색 버튼을 비활성화
 	Btn_FindSession->SetIsEnabled(false);
 }
@@ -56,7 +56,7 @@ void UCreateLobbyUI::OnFindComplete(int32 idx, FString info)
 	if (idx==-1)
 	{
 		// 검색 버튼 내용 다시 find로
-		TextBtn_FindSession->SetText(FText::FromString("Find"));
+		// TextBtn_FindSession->SetText(FText::FromString("Find"));
 		// 검색 버튼을 활성화
 		Btn_FindSession->SetIsEnabled(true);
 	}

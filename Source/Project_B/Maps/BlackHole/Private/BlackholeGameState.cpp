@@ -9,19 +9,27 @@
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Project_B/Maps/WeaponSpawnManager.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
+#include "Project_B/Maps/BlackHole/Public/BlackholePlayerState.h"
+#include "Project_B/Maps/BlackHole/Public/BlackholeSpectator.h"
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 #include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 
+class ABlackholePlayerState;
+
+ABlackholeGameState::ABlackholeGameState()
+{
+	bReplicates = true;
+}
+
 void ABlackholeGameState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	bReplicates = true;
 
 	// 게임 인스턴스
 	gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
@@ -30,12 +38,14 @@ void ABlackholeGameState::BeginPlay()
 	Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
 	Rotator = Cast<ADestroyZone>(UGameplayStatics::GetActorOfClass(GetWorld(), ADestroyZone::StaticClass()));
 
-	// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다
-	// TODO: 실제 시연때는 30초로 변경하기
-	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
-
+	// 서버
 	if (HasAuthority())
 	{
+		// 게임 시간
+		GameStartTime = GetWorld()->GetTimeSeconds();
+		// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다	
+		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
+
 		WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
 	}
 }
@@ -59,6 +69,9 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 
 void ABlackholeGameState::SpawnBlackhole()
 {
+	// 서버만
+	if (!HasAuthority()) return;
+	
 	// 블랙홀 스폰 함수
 	Blackhole->bIsActive = true;
 	Rotator->Rotate(true);
@@ -66,11 +79,14 @@ void ABlackholeGameState::SpawnBlackhole()
 	if(BlackholeSpawnCount >=4) return;
 
 	// 10초 후 블랙홀 소멸
-	GetWorld()->GetTimerManager().SetTimer(BlackholeDestroyHandle, this, &ABlackholeGameState::DestroyBalckhole, 10.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(BlackholeDestroyHandle, this, &ABlackholeGameState::DestroyBlackhole, 10.0f, false);
 }
 
-void ABlackholeGameState::DestroyBalckhole()
+void ABlackholeGameState::DestroyBlackhole()
 {
+	// 서버만
+	if (!HasAuthority()) return;
+	
 	Blackhole->bIsActive = false;
 	BlackholeSpawnCount++;
 	Rotator->Rotate(false);
@@ -84,11 +100,14 @@ void ABlackholeGameState::DestroyBalckhole()
 
 void ABlackholeGameState::CheckGameEndConditions()
 {
+	// 서버만
+	if (!HasAuthority()) return;
+	
 	// 게임 인스턴스에서 플레이어 정보 확인
 	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
 
-	AlivePlayers = 0;
-	// 플레이어 정보 순회
+	AlivePlayers = 0; // 초기화
+	// 플레이어 정보 순회 (처음부터 세기)
 	for (auto& it : InfoMap)
 	{
 		FPlayerInfo& PlayerInfo = it.Value;
@@ -99,36 +118,43 @@ void ABlackholeGameState::CheckGameEndConditions()
 		}
 	}
 
-	// TODO: 종료 조건: 한 팀만 남았거나 플레이어가 1명 이하일 때
+	// TODO: 종료 조건: "한 팀만 남았거나" 플레이어가 1명 이하일 때
 	if (AlivePlayers <= 1)
 	{
 		DetermineWinner();
 	}
 }
 
-
+// 플레이어가 죽으면 사망한 플레이어 목록을 추가하자
 void ABlackholeGameState::AddDeadPlayer(APlayerController* PlayerController)
 {
-	if (HasAuthority())
+	if (HasAuthority()) // 서버
 	{
 		DeadPlayers.AddUnique(PlayerController);
-		OnRep_PlayerDeathStates(); // 서버에서 즉시 실행
 	}
 }
 
-void ABlackholeGameState::OnRep_PlayerDeathStates()
+void ABlackholeGameState::Multicast_PlayerDeath_Implementation(APlayerController* PlayerController)
 {
-	for (APlayerController* PC : DeadPlayers)
-	{
-		if (PC && PC->IsLocalController()) // 로컬 플레이어만 처리
-		{
-			DeathEffects(PC);
-		}
-	}
+	if (!PlayerController) return;
+	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayerDeath_Implementation"));
+	
+	// 죽은 플레이어에게 사망 효과 적용
+	DeathEffects(PlayerController);
+	
+	// 입력 비활성화하고
+	PlayerController->SetIgnoreLookInput(true);
+	PlayerController->SetIgnoreMoveInput(true);
+    
+	// 관전자 모드로 전환
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateUObject(this, &ABlackholeGameState::ConvertToSpectator, PlayerController), 3.0f, false);
 }
 
 void ABlackholeGameState::DetermineWinner()
 {
+	if (!HasAuthority()) return;
+	
 	for (APlayerState* PS : PlayerArray)
 	{
 		if (PS && !DeadPlayers.Contains(PS->GetPlayerController()))
@@ -140,68 +166,68 @@ void ABlackholeGameState::DetermineWinner()
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Game Over! Winner determined."));
+	// TODO: 슬로우모션 동기화
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5);
+	UE_LOG(LogTemp, Warning, TEXT("게임 종료! 승자가 결정되었습니다!"));
 }
-
-
-/*void ABlackholeGameState::MulticastRPC_SetGameStart_Implementation(float StartTime)
-{
-	// 게임 시작 로직
-	GameStartTime = StartTime;
-}
-
-void ABlackholeGameState::MulticastRPC_SetGameOver_Implementation()
-{
-	UE_LOG(LogTemp, Warning, TEXT("End Game!!!!"));
-	
-	// 승패 가르기
-	DetermineWinner();
-}*/
 
 void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
-	if (!HasAuthority()) return;
+	if (!HasAuthority()) return; // 서버만
 	
-	CheckGameEndConditions();
 	// 서버에서 사망 플레이어를 추가한다
 	AddDeadPlayer(PlayerController);
 
 	// 사망 처리 로직
-	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
-	UE_LOG(LogTemp, Warning, TEXT("Player Death"));
-
-	// 사망 처리 로직
-	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->SetIgnoreMoveInput(true);
-	DeathEffects(PlayerController);
+	Multicast_PlayerDeath(PlayerController);
 	
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([Player, PlayerController, this]()
-	{
-	   AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
-	   if (Target)
-	   {
-		  PlayerController->SetViewTarget(Target);
-		  Player->SetActorHiddenInGame(true);
-		  Player->SetActorEnableCollision(false);
-	   }
-	}), 3.0f, false);
+	CheckGameEndConditions();
+	UE_LOG(LogTemp, Warning, TEXT("OnPlayerDeath"));
 }
 
 void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
 {
 	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
-
-	UE_LOG(LogTemp, Warning, TEXT("카메라 흑백효과입니다"));
+	
 	// 카메라 흑백 효과
 	if (Player->CameraComp)
 	{
 		Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
-		UE_LOG(LogTemp, Warning, TEXT("카메라 전환합니다"));
+		UE_LOG(LogTemp, Warning, TEXT("카메라 흑백 전환합니다"));
 	}
 }
 
+void ABlackholeGameState::ConvertToSpectator(APlayerController* PlayerController)
+{
+	APawn* ControlledPawn = PlayerController->GetPawn();
+	
+	ControlledPawn->SetActorHiddenInGame(true);
+	ControlledPawn->SetActorEnableCollision(false);
+	UE_LOG(LogTemp, Warning, TEXT("ConvertToSpectator"));
 
+	PlayerController->UnPossess();
 
+	if (PlayerController == GetWorld()->GetFirstPlayerController())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SamePlayerController!!!!!!! : %p || %p"), PlayerController, GetWorld()->GetFirstPlayerController());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Different Controller : %p || %p"), PlayerController, GetWorld()->GetFirstPlayerController());
+	}
+	
+	AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
+	if (Target)
+	{
+		// SpectatorPawn 생성 및 전환
+		ABlackholeSpectator* Spectator = GetWorld()->SpawnActorDeferred<ABlackholeSpectator>(SpectatorPawnClass, Target->GetActorTransform(), PlayerController, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
-
+		if (Spectator)
+		{
+			UGameplayStatics::FinishSpawningActor(Spectator, Target->GetActorTransform());
+			PlayerController->Possess(Spectator);
+			Spectator->CreateSpectatorUI();
+			UE_LOG(LogTemp, Warning, TEXT("Spectator Possessed"));
+		}
+	}
+}
