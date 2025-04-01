@@ -79,7 +79,7 @@ void UBaseCharacterPickComponent::UpdateGrabState(EGrabState State, bool bIsGrab
 		
 		GrabState &= ~State;
 		
-		LOG_SCREEN("Rlease %s", *EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(GrabState)).ToString());
+		LOG_SCREEN("Release %s", *EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(GrabState)).ToString());
 	}
 
 	GetWorld()->GetTimerManager().ClearTimer(ValidTimerHandle);

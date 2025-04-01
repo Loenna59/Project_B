@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "Weapon/Hammer.h"
+﻿#include "Weapon/Hammer.h"
 
 #include "KismetTraceUtils.h"
 #include "Character/BaseCharacter.h"
@@ -8,10 +6,8 @@
 #include "Project_B/Utilities/LogMacro.h"
 #include "Project_B/Utilities/TraceChannelHelper.h"
 
-// Sets default values
 AHammer::AHammer()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
