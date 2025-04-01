@@ -21,12 +21,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool isDummyPlayer = false;
 	
-	UPROPERTY()
-	class APodiumCamera* PodiumCamera = nullptr;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
 	float ReadyTime = 12.0f;
 
+	//UPROPERTY(Replicated)
+	class APodiumCamera* PodiumCamera = nullptr;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | WinPrize")
 	TSubclassOf<class AWinnerPrize> WinnerPrizeClass;
 
@@ -49,23 +49,20 @@ private:
 	uint8 dummyKey = 0;
 	
 protected:
-	void InitPlayerInfo();
+	//virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
+	
+	void InitPlayerInfo();
 
 public:
-	void InitPlayerLoc(APawn* pawn, bool bIsWin);
-
+	void InitPlayer(APlayerController* pc, bool bIsWin);
 	void AddWinPrize(APawn* pawn);
-	
-	void InitPodiumCamera(APlayerController* pc);
 
 private:
 	void InitSpawnPoints();
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_Shoot();
-
-	void Shoot();
 
 	TMap<FString,FPlayerInfo> DummyPlayersInfo();
 };

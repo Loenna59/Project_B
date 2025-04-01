@@ -15,7 +15,7 @@ class PROJECT_B_API APodiumGameMode : public AGameModeBase
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float BeginDelay = 1.0f;
+	float BeginDelay = 1.2f;
 
 private:
 	TArray<FString> WinnerKeys;

@@ -1,6 +1,7 @@
 ﻿#include "LuggageChaosGameState.h"
 
 #include "LuggageChaosGameMode.h"
+#include "LuggagePlayerState.h"
 
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/Character.h"
@@ -17,7 +18,6 @@
 
 ALuggageChaosGameState::ALuggageChaosGameState()
 {
-	bReplicates = true;
 }
 
 void ALuggageChaosGameState::BeginPlay()
@@ -29,15 +29,12 @@ void ALuggageChaosGameState::BeginPlay()
 void ALuggageChaosGameState::GameReady()
 {
 	InitPlayerInfo();
-	UE_LOG(LogTemp,Warning,TEXT("GameReady: 게임 레디"));
 	
 	if (HasAuthority())
 	{
 		FTimerHandle OnStartTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ALuggageChaosGameState::GameStart,ReadyTime,false);
-		
 		InitSpawnPoint();
-		UE_LOG(LogTemp,Warning,TEXT("HasAuthority: 게임 레디"));
 	}
 
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
@@ -46,7 +43,6 @@ void ALuggageChaosGameState::GameReady()
 
 void ALuggageChaosGameState::InitPlayerInfo()
 {
-	UE_LOG(LogTemp,Warning,TEXT("InitPlayerInfo: 플레이어 초기화 시작"));
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	
 	if (isDummyPlayerInfo)
@@ -238,6 +234,11 @@ void ALuggageChaosGameState::AddScore(ETeamType team, const uint8 point)
 	}
 }
 
+void ALuggageChaosGameState::AddWinner(FString playerKey)
+{
+	WinnerKeys.Add(playerKey);
+}
+
 void ALuggageChaosGameState::GameEnd()
 {
 	FTimerHandle OnEndTimerHandle;
@@ -300,8 +301,8 @@ void ALuggageChaosGameState::Win(ETeamType winner)
 		LOG_SCREEN("WIN");
 		
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
+		pc->GetPlayerState<ALuggagePlayerState>()->Server_Win();
 		AddWinPrize(pc);
-		WinnerKeys.Add(MyKey);
 	}
 	else
 	{

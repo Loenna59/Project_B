@@ -14,16 +14,8 @@ UCLASS()
 class PROJECT_B_API ALuggagePlayerState : public APlayerState
 {
 	GENERATED_BODY()
-
-private:
-	ETeamType MyTeamType = ETeamType::None;
-	
-	bool bIsWin = false;
 	
 public:
-	void SetTeamType(const ETeamType team) { MyTeamType = team; }
-	ETeamType GetTeamType() const { return MyTeamType; }
-
-	void SetIsWin(bool isWin) { bIsWin = isWin; }
-	bool GetIsWin() { return bIsWin; }
+	UFUNCTION(Server, Reliable)
+	void Server_Win();
 };
