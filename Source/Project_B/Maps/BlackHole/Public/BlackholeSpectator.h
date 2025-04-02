@@ -45,4 +45,10 @@ public:
 	UPROPERTY()
 	class USpectatorUI* SpectatorUI;
 	void CreateSpectatorUI();
+
+	// 스폰시킬 물체
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ASpectatorItem> SepctatorItmeFactory;
+	UPROPERTY(EditAnywhere)
+	class ASpectatorItem* SpectatorItem;
 };

@@ -30,23 +30,6 @@ void UGravityComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*
-	// 소유자의 물리 컴포넌트 가져오기
-	OwnerPhysicsComp = Cast<UPrimitiveComponent>(GetOwner()->GetComponentByClass(UPrimitiveComponent::StaticClass()));
-
-	// 블랙홀 캐스팅
-	Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
-	Planet = Blackhole;
-	
-	// 플레이어 캐스팅
-	AActor* OwnerActor = GetOwner(); 
-	PlayerCharacter = Cast<ABaseCharacter>(OwnerActor);
-	
-	// 게임 스테이트 캐스팅
-	gs = Cast<ABlackholeGameState>(GetWorld()->GetGameState());
-
-	// 각 액터마다 랜덤한 초기 각도 부여
-	CurrentOrbitAngle = FMath::RandRange(0.0f, 360.0f);*/
 }
 
 void UGravityComponent::InitializeComponent()
@@ -85,7 +68,6 @@ void UGravityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		{
 			return;
 		}
-		
 		if (Blackhole->bIsActive)
 		{
 			ApplyGravity(DeltaTime);
@@ -107,7 +89,6 @@ void UGravityComponent::GetLifetimeReplicatedProps(
 	DOREPLIFETIME(UGravityComponent, RotationSpeed);
 	DOREPLIFETIME(UGravityComponent, OrbitSpeed);
 	DOREPLIFETIME(UGravityComponent, bPhysics);
-	
 }
 
 void UGravityComponent::ApplyGravity(float DeltaTime)
@@ -209,7 +190,7 @@ void UGravityComponent::DeactivateGravity()
 	// 현재 속도 가져오기
 	FVector CurrentVelocity = OwnerPhysicsComp->GetPhysicsLinearVelocity();
 	// X, Y축 속도를 0으로 만들고, Z축만 중력 방향으로 설정
-	FVector NewVelocity = FVector(0, 0, -500.0f);
+	FVector NewVelocity = FVector(0, 0, -600.0f);
 
 	// 서버에서만 실행
 	if (GetOwner()->HasAuthority())
@@ -306,30 +287,29 @@ void UGravityComponent::MulticastRPC_SetOrbit_Implementation(FVector AngularVelo
 
 void UGravityComponent::SpawnCount()
 {
-	ABaseCharacter* player = Cast<ABaseCharacter>(GetOwner());
-	EGrabState state = player->PickComp->GetGrabState();
-	if (state != EGrabState::None) // TODO: 뭔갈 잡고 있으면
-		
+	EGrabState state = PlayerCharacter->PickComp->GetGrabState();
+	bool bIsGrabbing = (state != EGrabState::None);
+	
 	if (gs)
 	{
 		// 블랙홀 페이즈별 공전궤도와 힘을 설정해주자
 		switch (gs->BlackholeSpawnCount)
 		{
 		case 0:
-			OrbitRadius = 900;
-			OrbitSpeed = 30.0f;
+			OrbitRadius = 1000;
+			OrbitSpeed = 10.0f;
 			break;
 		case 1:
-			OrbitRadius = 750;
-			OrbitSpeed = 40.0f;
+			OrbitRadius = 850;
+			OrbitSpeed = 20.0f;
 			break;
 		case 2:
-			OrbitRadius = 500;
-			OrbitSpeed = 60.0f;
+			OrbitRadius = 550;
+			OrbitSpeed = 20.0f;
 			break;
 		default:
 			OrbitRadius = 400;
-			OrbitSpeed = 60.0f;
+			OrbitSpeed = 20.0f;
 			break;
 		}
 	}
