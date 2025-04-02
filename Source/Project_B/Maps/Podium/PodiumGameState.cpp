@@ -16,14 +16,8 @@ class UBanimalsGameInstance;
 
 APodiumGameState::APodiumGameState()
 {
-	//bReplicates = true;
+	
 }
-
-// void APodiumGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-// {
-// 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-// 	DOREPLIFETIME(APodiumGameState, PodiumCamera);
-// }
 
 void APodiumGameState::BeginPlay()
 {

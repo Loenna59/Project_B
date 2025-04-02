@@ -49,7 +49,6 @@ private:
 	uint8 dummyKey = 0;
 	
 protected:
-	//virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	
 	void InitPlayerInfo();
