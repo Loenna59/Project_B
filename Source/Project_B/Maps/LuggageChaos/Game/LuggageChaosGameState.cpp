@@ -390,69 +390,55 @@ void ALuggageChaosGameState::Server_OnPlayerDeath_Implementation(APlayerControll
 	
 	AddDeadPlayer(pc);
 	
+	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
+	
+	// 흑백으로 죽은 자기 자신 보는 상태
+	Net_OnPlayerDeath(player, pc);
+
+	// 관전모드 진입
+	FTimerHandle deadTimerHandle;
+	GetWorldTimerManager().SetTimer(deadTimerHandle, FTimerDelegate::CreateLambda([player, pc, this]()
+	{
+		Net_OnPlayerSpectate(player,pc);
+	}), DeadTime, false);
+
+	// 리스폰
 	FTimerHandle respawnTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(respawnTimerHandle, this,&ALuggageChaosGameState::Respawn,RespawnTime, false);
+}
+
+// 흑백으로 죽은 자기 자신 보는 상태
+void ALuggageChaosGameState::Net_OnPlayerDeath_Implementation(ABaseCharacter* player, APlayerController* pc)
+{
+	// 모든 클라이언트
+	player->SetDie();
 	
-	//클라이언트일 경우
-	if (pc != GetWorld()->GetFirstPlayerController())
+	if (pc == nullptr)
 	{
-		Net_OnPlayerDeath(pc);
 		return;
 	}
 
-	//서버일 경우
-	LOG_SCREEN("서버: 죽기");
-	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
-	player->SetDie();
-	
-	pc->GetPawn()->DisableInput(pc);
-	DeathEffects(pc);
-	
-	FTimerHandle deadTimerHandle;
-	GetWorldTimerManager().SetTimer(deadTimerHandle, FTimerDelegate::CreateLambda([player, pc, this]()
+	if (pc->IsLocalController())
 	{
-		LOG_SCREEN("서버: 관전자로 전환");
-		player->SetActorHiddenInGame(true);
-		player->SetActorEnableCollision(false);
-		pc->StartSpectatingOnly();
-	}), DeadTime, false);
-}
-
-void ALuggageChaosGameState::Net_OnPlayerDeath_Implementation(APlayerController* pc)
-{
-	LOG_SCREEN("클라: 죽을게");
-	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
-	player->SetDie();
-	
-	pc->GetPawn()->DisableInput(pc);
-	DeathEffects(pc);
-	
-	FTimerHandle deadTimerHandle;
-	GetWorldTimerManager().SetTimer(deadTimerHandle, FTimerDelegate::CreateLambda([player, pc, this]()
-	{
-		LOG_SCREEN("클라: 관전자로 전환");
-		player->SetActorHiddenInGame(true);
-		player->SetActorEnableCollision(false);
-
-		pc->StartSpectatingOnly();
-		
-	}), DeadTime, false);
-}
-
-void ALuggageChaosGameState::AddDeadPlayer(APlayerController* pc)
-{
-	DeadPawns.Enqueue(pc->GetPawn());
-	DeadPlayers.Enqueue(pc->GetPlayerState<APlayerState>());
-}
-
-void ALuggageChaosGameState::DeathEffects(APlayerController* pc)
-{
-	ABaseCharacter* Player = Cast<ABaseCharacter>(pc->GetPawn());
-	
-	if (Player->CameraComp)
-	{
-		Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
+		LOG_SCREEN("클라: 죽을게");
+		pc->GetPawn()->DisableInput(pc);
+		DeathEffects(pc);
 	}
+}
+
+// 관전모드 진입
+void ALuggageChaosGameState::Net_OnPlayerSpectate_Implementation(ABaseCharacter* player, APlayerController* pc)
+{
+	// 모든 클라이언트
+	player->SetActorHiddenInGame(true);
+	player->SetActorEnableCollision(false);
+
+	if (pc == nullptr)
+	{
+		return;
+	}
+	
+	pc->StartSpectatingOnly();
 }
 
 void ALuggageChaosGameState::Respawn()
@@ -491,45 +477,52 @@ void ALuggageChaosGameState::Respawn()
 	APlayerController* pc = ps->GetPlayerController();
 	
 	pc->Possess(pawn);
-	
-	//클라이언트일 경우
-	if (key != MyKey)
-	{
-		LOG_PRINT(TEXT("클라이언트 살리기"));
-		Net_OnPlayerRespawn(ps->GetPlayerController());
-		return;
-	}
 
-	//서버일 경우
-	ABaseCharacter* player = Cast<ABaseCharacter>(pawn);
-	player->Rebirth();
-	
-	pawn->EnableInput(pc);
-	player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(1, 1, 1, 1);
-	
-	player->SetActorHiddenInGame(false);
-	player->SetActorEnableCollision(true);
-}
-
-void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerController* pc)
-{
-	LOG_SCREEN("클라: 리스폰!");
-	
 	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
 	
-	player->Rebirth();
-	
-	FInputModeGameOnly InputMode;
-	pc->SetInputMode(InputMode);
-	
-	pc->GetPawn()->EnableInput(pc);
-	
-	player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(1, 1, 1, 1);
-	
-	player->SetActorHiddenInGame(false);
-	player->SetActorEnableCollision(true);
+	Net_OnPlayerRespawn(pc, player);
 }
 
+void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerController* pc, ABaseCharacter* player)
+{
+	LOG_SCREEN("클라: 리스폰!");
+
+	player->SetActorHiddenInGame(false);
+	player->SetActorEnableCollision(true);
+	
+	if (pc == nullptr)
+	{
+		return;
+	}
+	
+	player->Rebirth();
+	
+	if (pc->IsLocalController())
+	{
+		FInputModeGameOnly InputMode;
+		pc->SetInputMode(InputMode);
+	
+		pc->GetPawn()->EnableInput(pc);
+	
+		player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(1, 1, 1, 1);
+	}
+}
+
+void ALuggageChaosGameState::AddDeadPlayer(APlayerController* pc)
+{
+	DeadPawns.Enqueue(pc->GetPawn());
+	DeadPlayers.Enqueue(pc->GetPlayerState<APlayerState>());
+}
+
+void ALuggageChaosGameState::DeathEffects(APlayerController* pc)
+{
+	ABaseCharacter* Player = Cast<ABaseCharacter>(pc->GetPawn());
+	
+	if (Player->CameraComp)
+	{
+		Player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
+	}
+}
 
 TMap<FString,FPlayerInfo> ALuggageChaosGameState::DummyPlayersInfo()
 {
