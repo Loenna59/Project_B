@@ -12,7 +12,6 @@
 #include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "Project_B/Maps/WeaponSpawnManager.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholePlayerState.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholeSpectator.h"
@@ -31,6 +30,7 @@ void ABlackholeGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UE_LOG(LogTemp,Warning,TEXT("ABlackholeGameState::BeginPlay"));
 	// 게임 인스턴스
 	gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	
@@ -38,16 +38,10 @@ void ABlackholeGameState::BeginPlay()
 	Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
 	Rotator = Cast<ADestroyZone>(UGameplayStatics::GetActorOfClass(GetWorld(), ADestroyZone::StaticClass()));
 
-	// 서버
-	if (HasAuthority())
-	{
-		// 게임 시간
-		GameStartTime = GetWorld()->GetTimeSeconds();
-		// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다	
-		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
-
-		WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
-	}
+	// 게임 시간
+	GameStartTime = GetWorld()->GetTimeSeconds();
+	// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다	
+	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 5.0f, false);
 }
 
 void ABlackholeGameState::Tick(float DeltaTime)
@@ -63,15 +57,10 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 	DOREPLIFETIME(ABlackholeGameState, GameStartTime);
 	DOREPLIFETIME(ABlackholeGameState, AlivePlayers);
 	DOREPLIFETIME(ABlackholeGameState, DeadPlayers);
-	DOREPLIFETIME(ABlackholeGameState, WeaponSpawnManager);
 }
-
 
 void ABlackholeGameState::SpawnBlackhole()
 {
-	// 서버만
-	if (!HasAuthority()) return;
-	
 	// 블랙홀 스폰 함수
 	Blackhole->bIsActive = true;
 	Rotator->Rotate(true);
@@ -84,9 +73,6 @@ void ABlackholeGameState::SpawnBlackhole()
 
 void ABlackholeGameState::DestroyBlackhole()
 {
-	// 서버만
-	if (!HasAuthority()) return;
-	
 	Blackhole->bIsActive = false;
 	BlackholeSpawnCount++;
 	Rotator->Rotate(false);
@@ -100,9 +86,6 @@ void ABlackholeGameState::DestroyBlackhole()
 
 void ABlackholeGameState::CheckGameEndConditions()
 {
-	// 서버만
-	if (!HasAuthority()) return;
-	
 	// 게임 인스턴스에서 플레이어 정보 확인
 	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
 
@@ -227,6 +210,8 @@ void ABlackholeGameState::ConvertToSpectator(APlayerController* PlayerController
 			UGameplayStatics::FinishSpawningActor(Spectator, Target->GetActorTransform());
 			PlayerController->Possess(Spectator);
 			Spectator->CreateSpectatorUI();
+			// 커서 보이게 하자
+			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 			UE_LOG(LogTemp, Warning, TEXT("Spectator Possessed"));
 		}
 	}

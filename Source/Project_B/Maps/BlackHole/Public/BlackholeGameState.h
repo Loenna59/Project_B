@@ -44,7 +44,6 @@ public:
 	// 게임 승리/패배 결정을 위한 생존 플레이어 수 체크
 	UPROPERTY(Replicated, VisibleAnywhere)
 	int32 AlivePlayers = 0;
-	
 
 	// Replicated 변수 추가
 	// UPROPERTY(ReplicatedUsing = OnRep_PlayerDeathStates)

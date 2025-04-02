@@ -9,6 +9,7 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
+#include "Project_B/Maps/BlackHole/Public/SpectatorItem.h"
 #include "Project_B/Maps/BlackHole/Public/SpectatorUI.h"
 
 
@@ -67,7 +68,6 @@ void ABlackholeSpectator::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	{
 		inputsys->ClearAllMappings();
 		inputsys->AddMappingContext(IMC_Spectator,0);
-		UE_LOG(LogTemp,Display,TEXT("IMC_Spectator 바인딩추가"));
 	}
 	
 	pc = Cast<APlayerController>(GetController());
@@ -75,7 +75,6 @@ void ABlackholeSpectator::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->ClearActionBindings();
 	PlayerInputComponent->ClearAxisBindings();
 	PlayerInputComponent->AxisBindings.Empty();
-	UE_LOG(LogTemp,Display,TEXT("플레이어 바인딩 초기화"));
 
 	UE_LOG(LogTemp, Warning, TEXT("Possessed: %p , LocalPlayerController: %p"), (void*)Controller, GetWorld()->GetFirstPlayerController());
 
@@ -88,11 +87,29 @@ void ABlackholeSpectator::SpawnProjectile()
 	UE_LOG(LogTemp, Warning, TEXT("Spawning Projectile"));
 	
 	// Projectile 발사 위치
-	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
-	FActorSpawnParameters SpawnParams;
+	// 카메라 위치기준으로 트레이스에서 날릴 위치를 찾자
+	FVector start = GetActorLocation();
+	FVector dir;
+	FVector end = start + dir * 10000;
+	bool bIsHit;
+	FHitResult hitInfo;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+	
+	// 마우스 클릭 위치를 3D 공간에서 좌표, 방향을 구하자
+	GetWorld()->GetFirstPlayerController()->DeprojectMousePositionToWorld(start, dir);
+	bIsHit = GetWorld()->LineTraceSingleByChannel(hitInfo, start, end, ECC_WorldDynamic, params);
+	if (bIsHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("목적지: %s"), *hitInfo.GetActor()->GetActorNameOrLabel());
+		DrawDebugLine(GetWorld(),start,end,FColor::Red, false, -1, 0, true);
+	}
 
 	// Projectile 생성
-	// GetWorld()->SpawnActor<AProjectileClass>(ProjectileClass, SpawnLocation, Rotation, SpawnParams);
+	FTransform SpawnTransform;
+	SpawnTransform.SetLocation(hitInfo.ImpactPoint);
+	SpawnTransform.SetRotation(FQuat::Identity);
+	GetWorld()->SpawnActor<ASpectatorItem>(SepctatorItmeFactory, SpawnTransform);
 }
 
 void ABlackholeSpectator::CreateSpectatorUI()

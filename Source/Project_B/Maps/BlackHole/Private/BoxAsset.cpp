@@ -46,7 +46,7 @@ void ABoxAsset::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector Velocity = Box->GetPhysicsLinearVelocity();
+	/*FVector Velocity = Box->GetPhysicsLinearVelocity();
 	FVector Angular = Box->GetPhysicsAngularVelocityInDegrees();
 	
 	if (Velocity.Size() > MaxLinearVelocity)
@@ -59,6 +59,6 @@ void ABoxAsset::Tick(float DeltaTime)
 	{
 		Angular = Angular.GetClampedToMaxSize(MaxAngularVelocity);
 		Box->SetAllPhysicsAngularVelocityInDegrees(Angular);
-	}
+	}*/
 }
 

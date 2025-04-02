@@ -22,4 +22,9 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* SpectatorMesh;
+	UPROPERTY(EditAnywhere)
+	class UProjectileMovementComponent* ProjectileMovement;
 };
