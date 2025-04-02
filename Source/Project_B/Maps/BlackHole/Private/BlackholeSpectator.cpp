@@ -133,9 +133,6 @@ void ABlackholeSpectator::SpawnProjectile()
 		{
 			ProjectileMovement->Velocity = LaunchDirection * ProjectileMovement->InitialSpeed;
 			ProjectileMovement->Activate();
-
-			// 중력 영향을 받을지 여부 (필요하면 0으로)
-			ProjectileMovement->ProjectileGravityScale = 0.0f; 
 		}
 
 		// Projectile이 이상한 방향을 바라보지 않도록 회전 조정
