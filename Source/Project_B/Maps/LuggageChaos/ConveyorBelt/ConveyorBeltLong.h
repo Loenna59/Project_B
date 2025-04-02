@@ -21,7 +21,7 @@ public:
 	TArray<UStaticMeshComponent*> Plates;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Conveyor Belt")
-	uint8 PlateCount = 34;
+	uint8 PlateCount = 36;
 	
 	FVector MoveDir;
 	FVector StarLoc;

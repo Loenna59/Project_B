@@ -128,8 +128,7 @@ void ALuggageManager::DeactiveLuggage(ALuggage* lug, ETeamType team)
 		GoldLuggage->SetActorLocation(GetActorLocation());
 
 		GetWorldTimerManager().SetTimer(GoldTimerHandle,this,&ALuggageManager::ActiveGoldLuggage,GoldCoolTime);
-	
-		LOG_SCREEN("황금 러기지 퇴장... ε=ε=ε=┏(ﾟロﾟ;)┛");
+		
 		return;
 	}
 	
@@ -150,6 +149,22 @@ void ALuggageManager::DeactiveLuggage(ALuggage* lug, ETeamType team)
 	
 }
 
+void ALuggageManager::ResetLuggage(ALuggage* lug, FVector loc)
+{
+	lug->LuggageMesh->SetSimulatePhysics(false);
+	lug->SetActorEnableCollision(false);
+	lug->SetActorHiddenInGame(true);
+	
+	lug->LuggageMesh->AttachToComponent(lug->GetRootComponent(),FAttachmentTransformRules::KeepWorldTransform);
+	lug->LuggageMesh->SetRelativeLocation(FVector::ZeroVector);
+
+	lug->SetActorLocation(loc);
+
+	lug->LuggageMesh->SetSimulatePhysics(true);
+	lug->SetActorEnableCollision(true);
+	lug->SetActorHiddenInGame(false);
+}
+
 void ALuggageManager::ActiveLuggage(ALuggage* lug, FVector dir)
 {
 	lug->LuggageMesh->SetSimulatePhysics(true);
@@ -163,7 +178,6 @@ void ALuggageManager::ActiveGoldLuggage()
 	GoldLuggage->LuggageMesh->SetSimulatePhysics(true);
 	GoldLuggage->SetActorEnableCollision(true);
 	GoldLuggage->SetActorHiddenInGame(false);
-	LOG_SCREEN("황금 러기지 등장  (*ﾟuﾟ )/\"");
 }
 
 ALuggage* ALuggageManager::SpawnLuggage(FVector pos)

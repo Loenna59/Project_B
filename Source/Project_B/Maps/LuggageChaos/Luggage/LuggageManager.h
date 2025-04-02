@@ -68,9 +68,11 @@ private:
 	void ActiveLuggage(ALuggage* lug, FVector dir);
 	
 	void ActiveGoldLuggage();
-
-	UFUNCTION()
+	
 	void DeactiveLuggage(ALuggage* lug, ETeamType team);
+	
+	UFUNCTION(BlueprintCallable)
+	void ResetLuggage(ALuggage* lug, FVector loc);
 
 	ALuggage* SpawnLuggage(FVector pos);
 	ALuggage* SpawnGoldLuggage();
