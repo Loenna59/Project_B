@@ -3,7 +3,9 @@
 
 #include "PodiumGameMode.h"
 #include "PodiumGameState.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 #include "Project_B/Utilities/LogMacro.h"
 
@@ -17,6 +19,11 @@ void APodiumGameMode::BeginPlay()
 	for (int i = 0; i<WinnerKeys.Num(); i++)
 	{
 		UE_LOG(LogTemp,Error,TEXT("gi에 저장된 승리자: %s"), *WinnerKeys[i]);
+	}
+	
+	if (BGM)
+	{
+		BgmComponent = UGameplayStatics::SpawnSound2D(GetWorld(), BGM);
 	}
 }
 
@@ -71,4 +78,20 @@ void APodiumGameMode::OnPostLogin(AController* NewPlayer)
 	{
 		LOG_ERROR(this,TEXT("올바른 게임스테이트 미할당"));
 	}
+}
+
+void APodiumGameMode::GoToHome()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby/ModeSelectMap?listen"));
+	BgmComponent->DestroyComponent();
+}
+
+void APodiumGameMode::Server_GoToHome_Implementation()
+{
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby/ModeSelectMap?listen"));
 }

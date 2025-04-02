@@ -5,6 +5,7 @@
 
 #include "PodiumCamera.h"
 #include "WinnerPrize.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"

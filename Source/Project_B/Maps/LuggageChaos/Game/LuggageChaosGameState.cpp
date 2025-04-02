@@ -103,6 +103,9 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 			pawn->SetActorLocation(BlueSpawnPoints[blueIdx]->GetActorLocation());
 			pawn->SetActorRotation(BlueSpawnPoints[blueIdx]->GetActorRotation());
 			++blueIdx;
+			
+			ABaseCharacter* character = Cast<ABaseCharacter>(pawn);
+			Net_InitCharacterSkin(character, ETeamType::Blue);
 		}
 		else
 		{
@@ -110,6 +113,9 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 			pawn->SetActorLocation(RedSpawnPoints[redIdx]->GetActorLocation());
 			pawn->SetActorRotation(RedSpawnPoints[blueIdx]->GetActorRotation());
 			++redIdx;
+			
+			ABaseCharacter* character = Cast<ABaseCharacter>(pawn);
+			Net_InitCharacterSkin(character, ETeamType::Red);
 		}
 	}
 	
@@ -122,6 +128,9 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 			pawn->SetActorLocation(BlueSpawnPoints[blueIdx]->GetActorLocation());
 			pawn->SetActorRotation(BlueSpawnPoints[blueIdx]->GetActorRotation());
 			++blueIdx;
+			
+			ABaseCharacter* character = Cast<ABaseCharacter>(pawn);
+			Net_InitCharacterSkin(character, ETeamType::Blue);
 		}
 		else
 		{
@@ -129,6 +138,9 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 			pawn->SetActorLocation(RedSpawnPoints[redIdx]->GetActorLocation());
 			pawn->SetActorRotation(RedSpawnPoints[blueIdx]->GetActorRotation());
 			++redIdx;
+			
+			ABaseCharacter* character = Cast<ABaseCharacter>(pawn);
+			Net_InitCharacterSkin(character, ETeamType::Red);
 		}
 	}
 	else
@@ -199,6 +211,19 @@ void ALuggageChaosGameState::InitSpawnPoint()
 	if (HasAuthority())
 	{
 		WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
+	}
+}
+
+
+void ALuggageChaosGameState::Net_InitCharacterSkin_Implementation(ABaseCharacter* character, ETeamType team)
+{
+	if (team == ETeamType::Blue)
+	{
+		character->SetSkin(CharacterColor::Blue);
+	}
+	else
+	{
+		character->SetSkin(CharacterColor::Red);
 	}
 }
 
@@ -296,7 +321,6 @@ void ALuggageChaosGameState::Net_GameEnd_Implementation()
 
 void ALuggageChaosGameState::ChangeLevelPodium()
 {
-	LOG_SCREEN("레벨 전환");
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Podium01?listen"));
 }
 
@@ -331,7 +355,6 @@ void ALuggageChaosGameState::Win(ETeamType winner)
 	if (myInfo->Team == winner)
 	{
 		GameEndWidget->ShowVictory();
-		LOG_SCREEN("WIN");
 		
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
 		pc->GetPlayerState<ALuggagePlayerState>()->Server_Win();
@@ -340,7 +363,6 @@ void ALuggageChaosGameState::Win(ETeamType winner)
 	else
 	{
 		GameEndWidget->ShowDefeat();
-		LOG_SCREEN("LOSE");
 	}
 	
 	if (HasAuthority())
@@ -392,8 +414,6 @@ void ALuggageChaosGameState::OnPlayerDeath(APlayerController* pc)
 
 void ALuggageChaosGameState::Server_OnPlayerDeath_Implementation(APlayerController* pc)
 {
-	LOG_SCREEN("서버: 죽일게");
-	
 	AddDeadPlayer(pc);
 	
 	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
@@ -426,7 +446,6 @@ void ALuggageChaosGameState::Net_OnPlayerDeath_Implementation(ABaseCharacter* pl
 
 	if (pc->IsLocalController())
 	{
-		LOG_SCREEN("클라: 죽을게");
 		pc->GetPawn()->DisableInput(pc);
 		DeathEffects(pc);
 	}
@@ -449,7 +468,6 @@ void ALuggageChaosGameState::Net_OnPlayerSpectate_Implementation(ABaseCharacter*
 
 void ALuggageChaosGameState::Respawn()
 {
-	LOG_SCREEN("서버: 살릴게");
 	APlayerState* ps;
 	APawn* pawn;
 	DeadPawns.Dequeue(pawn);
@@ -491,8 +509,6 @@ void ALuggageChaosGameState::Respawn()
 
 void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerController* pc, ABaseCharacter* player)
 {
-	LOG_SCREEN("클라: 리스폰!");
-
 	player->SetActorHiddenInGame(false);
 	player->SetActorEnableCollision(true);
 	player->Rebirth();

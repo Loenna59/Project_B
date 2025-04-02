@@ -19,11 +19,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UPictureWidget* PictureWidget = nullptr;
 
+	UPROPERTY(meta = (BindWidget))
+	class UButton* btn_Finish;
+	
 	UPROPERTY(Transient,meta = (BindWidgetAnim))
 	UWidgetAnimation* FrameAnim;
 
 	void PlayAnimFrame();
 
+	
+
 private:
+	UFUNCTION()
+	void GoToHome();
 	virtual void NativeConstruct() override;
 };

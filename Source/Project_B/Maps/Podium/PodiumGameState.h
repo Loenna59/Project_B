@@ -30,6 +30,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | WinPrize")
 	TSubclassOf<class AWinnerPrize> WinnerPrizeClass;
 
+	
+	
 private:
 	TMap<FString,FPlayerInfo> PlayersInfo;
 
@@ -62,6 +64,6 @@ private:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_Shoot();
-
+	
 	TMap<FString,FPlayerInfo> DummyPlayersInfo();
 };
