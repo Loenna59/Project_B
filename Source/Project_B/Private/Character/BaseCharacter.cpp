@@ -347,7 +347,9 @@ void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, FV
 	// LOG_SCREEN("Hit");
 	
 	float Power = 1500.f;
-	FVector LaunchVelocity = NormalPoint * Power + FVector(0, 0, 100.f);
+	FVector LaunchVelocity = Type == EAttackType::KICK || Type == EAttackType::HAMMER?
+		NormalPoint * Power + FVector(0, 0, 100.f) :
+		NormalPoint;
 
 	FVector WorldHitDir = LaunchVelocity.GetSafeNormal();
 	FVector LocalHitDir = GetActorTransform().InverseTransformVectorNoScale(WorldHitDir);
