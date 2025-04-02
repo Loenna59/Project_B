@@ -11,6 +11,9 @@ AWeaponSpawnManager::AWeaponSpawnManager()
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 
+	USceneComponent* Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	SetRootComponent(Root);
+
 	ConstructorHelpers::FClassFinder<AHammer> temp_hammer(TEXT("/Game/Blueprints/BP_Hammer.BP_Hammer_C"));
 
 	if (temp_hammer.Succeeded())
@@ -83,24 +86,57 @@ void AWeaponSpawnManager::Disappear(EAttackType Type, int32 SpawnPointIndex)
 		break;
 	}
 
-	Respawn(SpawnPointIndex);
+	LOG_SCREEN("%d", SpawnPointIndex);
+
+	Respawn(Type, SpawnPointIndex);
 }
 
-void AWeaponSpawnManager::Respawn(int32 SpawnPointIndex)
+void AWeaponSpawnManager::Respawn(EAttackType Type, int32 SpawnPointIndex)
 {
 	TWeakObjectPtr<AWeaponSpawnManager> WeakThis = this;
-	GetWorld()->GetTimerManager().SetTimer(
-		RespawnTimerHandle,
-		[WeakThis, SpawnPointIndex]()
-		{
-			if (WeakThis.IsValid())
+
+	switch (Type)
+	{
+	case EAttackType::HAMMER:
+	{
+		GetWorld()->GetTimerManager()
+		.SetTimer
+		(
+			RespawnHammerTimerHandle,
+			[WeakThis, SpawnPointIndex]()
 			{
-				WeakThis->RespawnInternal(SpawnPointIndex);
-			}
-		},
-		5.f,
-		false
-	);
+				if (WeakThis.IsValid())
+				{
+					WeakThis->RespawnInternal(SpawnPointIndex);
+				}
+			},
+			5.f,
+			false
+		);
+		break;
+	}
+	case EAttackType::BOTTLE:
+	{
+		GetWorld()->GetTimerManager()
+		.SetTimer
+		(
+			RespawnBottleTimerHandle,
+			[WeakThis, SpawnPointIndex]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->RespawnInternal(SpawnPointIndex);
+				}
+			},
+			5.f,
+			false
+		);
+		break;
+	}
+	default:
+		break;
+	}
+	
 }
 
 void AWeaponSpawnManager::RespawnInternal(int32 SpawnPointIndex)

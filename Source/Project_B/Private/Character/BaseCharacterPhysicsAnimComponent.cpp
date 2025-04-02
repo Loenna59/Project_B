@@ -37,26 +37,26 @@ void UBaseCharacterPhysicsAnimComponent::GetLifetimeReplicatedProps(
 	DOREPLIFETIME(UBaseCharacterPhysicsAnimComponent, SimulateBoneName);
 }
 
-// void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-//                                                        FActorComponentTickFunction* ThisTickFunction)
-// {
-// 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-//
-// 	if (!Character || !Character->HasAuthority())
-// 	{
-// 		return; // 서버에서만 실행
-// 	}
-//
-// 	if (Mesh && Mesh->IsSimulatingPhysics())
-// 	{
-// 		// 지정한 본의 up벡터 가져오기
-// 		FVector CurrentUpVector = Mesh->GetBoneQuaternion(SimulateBoneName).Vector();
-// 	
-// 		// 회전을 보정하는 토크 적용 (외적)
-// 		FVector Torque = FVector::CrossProduct(CurrentUpVector, FVector::UpVector) * 500000.f;
-// 		Mesh->AddTorqueInRadians(Torque, SimulateBoneName, true);
-// 	}
-// }
+void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                                       FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!Character || !Character->HasAuthority())
+	{
+		return; // 서버에서만 실행
+	}
+
+	if (Mesh && Mesh->IsSimulatingPhysics())
+	{
+		// 지정한 본의 up벡터 가져오기
+		FVector CurrentUpVector = Mesh->GetBoneQuaternion(SimulateBoneName).Vector();
+	
+		// 회전을 보정하는 토크 적용 (외적)
+		FVector Torque = FVector::CrossProduct(CurrentUpVector, FVector::UpVector) * 500000.f;
+		Mesh->AddTorqueInRadians(Torque, SimulateBoneName, true);
+	}
+}
 
 void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 {
@@ -81,7 +81,10 @@ void UBaseCharacterPhysicsAnimComponent::Server_TogglePhysicalAnimation_Implemen
 void UBaseCharacterPhysicsAnimComponent::Multicast_TogglePhysicalAnimation_Implementation(FName BoneName,
 	bool bSimulate)
 {
-	TogglePhysicalAnimationInternal(BoneName, bSimulate);
+	if (!Character || Character->IsLocallyControlled() || Character->HasAuthority())
+	{
+		TogglePhysicalAnimationInternal(BoneName, bSimulate);
+	}
 }
 
 void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimationInternal(FName BoneName, bool bSimulate)

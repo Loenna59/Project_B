@@ -24,7 +24,7 @@ protected:
 	void Disappear(EAttackType Type, int32 SpawnPointIndex);
 
 	UFUNCTION()
-	void Respawn(int32 SpawnPointIndex);
+	void Respawn(EAttackType Type, int32 SpawnPointIndex);
 
 	UFUNCTION()
 	void RespawnInternal(int32 SpawnPointIndex);
@@ -51,6 +51,8 @@ public:
 	
 	int32 VisibleBottleIndex = 0;
 
-	FTimerHandle RespawnTimerHandle;
+	FTimerHandle RespawnHammerTimerHandle;
+	
+	FTimerHandle RespawnBottleTimerHandle;
 
 };

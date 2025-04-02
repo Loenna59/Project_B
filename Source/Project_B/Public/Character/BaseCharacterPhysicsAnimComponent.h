@@ -23,9 +23,8 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
-	// Called every frame
-	// virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	//                            FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	void TogglePhysicalAnimation(bool toggle);
 
