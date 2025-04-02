@@ -21,8 +21,8 @@ ASpectatorItem::ASpectatorItem()
 	ProjectileMovement->SetUpdatedComponent(SpectatorMesh);
 	ProjectileMovement->InitialSpeed = 3000;
 	ProjectileMovement->MaxSpeed = 3000;
-	ProjectileMovement->bShouldBounce = true;
-	ProjectileMovement->Bounciness = 0.3f;
+	ProjectileMovement->bShouldBounce = false;
+	// ProjectileMovement->Bounciness = 0.3f;
 }
 
 // Called when the game starts or when spawned
