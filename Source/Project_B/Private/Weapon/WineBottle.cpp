@@ -57,18 +57,18 @@ void AWineBottle::OnAttackTraceChannel()
 
 	if (bDrawDebug)
 	{
-		DrawDebugSphereTraceMulti(
-			GetWorld(),
-			Location,
-			Location,
-			25.f,
-			EDrawDebugTrace::ForDuration,
-			bHit,
-			HitResult,
-			FColor::Yellow,
-			FColor::Green,
-			1.f
-		);
+		// DrawDebugSphereTraceMulti(
+		// 	GetWorld(),
+		// 	Location,
+		// 	Location,
+		// 	25.f,
+		// 	EDrawDebugTrace::ForDuration,
+		// 	bHit,
+		// 	HitResult,
+		// 	FColor::Yellow,
+		// 	FColor::Green,
+		// 	1.f
+		// );
 	}
 
 	if (bHit)

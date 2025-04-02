@@ -65,6 +65,7 @@ void UBaseCharacterAttackComponent::GetLifetimeReplicatedProps(TArray<class FLif
 	DOREPLIFETIME(UBaseCharacterAttackComponent, HeadButtAnimMontage);
 	DOREPLIFETIME(UBaseCharacterAttackComponent, KickAnimMontage);
 	DOREPLIFETIME(UBaseCharacterAttackComponent, AlreadyHitActorsDuringAttack);
+	DOREPLIFETIME(UBaseCharacterAttackComponent, bIsAttacking);
 }
 
 void UBaseCharacterAttackComponent::SetupInputBiding(class UEnhancedInputComponent* input)
@@ -303,18 +304,18 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 
 	if (DrawDebug)
 	{
-		DrawDebugSphereTraceMulti(
-			GetWorld(),
-			Location,
-			Location,
-			Radius,
-			EDrawDebugTrace::ForDuration,
-			bHit,
-			HitResults,
-			FColor::Yellow,
-			FColor::Green,
-			1.f
-		);
+		// DrawDebugSphereTraceMulti(
+		// 	GetWorld(),
+		// 	Location,
+		// 	Location,
+		// 	Radius,
+		// 	EDrawDebugTrace::ForDuration,
+		// 	bHit,
+		// 	HitResults,
+		// 	FColor::Yellow,
+		// 	FColor::Green,
+		// 	1.f
+		// );
 	}
 
 	if (bHit)

@@ -67,18 +67,18 @@ void AHammer::OnAttackTraceChannel()
 
 	if (bDrawDebug)
 	{
-		DrawDebugSphereTraceMulti(
-			GetWorld(),
-			Location,
-			Location,
-			50.f,
-			EDrawDebugTrace::ForDuration,
-			bHit,
-			HitResult,
-			FColor::Yellow,
-			FColor::Green,
-			1.f
-		);
+		// DrawDebugSphereTraceMulti(
+		// 	GetWorld(),
+		// 	Location,
+		// 	Location,
+		// 	50.f,
+		// 	EDrawDebugTrace::ForDuration,
+		// 	bHit,
+		// 	HitResult,
+		// 	FColor::Yellow,
+		// 	FColor::Green,
+		// 	1.f
+		// );
 	}
 
 	if (bHit)

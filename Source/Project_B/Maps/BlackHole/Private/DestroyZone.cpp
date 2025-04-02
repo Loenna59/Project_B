@@ -3,14 +3,11 @@
 
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 
-#include "DataTableEditorUtils.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Project_B/Maps/Base/BanimalsGameState.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
-#include "Project_B/Maps/BlackHole/Public/BlackholeGameMode.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
 #include "Project_B/Utilities/LogMacro.h"

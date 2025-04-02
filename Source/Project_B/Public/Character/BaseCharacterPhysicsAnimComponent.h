@@ -24,8 +24,8 @@ protected:
 
 public:
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+	// virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	//                            FActorComponentTickFunction* ThisTickFunction) override;
 
 	void TogglePhysicalAnimation(bool toggle);
 
@@ -38,7 +38,7 @@ public:
 	UFUNCTION()
 	void TogglePhysicalAnimationInternal(FName BoneName, bool bSimulate);
 
-	void AddForceForwardVector();
+	// void AddForceForwardVector();
 
 protected:
 	UPROPERTY()
@@ -47,7 +47,7 @@ protected:
 	UPROPERTY()
 	class UBaseCharacterAnimInstance* AnimInstance = nullptr;
 
-	UPROPERTY(Replicated)
+	UPROPERTY()
 	class USkeletalMeshComponent* Mesh = nullptr;
 	
 	UPROPERTY()
