@@ -85,17 +85,18 @@ void AWineBottle::OnAttackTraceChannel()
 			
 			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
 			{
-				// LOG_SCREEN("%s", *GetVelocity().ToString());
+				LOG_SCREEN("%s", *GetVelocity().ToString());
 				Character->OnHit(EAttackType::BOTTLE, Result.Normal.GetSafeNormal(), 0);
+				DecreaseCapacity();
 				break;
 			}
 		}
 	}
 }
 
-void AWineBottle::SetVisible(bool bVisible)
+void AWineBottle::SetVisible(bool bVisible, int32 SpawnPointIndex)
 {
 	Mesh->SetVisibility(bVisible);
 	
-	Super::SetVisible(bVisible);
+	Super::SetVisible(bVisible, SpawnPointIndex);
 }

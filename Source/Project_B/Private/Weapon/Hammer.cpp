@@ -96,17 +96,18 @@ void AHammer::OnAttackTraceChannel()
 			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
 			{
 				Character->OnHit(EAttackType::HAMMER, Result.Normal.GetSafeNormal(), 0);
+				DecreaseCapacity();
 				break;
 			}
 		}
 	}
 }
 
-void AHammer::SetVisible(bool bVisible)
+void AHammer::SetVisible(bool bVisible, int32 SpawnPointIndex)
 {
 	Mesh->SetVisibility(bVisible);
 	HitPoint->SetActive(bVisible);
 	
-	Super::SetVisible(bVisible);
+	Super::SetVisible(bVisible, SpawnPointIndex);
 }
 

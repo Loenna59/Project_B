@@ -227,6 +227,7 @@ void ABaseCharacter::Server_TakeWeapon_Implementation(class AWeapon* Weapon)
 		return;
 	}
 
+	Weapon->CancelDisappear();
 	OwnedWeapon = Weapon;
 	OwnedWeapon->SetOwner(this);
 	
