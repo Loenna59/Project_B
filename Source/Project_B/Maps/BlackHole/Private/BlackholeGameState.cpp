@@ -175,8 +175,6 @@ void ABlackholeGameState::DestroyBlackhole()
 
 void ABlackholeGameState::CheckGameEndConditions()
 {
-	if (!HasAuthority()) return;
-	
 	// 게임 인스턴스에서 플레이어 정보 확인
 	PlayersInfo = gi->GetPlayerInfo();
 
@@ -205,7 +203,7 @@ void ABlackholeGameState::CheckGameEndConditions()
 	// 1. 단일 팀만 남은 경우 (2명 이상이 같은 팀일 때)
 	if (RemainingTeams.Num() == 1)
 	{
-		DetermineTeamWinner(RemainingTeams[0]);
+		Multicast_DetermineTeamWinner(RemainingTeams[0]);
 		UE_LOG(LogTemp, Warning, TEXT("단일 팀만 남았습니다"));
 		UE_LOG(LogTemp, Warning, TEXT("%d"), RemainingTeams[0]);
 		return;
@@ -219,7 +217,7 @@ void ABlackholeGameState::CheckGameEndConditions()
 			FPlayerInfo& PlayerInfo = it.Value;
 			if (PlayerInfo.bIsAlive && PlayerInfo.Team != ETeamType::None)
 			{
-				DetermineTeamWinner(PlayerInfo.Team);
+				Multicast_DetermineTeamWinner(PlayerInfo.Team);
 				UE_LOG(LogTemp, Warning, TEXT("플레이어 한명만 남았음, 승자결정합니다"));
 				UE_LOG(LogTemp, Warning, TEXT("%d"), PlayerInfo.Team);
 				return;
@@ -290,14 +288,32 @@ void ABlackholeGameState::ChangeLevelPodium()
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Podium01?listen"));
 }
 
-void ABlackholeGameState::DetermineTeamWinner(ETeamType WinningTeam)
+void ABlackholeGameState::Multicast_DetermineTeamWinner_Implementation(ETeamType WinningTeam)
 {
-	if (!HasAuthority()) return;
 	WinnerTeam = WinningTeam;
-
-	UE_LOG(LogTemp,Warning,TEXT("승리자 결정"));
+	if (WinningTeam == ETeamType::Red)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("승리자 결정, 레드!"));
+	}
+	else if (WinningTeam == ETeamType::Blue)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("승리자 결정, 블루!"));
+	}
+	else if (WinningTeam == ETeamType::Yellow)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("승리자 결정, 옐로!"));
+	}
+	else if (WinningTeam == ETeamType::Green)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("승리자 결정, 그린!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp,Warning,TEXT("????"));
+	}
 	
 	FPlayerInfo* myInfo = PlayersInfo.Find(MyKey);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *MyKey);
 	if (myInfo->Team == WinningTeam)
 	{
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
@@ -359,31 +375,33 @@ void ABlackholeGameState::ServerRPC_PlayerDeath_Implementation(APlayerController
 void ABlackholeGameState::ConvertToSpectator(APlayerController* PlayerController)
 {
 	APawn* ControlledPawn = PlayerController->GetPawn();
-	
-	ControlledPawn->SetActorHiddenInGame(true);
-	ControlledPawn->SetActorEnableCollision(false);
-	UE_LOG(LogTemp, Warning, TEXT("ConvertToSpectator"));
 
-	PlayerController->UnPossess();
-
-	AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
-	if (Target)
+	if (PlayerController->IsLocalController())
 	{
-		// SpectatorPawn 생성 및 전환
-		ABlackholeSpectator* Spectator = GetWorld()->SpawnActorDeferred<ABlackholeSpectator>(SpectatorPawnClass, Target->GetActorTransform(), PlayerController, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		ControlledPawn->SetActorHiddenInGame(true);
+		ControlledPawn->SetActorEnableCollision(false);
+		UE_LOG(LogTemp, Warning, TEXT("ConvertToSpectator"));
+		PlayerController->UnPossess();
 
-		if (Spectator)
+		AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
+		if (Target)
 		{
-			UGameplayStatics::FinishSpawningActor(Spectator, Target->GetActorTransform());
-			PlayerController->Possess(Spectator);
-			if (PlayerController->IsLocalController()) // UI는 로컬에서만 생성
+			// SpectatorPawn 생성 및 전환
+			ABlackholeSpectator* Spectator = GetWorld()->SpawnActorDeferred<ABlackholeSpectator>(SpectatorPawnClass, Target->GetActorTransform(), PlayerController, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+			if (Spectator)
 			{
-				Spectator->CreateSpectatorUI();
-			}
+				UGameplayStatics::FinishSpawningActor(Spectator, Target->GetActorTransform());
+				PlayerController->Possess(Spectator);
+				if (PlayerController->IsLocalController()) // UI는 로컬에서만 생성
+				{
+					Spectator->CreateSpectatorUI();
+				}
 			
-			// 커서 보이게 하자
-			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
-			UE_LOG(LogTemp, Warning, TEXT("Spectator Possessed"));
+				// 커서 보이게 하자
+				GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+				UE_LOG(LogTemp, Warning, TEXT("Spectator Possessed"));
+			}
 		}
 	}
 }

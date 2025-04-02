@@ -92,7 +92,8 @@ public:
 	ETeamType WinnerTeam = ETeamType::None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class AWinnerPrize> WinnerPrizeClass;
-	void DetermineTeamWinner(ETeamType WinningTeam);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DetermineTeamWinner(ETeamType WinningTeam);
 	void AddWinPrize(APlayerController* pc);
 	void AddWinner(FString playerKey);
 	
