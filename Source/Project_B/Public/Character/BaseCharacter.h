@@ -5,6 +5,16 @@
 #include "Character/AttackType.h"
 #include "BaseCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class CharacterColor : uint8
+{
+	None,
+	Red,
+	Blue,
+	Green,
+	Yellow
+};
+
 DECLARE_DELEGATE_OneParam(FOnCalculateSpeedByMass, float);
 
 UCLASS()
@@ -24,6 +34,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SetSkin(CharacterColor Color);
 
 	void OnHit(EAttackType Type, FVector NormalPoint, float damage);
 
@@ -156,6 +168,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 KnockdownPunchCount = 6;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<CharacterColor, class UMaterialInstance*> MaterialMap; 
 	
 	UPROPERTY()
 	int32 CurrentNormalHitCount = 0;
