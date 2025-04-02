@@ -4,6 +4,7 @@
 #include "Project_B/Maps/BlackHole/Public/SpectatorItem.h"
 
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "WorldPartition/ContentBundle/ContentBundleLog.h"
 
 
 // Sets default values
@@ -21,8 +22,22 @@ ASpectatorItem::ASpectatorItem()
 	ProjectileMovement->SetUpdatedComponent(SpectatorMesh);
 	ProjectileMovement->InitialSpeed = 3000;
 	ProjectileMovement->MaxSpeed = 3000;
-	ProjectileMovement->bShouldBounce = true;
-	ProjectileMovement->Bounciness = 0.3f;
+	ProjectileMovement->bShouldBounce = false;
+	ProjectileMovement->Bounciness = 0; // 탄성계수
+	ProjectileMovement->Friction = 1; // 마찰력(1이 최대)
+
+	SpectatorMesh->OnComponentHit.AddDynamic(this, &ASpectatorItem::OnHit);
+}
+
+void ASpectatorItem::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	// 완전히 멈추려면:
+	//ProjectileMovement->StopMovementImmediately();
+    
+	// 또는 속도를 크게 줄이려면:
+	ProjectileMovement->Velocity *= 0.1f; // 속도를 90% 감소
+	UE_LOG(LogTemp, Warning, TEXT("ProjectileMovement->HIT!!!!!!"));
 }
 
 // Called when the game starts or when spawned

@@ -15,6 +15,7 @@ class PROJECT_B_API USpectatorUI : public UUserWidget
 	GENERATED_BODY()
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	
 	// 아이템 버튼
 	UPROPERTY(meta = (BindWidget))
@@ -54,6 +55,18 @@ public:
 
 	// 코인 로직
 	int32 coinCount = 0; // 사실 시작시 3, 이러면 노란 코인이 3개 생성 (최대5)
-	int32 coinCreateTime = 10.f; // 코인은 10초마다 하나씩 생성
+	float coinCreateTime = 10; // 코인은 10초마다 하나씩 생성
+	float coinPercent = 0;
 	void UpdateItemImages();
+	void UpdateCoinProgress(float DeltaTime);
+
+	// 코인 머티리얼 초기화 함수
+	void InitializeCoinMaterials();
+	
+	UPROPERTY()
+	TArray<UImage*> CoinImages;
+	UPROPERTY()
+	TArray<UMaterialInstanceDynamic*> CoinMaterials;
 };
+
+

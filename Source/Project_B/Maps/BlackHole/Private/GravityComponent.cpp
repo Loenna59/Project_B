@@ -114,7 +114,7 @@ void UGravityComponent::ApplyGravity(float DeltaTime)
 	{
 		// 1. 자전 구현
 		// 물리 시뮬레이션과 충돌: 물리 시뮬레이션이 활성화된 액터의 경우 SetActorRotation이 물리 엔진에 의해 무시될 수 있음
-		FVector AngularVelocity = FVector(0, 0, RotationSpeed);
+		FVector AngularVelocity = FVector(0, 0, RotationSpeed/2);
 		if (PlayerCharacter)
 		{
 			PlayerCharacter->GetCapsuleComponent()->SetPhysicsAngularVelocityInDegrees(AngularVelocity);
