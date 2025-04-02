@@ -47,7 +47,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | WinPrize")
 	TSubclassOf<class AWinnerPrize> WinnerPrizeClass;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
 	TSubclassOf<class ULuggageScoreWidget> ScoreWidgetClass;
 	
@@ -60,6 +60,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | UI")
 	TSubclassOf<class UUserWidget> TransitionWidgetClass;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | Sound")
+	USoundWave* BGM;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class | Sound")
+	USoundWave* SW_Win;
 
 	UPROPERTY(Replicated)
 	class AWeaponSpawnManager* WeaponSpawnManager;
@@ -106,6 +111,9 @@ private:
 	UGameEndWidget* GameEndWidget;
 	UPROPERTY()
 	UUserWidget* TransitionWidget;
+
+	UPROPERTY()
+	UAudioComponent* BgmComponent;
 
 protected:
 	virtual void BeginPlay() override;

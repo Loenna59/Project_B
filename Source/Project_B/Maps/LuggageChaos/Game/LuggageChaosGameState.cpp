@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Character/BaseCharacter.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -213,6 +214,10 @@ void ALuggageChaosGameState::Net_GameStart_Implementation()
 	{
 		GameReadyWidget->PlayAnimLoadComplete();
 	}
+	if (BGM)
+	{
+		BgmComponent = UGameplayStatics::SpawnSound2D(GetWorld(), BGM);
+	}
 }
 
 void ALuggageChaosGameState::AddScore(ETeamType team, const uint8 point)
@@ -268,6 +273,11 @@ void ALuggageChaosGameState::GameEnd()
 void ALuggageChaosGameState::Net_GameEnd_Implementation()
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowTime);
+	BgmComponent->Stop();
+	if (SW_Win)
+	{
+		BgmComponent = UGameplayStatics::SpawnSound2D(GetWorld(), SW_Win);
+	}
 }
 
 void ALuggageChaosGameState::ChangeLevelPodium()
