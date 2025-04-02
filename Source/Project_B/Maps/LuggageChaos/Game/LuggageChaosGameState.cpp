@@ -205,17 +205,17 @@ void ALuggageChaosGameState::InitSpawnPoint()
 void ALuggageChaosGameState::GameStart()
 {
 	//TODO: 레벨 스트리밍 테스트 
-	ULevelStreaming* curLevel = GetWorld()->GetStreamingLevels()[0];
-	ULevelStreaming* nextLevel = GetWorld()->GetStreamingLevels()[1];
-	if (nextLevel && curLevel)
-	{
-		nextLevel->SetShouldBeVisible(true);
-		curLevel->SetShouldBeVisible(false);
-	}
-	else
-	{
-		LOG_ERROR(this,TEXT("레벨 없음"));
-	}
+	// ULevelStreaming* curLevel = GetWorld()->GetStreamingLevels()[0];
+	// ULevelStreaming* nextLevel = GetWorld()->GetStreamingLevels()[1];
+	// if (nextLevel && curLevel)
+	// {
+	// 	nextLevel->SetShouldBeVisible(true);
+	// 	curLevel->SetShouldBeVisible(false);
+	// }
+	// else
+	// {
+	// 	LOG_ERROR(this,TEXT("레벨 없음"));
+	// }
 	
 	Net_GameStart();
 	
