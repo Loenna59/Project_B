@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USphereComponent* SphereCollision;
 
+	UPROPERTY(VisibleAnywhere)
+	class UBoxComponent* Trigger;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ToZeroSpeed = 1.5f;
 	

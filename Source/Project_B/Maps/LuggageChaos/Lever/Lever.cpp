@@ -3,6 +3,7 @@
 
 #include "Lever.h"
 
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
@@ -30,15 +31,22 @@ ALever::ALever()
 	SphereCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	SphereCollision->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
 
+	Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger"));
+	Trigger->SetupAttachment(Root);
+	Trigger->SetRelativeLocation(FVector(150, 0, 0));
+	Trigger->SetBoxExtent(FVector(100, 32, 200));
+
 	bReplicates = true;
-	SetReplicateMovement(true);
 }
 
 void ALever::BeginPlay()
 {
 	Super::BeginPlay();
-	SphereCollision->OnComponentBeginOverlap.AddDynamic(this,&ALever::OnCollisionBeginOverlap);
-	SphereCollision->OnComponentEndOverlap.AddDynamic(this,&ALever::OnCollisionEndOverlap);
+	
+	SetReplicateMovement(true);
+
+	Trigger->OnComponentBeginOverlap.AddDynamic(this, &ALever::OnCollisionBeginOverlap);
+	Trigger->OnComponentEndOverlap.AddDynamic(this, &ALever::OnCollisionEndOverlap);
 }
 
 void ALever::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -50,6 +58,7 @@ void ALever::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLife
 void ALever::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	
 	if (bIsInteracting)
 	{
@@ -65,29 +74,37 @@ void ALever::SetLeverValue(float value)
 void ALever::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor->IsA(ACharacter::StaticClass()))
+	
+	if (OtherComp->ComponentHasTag(TEXT("LevelTrigger")))
 	{
-		SetOwner(OtherActor);
-		
-		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
-		{
-			Server_IsInteracting(true);
-		}
+		Server_IsInteracting(true);
 	}
+	
+	// if (OtherActor->IsA(ACharacter::StaticClass()))
+	// {
+	// 	SetOwner(OtherActor);
+	// 	
+	// 	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+	// 	{
+	// 		Server_IsInteracting(true);
+	// 	}
+	// }
 }
 
 void ALever::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor->IsA(ACharacter::StaticClass()))
-	{
-		SetOwner(OtherActor);
-		
-		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
-		{
-			Server_IsInteracting(false);
-		}
-	}
+	Server_IsInteracting(false);
+	
+	// if (OtherActor->IsA(ACharacter::StaticClass()))
+	// {
+	// 	SetOwner(OtherActor);
+	// 	
+	// 	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+	// 	{
+	// 		Server_IsInteracting(false);
+	// 	}
+	// }
 }
 
 void ALever::Server_IsInteracting_Implementation(bool isInteract)
