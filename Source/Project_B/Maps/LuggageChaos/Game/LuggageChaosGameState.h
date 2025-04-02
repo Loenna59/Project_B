@@ -158,7 +158,7 @@ protected:
 	void DeathEffects(APlayerController* pc);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void Net_OnPlayerRespawn(APlayerController* pc, APawn* pawn);
+	void Net_OnPlayerRespawn(APlayerController* pc);
 
 	void Respawn();
 
