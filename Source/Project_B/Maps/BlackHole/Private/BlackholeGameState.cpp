@@ -174,6 +174,7 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
 {
 	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
+	Player->SetDie();
 	
 	// 카메라 흑백 효과
 	if (Player->CameraComp)
