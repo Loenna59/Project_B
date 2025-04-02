@@ -162,6 +162,8 @@ void ABaseCharacter::BeginPlay()
 	AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 
 	OnCalculateSpeedByMass.BindUObject(this, &ABaseCharacter::CalculateSpeedByMass);
+
+	SetSkin(CharacterColor::None);
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -191,6 +193,15 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		InputComp->BindAction(InputActionUnequip, ETriggerEvent::Started, this, &ABaseCharacter::Unequip);
 	}
+}
+
+void ABaseCharacter::SetSkin(CharacterColor Color)
+{
+	if (MaterialMap.Contains(Color))
+	{
+		GetMesh()->SetMaterial(0, MaterialMap[Color]);
+	}
+	
 }
 
 void ABaseCharacter::OnHit(EAttackType Type, FVector NormalPoint, float damage)
