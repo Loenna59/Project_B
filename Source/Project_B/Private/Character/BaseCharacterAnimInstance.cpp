@@ -26,6 +26,13 @@ void UBaseCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		return;
 	}
 
+	bIsDead = Character->bIsDead;
+
+	if (Character->bIsDead)
+	{
+		return;
+	}
+
 	Velocity = MovementComponent->Velocity;
 	GroundSpeed = Velocity.Size2D();
 

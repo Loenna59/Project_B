@@ -378,7 +378,7 @@ void ALuggageChaosGameState::Server_OnPlayerDeath_Implementation(APlayerControll
 
 	LOG_SCREEN("tjqj: 죽을게");
 	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
-	player->IsDead = true;
+	player->SetDie();
 	
 	pc->GetPawn()->DisableInput(pc);
 	DeathEffects(pc);
@@ -397,7 +397,7 @@ void ALuggageChaosGameState::Net_OnPlayerDeath_Implementation(APlayerController*
 {
 	LOG_SCREEN("클라: 죽을게");
 	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
-	player->IsDead = true;
+	player->SetDie();
 	
 	pc->GetPawn()->DisableInput(pc);
 	DeathEffects(pc);
@@ -471,7 +471,7 @@ void ALuggageChaosGameState::Respawn()
 	
 	pc->Possess(pawn);
 	ABaseCharacter* player = Cast<ABaseCharacter>(pawn);
-	player->IsDead = true;
+	player->Rebirth();
 	
 	pawn->EnableInput(pc);
 	player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(1, 1, 1, 1);
@@ -490,7 +490,7 @@ void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerControlle
 	pc->Possess(pawn);
 	
 	ABaseCharacter* player = Cast<ABaseCharacter>(pawn);
-	player->IsDead = false;
+	player->Rebirth();
 	
 	FInputModeGameOnly InputMode;
 	pc->SetInputMode(InputMode);

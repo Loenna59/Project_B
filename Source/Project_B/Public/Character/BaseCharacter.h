@@ -71,7 +71,13 @@ public:
 
 	UFUNCTION()
 	void SetSunglasses(bool bEquip);
-	
+
+	UFUNCTION()
+	void SetDie();
+
+	UFUNCTION()
+	void Rebirth();
+
 protected:
 	UPROPERTY()
 	class UInputMappingContext* IMC = nullptr;
@@ -155,7 +161,7 @@ public:
 	int32 CurrentNormalHitCount = 0;
 
 	UPROPERTY()
-	bool IsDead = false;
+	bool bIsDead = false;
 
 	UPROPERTY()
 	bool bHasWeapon = false;

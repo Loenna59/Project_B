@@ -65,13 +65,7 @@ protected:
 	void StartJump();
 
 	UFUNCTION()
-	void EndJump();
-
-	UFUNCTION()
 	void StartRun();
-
-	UFUNCTION()
-	void EndRun();
 
 	UFUNCTION(Server, Reliable)
 	void Server_UpdateSpeed(float Speed);
@@ -85,4 +79,10 @@ protected:
 public:
 	UFUNCTION()
 	void CalculateSpeedByMass(float Mass);
+
+	UFUNCTION()
+	void EndRun();
+
+	UFUNCTION()
+	void EndJump();
 };
