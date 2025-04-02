@@ -63,14 +63,17 @@ void ABlackHole::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 활성화 되면 빨아들이기 시작
-	if (bIsActive)
+	if (HasAuthority())
 	{
-		Sphere->SetVisibility(true);
-		ActivateBlackhole();
-	}
-	else
-	{
-		Sphere->SetVisibility(false);
+		if (bIsActive)
+		{
+			Sphere->SetVisibility(true);
+			ActivateBlackhole();
+		}
+		else
+		{
+			Sphere->SetVisibility(false);
+		}
 	}
 }
 
@@ -79,6 +82,17 @@ void ABlackHole::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(ABlackHole, bIsActive);
+}
+
+void ABlackHole::OnRep_IsActive()
+{
+	// 블랙홀의 가시성을 클라이언트에서도 동기화
+	Sphere->SetVisibility(bIsActive);
+    
+	if (bIsActive)
+	{
+		ActivateBlackhole();
+	}
 }
 
 void ABlackHole::ActivateBlackhole()

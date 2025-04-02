@@ -36,8 +36,7 @@ ABlackholeGameState::ABlackholeGameState()
 void ABlackholeGameState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG(LogTemp,Warning,TEXT("ABlackholeGameState::BeginPlay"));
+	
 	// 게임 인스턴스
 	gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	
@@ -299,18 +298,11 @@ void ABlackholeGameState::DetermineTeamWinner(ETeamType WinningTeam)
 	UE_LOG(LogTemp,Warning,TEXT("승리자 결정"));
 	
 	FPlayerInfo* myInfo = PlayersInfo.Find(MyKey);
-	
 	if (myInfo->Team == WinningTeam)
 	{
-		GameEndWidget->ShowVictory();
-		
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
 		pc->GetPlayerState<ABlackholePlayerState>()->Server_Win();
 		AddWinPrize(pc);
-	}
-	else
-	{
-		GameEndWidget->ShowDefeat();
 	}
 	
 	if (HasAuthority())

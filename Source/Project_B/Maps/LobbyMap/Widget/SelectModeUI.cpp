@@ -5,6 +5,7 @@
 
 #include "Components/Button.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
+#include "Project_B/Maps/LobbyMap/LobbyGameState.h"
 
 void USelectModeUI::NativeConstruct()
 {
