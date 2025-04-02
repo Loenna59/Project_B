@@ -388,7 +388,7 @@ void ALuggageChaosGameState::Server_OnPlayerDeath_Implementation(APlayerControll
 	FTimerHandle deadTimerHandle;
 	GetWorldTimerManager().SetTimer(deadTimerHandle, FTimerDelegate::CreateLambda([player, pc, this]()
 	{
-		LOG_SCREEN("관전자로 전환");
+		LOG_SCREEN("서버: 관전자로 전환");
 		player->SetActorHiddenInGame(true);
 		player->SetActorEnableCollision(false);
 		pc->StartSpectatingOnly();
@@ -407,7 +407,7 @@ void ALuggageChaosGameState::Net_OnPlayerDeath_Implementation(APlayerController*
 	FTimerHandle deadTimerHandle;
 	GetWorldTimerManager().SetTimer(deadTimerHandle, FTimerDelegate::CreateLambda([player, pc, this]()
 	{
-		LOG_SCREEN("관전자로 전환");
+		LOG_SCREEN("클라: 관전자로 전환");
 		player->SetActorHiddenInGame(true);
 		player->SetActorEnableCollision(false);
 
@@ -462,16 +462,17 @@ void ALuggageChaosGameState::Respawn()
 		pawn->SetActorRotation(RedSpawnPoints[0]->GetActorRotation());
 	}
 
-	APlayerController* pc = ps->GetPlayerController();
+	ps->SetIsSpectator(false);
+	ps->SetIsOnlyASpectator(false);
 	
-	pc->GetPlayerState<APlayerState>()->SetIsSpectator(false);
-	pc->GetPlayerState<APlayerState>()->SetIsOnlyASpectator(false);
+	APlayerController* pc = ps->GetPlayerController();
 	
 	pc->Possess(pawn);
 	
 	//클라이언트일 경우
 	if (key != MyKey)
 	{
+		LOG_PRINT(TEXT("클라이언트 살리기"));
 		Net_OnPlayerRespawn(ps->GetPlayerController());
 		return;
 	}
