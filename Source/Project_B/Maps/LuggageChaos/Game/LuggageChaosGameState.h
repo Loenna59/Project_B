@@ -28,7 +28,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
 	float ReadyTime = 2.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
-	float GameTime = 6.0f;
+	float GameTime = 180.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timer")
 	float SlowTime = 0.2f;
@@ -80,6 +80,7 @@ private:
 	TArray<FString> WinnerKeys;
 
 	TQueue<APlayerState*> DeadPlayers;
+	TQueue<APawn*> DeadPawns;
 
 	FString MyKey = "";
 	
@@ -157,7 +158,7 @@ protected:
 	void DeathEffects(APlayerController* pc);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void Net_OnPlayerRespawn(APlayerController* pc);
+	void Net_OnPlayerRespawn(APlayerController* pc, APawn* pawn);
 
 	void Respawn();
 
