@@ -418,11 +418,11 @@ void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(bool bIsKnockdown
 	
 		if (SideDot > 0)
 		{
-			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Right"));
+			PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Left"));
 			return;
 		}
 	
-		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Left"));
+		PlayAnimMontage(KnockdownMontage, 1.f, TEXT("Right"));
 		return;
 	}
 	
