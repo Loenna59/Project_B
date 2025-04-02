@@ -109,7 +109,7 @@ void ABlackholeSpectator::SpawnProjectile()
 	if (bIsHit)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("목적지: %s"), *HitResult.GetActor()->GetActorNameOrLabel());
-		DrawDebugLine(GetWorld(), ClickLocation, HitResult.ImpactPoint, FColor::Blue, false, 2.0f, 0, 0.05f);
+		// DrawDebugLine(GetWorld(), ClickLocation, HitResult.ImpactPoint, FColor::Blue, false, 2.0f, 0, 0.05f);
 	}
 
 	// 스폰 위치: 클릭한 위치

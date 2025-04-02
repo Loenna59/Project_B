@@ -304,18 +304,18 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 
 	if (DrawDebug)
 	{
-		DrawDebugSphereTraceMulti(
-			GetWorld(),
-			Location,
-			Location,
-			Radius,
-			EDrawDebugTrace::ForDuration,
-			bHit,
-			HitResults,
-			FColor::Yellow,
-			FColor::Green,
-			1.f
-		);
+		// DrawDebugSphereTraceMulti(
+		// 	GetWorld(),
+		// 	Location,
+		// 	Location,
+		// 	Radius,
+		// 	EDrawDebugTrace::ForDuration,
+		// 	bHit,
+		// 	HitResults,
+		// 	FColor::Yellow,
+		// 	FColor::Green,
+		// 	1.f
+		// );
 	}
 
 	if (bHit)

@@ -3,8 +3,6 @@
 #include "Character/BaseCharacter.h"
 #include "Character/BaseCharacterAnimInstance.h"
 #include "Net/UnrealNetwork.h"
-#include "PhysicsEngine/PhysicalAnimationComponent.h"
-#include "Project_B/Utilities/LogMacro.h"
 
 
 UBaseCharacterPhysicsAnimComponent::UBaseCharacterPhysicsAnimComponent()
@@ -44,6 +42,11 @@ void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTi
                                                        FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!Character || !Character->HasAuthority())
+	{
+		return; // 서버에서만 실행
+	}
 
 	if (Mesh && Mesh->IsSimulatingPhysics())
 	{
