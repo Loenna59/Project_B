@@ -357,6 +357,12 @@ void ALuggageChaosGameState::AddWinPrize(APlayerController* pc)
 		prize->AttachToComponent(pc->GetCharacter()->GetMesh(), 
 								 FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	}
+
+	ABaseCharacter* Character = Cast<ABaseCharacter>(pc->GetCharacter());
+	if (Character)
+	{
+		Character->SetSunglasses(true);
+	}
 }
 
 void ALuggageChaosGameState::Net_JudgeWinner_Implementation()
