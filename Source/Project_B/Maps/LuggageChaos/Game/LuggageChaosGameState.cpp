@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Character/BaseCharacter.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -213,6 +214,10 @@ void ALuggageChaosGameState::Net_GameStart_Implementation()
 	{
 		GameReadyWidget->PlayAnimLoadComplete();
 	}
+	if (BGM)
+	{
+		BgmComponent = UGameplayStatics::SpawnSound2D(GetWorld(), BGM);
+	}
 }
 
 void ALuggageChaosGameState::AddScore(ETeamType team, const uint8 point)
@@ -268,6 +273,11 @@ void ALuggageChaosGameState::GameEnd()
 void ALuggageChaosGameState::Net_GameEnd_Implementation()
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowTime);
+	BgmComponent->Stop();
+	if (SW_Win)
+	{
+		BgmComponent = UGameplayStatics::SpawnSound2D(GetWorld(), SW_Win);
+	}
 }
 
 void ALuggageChaosGameState::ChangeLevelPodium()
@@ -369,14 +379,16 @@ void ALuggageChaosGameState::Server_OnPlayerDeath_Implementation(APlayerControll
 	
 	FTimerHandle respawnTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(respawnTimerHandle, this,&ALuggageChaosGameState::Respawn,RespawnTime, false);
-
+	
+	//클라이언트일 경우
 	if (pc != GetWorld()->GetFirstPlayerController())
 	{
 		Net_OnPlayerDeath(pc);
 		return;
 	}
 
-	LOG_SCREEN("tjqj: 죽을게");
+	//서버일 경우
+	LOG_SCREEN("서버: 죽기");
 	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
 	player->SetDie();
 	
@@ -386,7 +398,7 @@ void ALuggageChaosGameState::Server_OnPlayerDeath_Implementation(APlayerControll
 	FTimerHandle deadTimerHandle;
 	GetWorldTimerManager().SetTimer(deadTimerHandle, FTimerDelegate::CreateLambda([player, pc, this]()
 	{
-		LOG_SCREEN("관전자로 전환");
+		LOG_SCREEN("서버: 관전자로 전환");
 		player->SetActorHiddenInGame(true);
 		player->SetActorEnableCollision(false);
 		pc->StartSpectatingOnly();
@@ -405,10 +417,12 @@ void ALuggageChaosGameState::Net_OnPlayerDeath_Implementation(APlayerController*
 	FTimerHandle deadTimerHandle;
 	GetWorldTimerManager().SetTimer(deadTimerHandle, FTimerDelegate::CreateLambda([player, pc, this]()
 	{
-		LOG_SCREEN("관전자로 전환");
+		LOG_SCREEN("클라: 관전자로 전환");
 		player->SetActorHiddenInGame(true);
 		player->SetActorEnableCollision(false);
+
 		pc->StartSpectatingOnly();
+		
 	}), DeadTime, false);
 }
 
@@ -458,18 +472,22 @@ void ALuggageChaosGameState::Respawn()
 		pawn->SetActorRotation(RedSpawnPoints[0]->GetActorRotation());
 	}
 
+	ps->SetIsSpectator(false);
+	ps->SetIsOnlyASpectator(false);
+	
+	APlayerController* pc = ps->GetPlayerController();
+	
+	pc->Possess(pawn);
+	
+	//클라이언트일 경우
 	if (key != MyKey)
 	{
-		Net_OnPlayerRespawn(ps->GetPlayerController(), pawn);
+		LOG_PRINT(TEXT("클라이언트 살리기"));
+		Net_OnPlayerRespawn(ps->GetPlayerController());
 		return;
 	}
 
-	APlayerController* pc = ps->GetPlayerController();
-	
-	pc->GetPlayerState<APlayerState>()->SetIsSpectator(false);
-	pc->GetPlayerState<APlayerState>()->SetIsOnlyASpectator(false);
-	
-	pc->Possess(pawn);
+	//서버일 경우
 	ABaseCharacter* player = Cast<ABaseCharacter>(pawn);
 	player->Rebirth();
 	
@@ -480,22 +498,18 @@ void ALuggageChaosGameState::Respawn()
 	player->SetActorEnableCollision(true);
 }
 
-void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerController* pc, APawn* pawn)
+void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerController* pc)
 {
 	LOG_SCREEN("클라: 리스폰!");
 	
-	pc->GetPlayerState<APlayerState>()->SetIsSpectator(false);
-	pc->GetPlayerState<APlayerState>()->SetIsOnlyASpectator(false);
+	ABaseCharacter* player = Cast<ABaseCharacter>(pc->GetPawn());
 	
-	pc->Possess(pawn);
-	
-	ABaseCharacter* player = Cast<ABaseCharacter>(pawn);
 	player->Rebirth();
 	
 	FInputModeGameOnly InputMode;
 	pc->SetInputMode(InputMode);
 	
-	pawn->EnableInput(pc);
+	pc->GetPawn()->EnableInput(pc);
 	
 	player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(1, 1, 1, 1);
 	
