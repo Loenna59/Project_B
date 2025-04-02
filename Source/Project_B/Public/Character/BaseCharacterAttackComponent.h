@@ -66,7 +66,7 @@ public:
 	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
 	class UAnimMontage* WeaponAttackAnimMontage;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool bIsAttacking = false;
 
 	UPROPERTY(EditAnywhere, Category=Attack)

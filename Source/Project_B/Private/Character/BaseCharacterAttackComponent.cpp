@@ -65,6 +65,7 @@ void UBaseCharacterAttackComponent::GetLifetimeReplicatedProps(TArray<class FLif
 	DOREPLIFETIME(UBaseCharacterAttackComponent, HeadButtAnimMontage);
 	DOREPLIFETIME(UBaseCharacterAttackComponent, KickAnimMontage);
 	DOREPLIFETIME(UBaseCharacterAttackComponent, AlreadyHitActorsDuringAttack);
+	DOREPLIFETIME(UBaseCharacterAttackComponent, bIsAttacking);
 }
 
 void UBaseCharacterAttackComponent::SetupInputBiding(class UEnhancedInputComponent* input)
