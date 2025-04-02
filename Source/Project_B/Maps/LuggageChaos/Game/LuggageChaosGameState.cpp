@@ -488,10 +488,15 @@ void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerControlle
 	pc->GetPlayerState<APlayerState>()->SetIsOnlyASpectator(false);
 	
 	pc->Possess(pawn);
+	
 	ABaseCharacter* player = Cast<ABaseCharacter>(pawn);
-	player->IsDead = true;
+	player->IsDead = false;
+	
+	FInputModeGameOnly InputMode;
+	pc->SetInputMode(InputMode);
 	
 	pawn->EnableInput(pc);
+	
 	player->CameraComp->PostProcessSettings.ColorSaturation = FVector4(1, 1, 1, 1);
 	
 	player->SetActorHiddenInGame(false);

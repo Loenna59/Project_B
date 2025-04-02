@@ -25,7 +25,7 @@ void ALuggage::BeginPlay()
 	Super::BeginPlay();
 	if (HasAuthority() == false)
 	{
-		SetActorEnableCollision(false);
+		//SetActorEnableCollision(false);
 	}
 }
 
