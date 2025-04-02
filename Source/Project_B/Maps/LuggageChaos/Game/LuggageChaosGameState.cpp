@@ -103,9 +103,6 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 			pawn->SetActorLocation(BlueSpawnPoints[blueIdx]->GetActorLocation());
 			pawn->SetActorRotation(BlueSpawnPoints[blueIdx]->GetActorRotation());
 			++blueIdx;
-			
-			ABaseCharacter* character = Cast<ABaseCharacter>(pawn);
-			Net_InitCharacterSkin(character, ETeamType::Blue);
 		}
 		else
 		{
@@ -113,9 +110,6 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 			pawn->SetActorLocation(RedSpawnPoints[redIdx]->GetActorLocation());
 			pawn->SetActorRotation(RedSpawnPoints[blueIdx]->GetActorRotation());
 			++redIdx;
-			
-			ABaseCharacter* character = Cast<ABaseCharacter>(pawn);
-			Net_InitCharacterSkin(character, ETeamType::Red);
 		}
 	}
 	
@@ -128,9 +122,6 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 			pawn->SetActorLocation(BlueSpawnPoints[blueIdx]->GetActorLocation());
 			pawn->SetActorRotation(BlueSpawnPoints[blueIdx]->GetActorRotation());
 			++blueIdx;
-			
-			ABaseCharacter* character = Cast<ABaseCharacter>(pawn);
-			Net_InitCharacterSkin(character, ETeamType::Blue);
 		}
 		else
 		{
@@ -138,9 +129,6 @@ void ALuggageChaosGameState::InitPlayerLoc(APawn* pawn,FString key)
 			pawn->SetActorLocation(RedSpawnPoints[redIdx]->GetActorLocation());
 			pawn->SetActorRotation(RedSpawnPoints[blueIdx]->GetActorRotation());
 			++redIdx;
-			
-			ABaseCharacter* character = Cast<ABaseCharacter>(pawn);
-			Net_InitCharacterSkin(character, ETeamType::Red);
 		}
 	}
 	else
@@ -214,34 +202,8 @@ void ALuggageChaosGameState::InitSpawnPoint()
 	}
 }
 
-
-void ALuggageChaosGameState::Net_InitCharacterSkin_Implementation(ABaseCharacter* character, ETeamType team)
-{
-	if (team == ETeamType::Blue)
-	{
-		character->SetSkin(CharacterColor::Blue);
-	}
-	else
-	{
-		character->SetSkin(CharacterColor::Red);
-	}
-}
-
 void ALuggageChaosGameState::GameStart()
 {
-	//TODO: 레벨 스트리밍 테스트 
-	// ULevelStreaming* curLevel = GetWorld()->GetStreamingLevels()[0];
-	// ULevelStreaming* nextLevel = GetWorld()->GetStreamingLevels()[1];
-	// if (nextLevel && curLevel)
-	// {
-	// 	nextLevel->SetShouldBeVisible(true);
-	// 	curLevel->SetShouldBeVisible(false);
-	// }
-	// else
-	// {
-	// 	LOG_ERROR(this,TEXT("레벨 없음"));
-	// }
-	
 	Net_GameStart();
 	
 	GetWorld()->GetTimerManager().SetTimer(GameTimerHandle, this, &ALuggageChaosGameState::TimeOut,GameTime,false);
@@ -256,6 +218,28 @@ void ALuggageChaosGameState::Net_GameStart_Implementation()
 	if (BGM)
 	{
 		BgmComponent = UGameplayStatics::SpawnSound2D(GetWorld(), BGM);
+	}
+	
+	for (APlayerState* ps: PlayerArray)
+	{
+		const FUniqueNetIdRepl& NetIdRepl = ps->GetUniqueId();
+		
+		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+		FString key = NetId->ToString();
+		
+		if (FPlayerInfo* Info = PlayersInfo.Find(key))
+		{
+			ABaseCharacter* ch = Cast<ABaseCharacter>(ps->GetPlayerController()->GetPawn());
+			
+			if (Info->Team == ETeamType::Blue)
+			{
+				ch->SetSkin(CharacterColor::Blue);
+			}
+			else
+			{
+				ch->SetSkin(CharacterColor::Red);	
+			}
+		}
 	}
 }
 

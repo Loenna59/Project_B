@@ -139,9 +139,6 @@ protected:
 	void InitUI(APlayerController* pc);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Net_InitCharacterSkin(ABaseCharacter* character, ETeamType team);
-
-	UFUNCTION(NetMulticast, Reliable)
 	void Net_GameStart();
 	void GameStart();
 	
