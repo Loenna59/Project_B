@@ -30,7 +30,7 @@ public:
 	void SpawnProjectile();
 	
 	APlayerController* pc;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	class UCameraComponent* SpectatorCam;
 
 	// 인풋

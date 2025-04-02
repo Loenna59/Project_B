@@ -227,6 +227,7 @@ void ABaseCharacter::Server_TakeWeapon_Implementation(class AWeapon* Weapon)
 		return;
 	}
 
+	Weapon->CancelDisappear();
 	OwnedWeapon = Weapon;
 	OwnedWeapon->SetOwner(this);
 	
@@ -334,7 +335,7 @@ void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, FV
 	// 	return;
 	// }
 	//
-	LOG_SCREEN("Hit");
+	// LOG_SCREEN("Hit");
 	
 	float Power = 1000.f;
 	FVector LaunchVelocity = NormalPoint * Power + FVector(0, 0, 100.f);
@@ -486,4 +487,24 @@ void ABaseCharacter::Multicast_CheckAndStopKnockdown_Implementation()
 {
 	PlayAnimMontage(GetupAnimMontage, 1.f, "1");
 	bIsKnockdown = false;
+}
+
+void ABaseCharacter::SetDie()
+{
+	Unequip();
+	
+	HeadPhysicsAnimComp->TogglePhysicalAnimation(true);
+	LeftArmPhysicsAnimComp->TogglePhysicalAnimation(true);
+	RightArmPhysicsAnimComp->TogglePhysicalAnimation(true);
+
+	bIsDead = true;
+}
+
+void ABaseCharacter::Rebirth()
+{
+	// LOG_SCREEN("Rebirth");
+	MoveComp->EndRun();
+	MoveComp->EndJump();
+	
+	bIsDead = false;
 }

@@ -29,7 +29,9 @@ public:
 
 	virtual EWeaponType GetWeaponType() const override { return EWeaponType::OneHanded; }
 
+	virtual EAttackType GetAttackType() const override { return EAttackType::BOTTLE; }
+
 	virtual void OnAttackTraceChannel() override;
 
-	virtual void SetVisible(bool bVisible) override;
+	virtual void SetVisible(bool bVisible, int32 SpawnPointIndex = -1) override;
 };

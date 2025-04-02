@@ -26,7 +26,7 @@ protected:
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-	
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class ABaseCharacter* Character;
@@ -48,6 +48,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsHit;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsDead;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D HitDirection;

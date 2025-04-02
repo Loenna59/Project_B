@@ -17,7 +17,17 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void Spawn();
+	UFUNCTION()
+	void InitSpawn();
+
+	UFUNCTION()
+	void Disappear(EAttackType Type, int32 SpawnPointIndex);
+
+	UFUNCTION()
+	void Respawn(int32 SpawnPointIndex);
+
+	UFUNCTION()
+	void RespawnInternal(int32 SpawnPointIndex);
 
 public:
 	UPROPERTY()
@@ -34,5 +44,13 @@ public:
 
 	UPROPERTY()
 	TArray<class AWeapon*> CacheWineBottles;
+
+	int32 WeaponIndex = 0;
+
+	int32 VisibleHammerIndex = 0;
+	
+	int32 VisibleBottleIndex = 0;
+
+	FTimerHandle RespawnTimerHandle;
 
 };

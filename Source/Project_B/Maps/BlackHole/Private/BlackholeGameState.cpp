@@ -12,6 +12,7 @@
 #include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Project_B/Maps/WeaponSpawnManager.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholePlayerState.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholeSpectator.h"
@@ -42,6 +43,8 @@ void ABlackholeGameState::BeginPlay()
 	GameStartTime = GetWorld()->GetTimeSeconds();
 	// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다	
 	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 5.0f, false);
+
+	WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
 }
 
 void ABlackholeGameState::Tick(float DeltaTime)
@@ -171,6 +174,7 @@ void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
 {
 	ABaseCharacter* Player = Cast<ABaseCharacter>(PlayerController->GetPawn());
+	Player->SetDie();
 	
 	// 카메라 흑백 효과
 	if (Player->CameraComp)
