@@ -245,7 +245,7 @@ void UBaseCharacterAttackComponent::OnKickTraceChannel()
 		return;
 	}
 	
-	Server_OnHitTraceChannel(EAttackType::KICK, TEXT("FootToe1_R"), 25.f, KickDamage);
+	Server_OnHitTraceChannel(EAttackType::KICK, TEXT("FootToe1_R"), 40.f, KickDamage);
 }
 
 void UBaseCharacterAttackComponent::OnHeadButtTraceChannel()
@@ -314,7 +314,7 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 		// );
 	}
 
-	FVector Direction = (Location - PrevLocation).GetSafeNormal();
+	FVector Direction = (PrevLocation - Location).GetSafeNormal();
 	PrevLocation = Location;
 
 	if (bHit)
