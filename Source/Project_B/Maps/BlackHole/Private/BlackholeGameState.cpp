@@ -46,7 +46,10 @@ void ABlackholeGameState::BeginPlay()
 	Rotator = Cast<ADestroyZone>(UGameplayStatics::GetActorOfClass(GetWorld(), ADestroyZone::StaticClass()));
 
 	GameReady();
-	WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
+	if (HasAuthority())
+	{
+		WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
+	}
 }
 
 void ABlackholeGameState::Tick(float DeltaTime)
@@ -63,6 +66,7 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 	DOREPLIFETIME(ABlackholeGameState, AlivePlayers);
 	DOREPLIFETIME(ABlackholeGameState, DeadPlayers);
 	DOREPLIFETIME(ABlackholeGameState, WinnerKeys);
+	DOREPLIFETIME(ABlackholeGameState, WeaponSpawnManager);
 }
 
 void ABlackholeGameState::GameReady()
