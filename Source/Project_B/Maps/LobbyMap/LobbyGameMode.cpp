@@ -51,8 +51,6 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 
 	gi->AddPlayerInfo(Key, NewPlayerInfo);
 
-	// Map에다가 계속해서 추가!!
-
 	// 멀티캐스트 해주자
 	ALobbyGameState* gs = Cast<ALobbyGameState>(GetWorld()->GetGameState());
 	if (gs)

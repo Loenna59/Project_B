@@ -38,10 +38,7 @@ void UCreateLobbyUI::Btn_FindSession_Clicked()
 	// 그 다음에 검색을 시작
 	gi->FindOtherSession();
 
-	// 찾는 도중엔 버튼을 비활성화
-	// 검색 버튼 문구 바꿔주고
-	// TextBtn_FindSession->SetText(FText::FromString("Search..."));
-	// 검색 버튼을 비활성화
+	// 찾는동안 검색 버튼을 비활성화
 	Btn_FindSession->SetIsEnabled(false);
 }
 
