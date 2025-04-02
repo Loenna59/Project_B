@@ -13,5 +13,6 @@ class PROJECT_B_API ABlackholePlayerState : public APlayerState
 {
 	GENERATED_BODY()
 public:
-	
+	UFUNCTION(Server, Reliable)
+	void Server_Win();
 };

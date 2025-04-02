@@ -29,7 +29,4 @@ public:
 	FTimerHandle timerHandle;
 	void EndGame();
 	
-	// 게임 종료 로직
-	void CheckGameEndConditions();
-	
 };

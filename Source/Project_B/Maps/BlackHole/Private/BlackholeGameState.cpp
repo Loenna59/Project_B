@@ -7,11 +7,14 @@
 
 #include "Project_B/Maps/BlackHole/Public/BlackholeGameState.h"
 
+#include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Project_B/Maps/Base/Widget/GameEndWidget.h"
+#include "Project_B/Maps/Base/Widget/GameReadyWidget.h"
 #include "Project_B/Maps/WeaponSpawnManager.h"
 #include "Project_B/Maps/BlackHole/Public/BlackHole.h"
 #include "Project_B/Maps/BlackHole/Public/BlackholePlayerState.h"
@@ -19,13 +22,16 @@
 #include "Project_B/Maps/BlackHole/Public/DestroyZone.h"
 #include "Project_B/Maps/BlackHole/Public/TargetActor.h"
 #include "Project_B/Maps/LobbyMap/BanimalsGameInstance.h"
+#include "Project_B/Maps/Podium/WinnerPrize.h"
 
 class ABlackholePlayerState;
 
 ABlackholeGameState::ABlackholeGameState()
 {
 	bReplicates = true;
+	BlackholeSpawnCount = 0;
 }
+
 
 void ABlackholeGameState::BeginPlay()
 {
@@ -39,11 +45,7 @@ void ABlackholeGameState::BeginPlay()
 	Blackhole = Cast<ABlackHole>(UGameplayStatics::GetActorOfClass(GetWorld(), ABlackHole::StaticClass()));
 	Rotator = Cast<ADestroyZone>(UGameplayStatics::GetActorOfClass(GetWorld(), ADestroyZone::StaticClass()));
 
-	// 게임 시간
-	GameStartTime = GetWorld()->GetTimeSeconds();
-	// 게임 시작 30초후 첫번째 블랙홀을 보이게 한다	
-	GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 5.0f, false);
-
+	GameReady();
 	WeaponSpawnManager = Cast<AWeaponSpawnManager>(GetWorld()->SpawnActor(AWeaponSpawnManager::StaticClass()));
 }
 
@@ -60,10 +62,89 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 	DOREPLIFETIME(ABlackholeGameState, GameStartTime);
 	DOREPLIFETIME(ABlackholeGameState, AlivePlayers);
 	DOREPLIFETIME(ABlackholeGameState, DeadPlayers);
+	DOREPLIFETIME(ABlackholeGameState, WinnerKeys);
+}
+
+void ABlackholeGameState::GameReady()
+{
+	InitPlayerInfo();
+	
+	if (HasAuthority())
+	{
+		FTimerHandle OnStartTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(OnStartTimerHandle, this, &ABlackholeGameState::StartGame,10.f,false);
+	}
+
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	InitUI(pc);
+}
+
+void ABlackholeGameState::InitUI(APlayerController* pc)
+{
+	GameReadyWidget = CreateWidget<UGameReadyWidget>(pc, ReadyWidgetClass);
+	if (GameReadyWidget)
+	{
+		GameReadyWidget->AddToViewport();
+	}
+	
+	GameEndWidget = CreateWidget<UGameEndWidget>(pc, GameEndWidgetClass);
+	if (GameEndWidget)
+	{
+		GameEndWidget->AddToViewport();
+	}
+}
+
+void ABlackholeGameState::StartGame()
+{
+	if (HasAuthority())
+	{
+		// 게임 시간
+		GameStartTime = GetWorld()->GetTimeSeconds();
+		// TODO: 게임 시작 30초후 첫번째 블랙홀을 보이게 한다	
+		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
+	}
+    
+	// 모든 플레이어를 살아있는 상태로 초기화
+	PlayersInfo = gi->GetPlayerInfo();
+	for (auto& it : PlayersInfo)
+	{
+		it.Value.bIsAlive = true;
+		it.Value.bIsWin = false;
+	}
+	
+	MulticastRPC_GameStart();
+}
+
+void ABlackholeGameState::InitPlayerInfo()
+{
+	PlayersInfo = gi->GetPlayerInfo();
+	FTimerHandle LambdaTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(LambdaTimerHandle, [this]()
+	{
+		const FUniqueNetIdRepl& NetIdRepl = GetWorld()->GetFirstPlayerController()->GetPlayerState<APlayerState>()->GetUniqueId();
+			
+		if (NetIdRepl.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			MyKey = NetId->ToString();
+			UE_LOG(LogTemp, Error, TEXT("나의 키: %s"), *MyKey);
+		}
+	},0.8f, false);
+}
+
+
+void ABlackholeGameState::MulticastRPC_GameStart_Implementation()
+{
+	if (GameReadyWidget)
+	{
+		GameReadyWidget->PlayAnimLoadComplete();
+	}
 }
 
 void ABlackholeGameState::SpawnBlackhole()
 {
+	if (!HasAuthority()) return; // 서버만 실행
+	
 	// 블랙홀 스폰 함수
 	Blackhole->bIsActive = true;
 	Rotator->Rotate(true);
@@ -71,11 +152,13 @@ void ABlackholeGameState::SpawnBlackhole()
 	if(BlackholeSpawnCount >=4) return;
 
 	// 10초 후 블랙홀 소멸
-	GetWorld()->GetTimerManager().SetTimer(BlackholeDestroyHandle, this, &ABlackholeGameState::DestroyBlackhole, 10.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(BlackholeDestroyHandle, this, &ABlackholeGameState::DestroyBlackhole, 15.0f, false);
 }
 
 void ABlackholeGameState::DestroyBlackhole()
 {
+	if (!HasAuthority()) return;
+	
 	Blackhole->bIsActive = false;
 	BlackholeSpawnCount++;
 	Rotator->Rotate(false);
@@ -89,25 +172,56 @@ void ABlackholeGameState::DestroyBlackhole()
 
 void ABlackholeGameState::CheckGameEndConditions()
 {
+	if (!HasAuthority()) return;
+	
 	// 게임 인스턴스에서 플레이어 정보 확인
-	TMap<FString, FPlayerInfo>& InfoMap = gi->GetPlayerInfo();
+	PlayersInfo = gi->GetPlayerInfo();
 
 	AlivePlayers = 0; // 초기화
+	
 	// 플레이어 정보 순회 (처음부터 세기)
-	for (auto& it : InfoMap)
+	// 생존 플레이어 수 계산 및 팀별 생존자 수 집계
+	TMap<ETeamType, int32> TeamAliveCounts;
+	TArray<ETeamType> RemainingTeams;
+    
+	for (auto& it : PlayersInfo)
 	{
 		FPlayerInfo& PlayerInfo = it.Value;
-		// 살아있다면
 		if (PlayerInfo.bIsAlive)
 		{
 			AlivePlayers++;
+			TeamAliveCounts.FindOrAdd(PlayerInfo.Team)++;
+            
+			if (!RemainingTeams.Contains(PlayerInfo.Team))
+			{
+				RemainingTeams.Add(PlayerInfo.Team);
+			}
 		}
 	}
 
-	// TODO: 종료 조건: "한 팀만 남았거나" 플레이어가 1명 이하일 때
-	if (AlivePlayers <= 1)
+	// 1. 단일 팀만 남은 경우 (2명 이상이 같은 팀일 때)
+	if (RemainingTeams.Num() == 1)
 	{
-		DetermineWinner();
+		DetermineTeamWinner(RemainingTeams[0]);
+		UE_LOG(LogTemp, Warning, TEXT("단일 팀만 남았습니다"));
+		UE_LOG(LogTemp, Warning, TEXT("%d"), RemainingTeams[0]);
+		return;
+	}
+    
+	// 2. 1명만 남은 경우
+	if (AlivePlayers == 1)
+	{
+		for (auto& it : PlayersInfo)
+		{
+			FPlayerInfo& PlayerInfo = it.Value;
+			if (PlayerInfo.bIsAlive && PlayerInfo.Team != ETeamType::None)
+			{
+				DetermineTeamWinner(PlayerInfo.Team);
+				UE_LOG(LogTemp, Warning, TEXT("플레이어 한명만 남았음, 승자결정합니다"));
+				UE_LOG(LogTemp, Warning, TEXT("%d"), PlayerInfo.Team);
+				return;
+			}
+		}
 	}
 }
 
@@ -126,49 +240,86 @@ void ABlackholeGameState::Multicast_PlayerDeath_Implementation(APlayerController
 	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayerDeath_Implementation"));
 	
 	// 죽은 플레이어에게 사망 효과 적용
+	PlayerController->DisableInput(PlayerController);
 	DeathEffects(PlayerController);
-	
-	// 입력 비활성화하고
-	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->SetIgnoreMoveInput(true);
     
 	// 관전자 모드로 전환
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateUObject(this, &ABlackholeGameState::ConvertToSpectator, PlayerController), 3.0f, false);
 }
 
-void ABlackholeGameState::DetermineWinner()
+void ABlackholeGameState::GameEnd()
+{
+	FTimerHandle OnEndTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(OnEndTimerHandle, this, &ABlackholeGameState::ChangeLevelPodium,3.f,false);
+	UE_LOG(LogTemp, Warning, TEXT("게임끝!!!!!"));
+	
+	gi->WinnerKeys = WinnerKeys;
+	
+	for (int i = 0; i<WinnerKeys.Num(); i++)
+	{
+		UE_LOG(LogTemp,Error,TEXT("gi에 승리자 키: %s 저장"), *WinnerKeys[i]);
+	}
+	
+	MulticastRPC_GameEnd();
+}
+
+void ABlackholeGameState::MulticastRPC_GameEnd_Implementation()
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5);
+}
+
+void ABlackholeGameState::ChangeLevelPodium()
+{
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Podium01?listen"));
+}
+
+void ABlackholeGameState::DetermineTeamWinner(ETeamType WinningTeam)
 {
 	if (!HasAuthority()) return;
-	
-	for (APlayerState* PS : PlayerArray)
-	{
-		if (PS && !DeadPlayers.Contains(PS->GetPlayerController()))
-		{
-			if (gi)
-			{
-				gi->SetPlayerWinInfo(PS->GetUniqueId()->ToString(), true);
-			}
-		}
-	}
+	WinnerTeam = WinningTeam;
 
-	// TODO: 슬로우모션 동기화
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5);
-	UE_LOG(LogTemp, Warning, TEXT("게임 종료! 승자가 결정되었습니다!"));
+	UE_LOG(LogTemp,Warning,TEXT("승리자 결정"));
+	
+	FPlayerInfo* myInfo = PlayersInfo.Find(MyKey);
+	
+	if (myInfo->Team == WinningTeam)
+	{
+		GameEndWidget->ShowVictory();
+		
+		APlayerController* pc = GetWorld()->GetFirstPlayerController();
+		pc->GetPlayerState<ABlackholePlayerState>()->Server_Win();
+		AddWinPrize(pc);
+	}
+	else
+	{
+		GameEndWidget->ShowDefeat();
+	}
+	
+	if (HasAuthority())
+	{
+		GameEnd();
+	}
+}
+
+void ABlackholeGameState::AddWinner(FString playerKey)
+{
+	WinnerKeys.Add(playerKey);
+}
+
+void ABlackholeGameState::AddWinPrize(APlayerController* pc)
+{
+	AWinnerPrize* prize = GetWorld()->SpawnActor<AWinnerPrize>(WinnerPrizeClass, pc->GetCharacter()->GetTransform());
+	if (prize)
+	{
+		prize->AttachToComponent(pc->GetCharacter()->GetMesh(), 
+								 FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
 }
 
 void ABlackholeGameState::OnPlayerDeath(APlayerController* PlayerController)
 {
-	if (!HasAuthority()) return; // 서버만
-	
-	// 서버에서 사망 플레이어를 추가한다
-	AddDeadPlayer(PlayerController);
-
-	// 사망 처리 로직
-	Multicast_PlayerDeath(PlayerController);
-	
-	CheckGameEndConditions();
-	UE_LOG(LogTemp, Warning, TEXT("OnPlayerDeath"));
+	ServerRPC_PlayerDeath(PlayerController);
 }
 
 void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
@@ -184,6 +335,18 @@ void ABlackholeGameState::DeathEffects(APlayerController* PlayerController)
 	}
 }
 
+void ABlackholeGameState::ServerRPC_PlayerDeath_Implementation(APlayerController* PlayerController)
+{
+	// 서버에서 사망 플레이어를 추가한다
+	AddDeadPlayer(PlayerController);
+
+	// 사망 처리 로직
+	Multicast_PlayerDeath(PlayerController);
+
+	// 사망자 수 세기
+	CheckGameEndConditions();
+}
+
 void ABlackholeGameState::ConvertToSpectator(APlayerController* PlayerController)
 {
 	APawn* ControlledPawn = PlayerController->GetPawn();
@@ -194,15 +357,6 @@ void ABlackholeGameState::ConvertToSpectator(APlayerController* PlayerController
 
 	PlayerController->UnPossess();
 
-	if (PlayerController == GetWorld()->GetFirstPlayerController())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("SamePlayerController!!!!!!! : %p || %p"), PlayerController, GetWorld()->GetFirstPlayerController());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Different Controller : %p || %p"), PlayerController, GetWorld()->GetFirstPlayerController());
-	}
-	
 	AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetActor::StaticClass());
 	if (Target)
 	{
