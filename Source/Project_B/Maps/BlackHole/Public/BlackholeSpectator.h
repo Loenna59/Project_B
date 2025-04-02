@@ -26,9 +26,19 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	
+public:
+	// 물체 스폰 함수
 	void SpawnProjectile();
-	
+	// 물체 생성은 서버 권한으로 실행되게하자~!
+	// 동기화
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SpawnProjectile(FVector SpawnLocation, FVector TargetLocation);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SpawnProjectile(FVector SpawnLocation, FVector TargetLocation);
+	// 스폰
+	void SpawnProjectileInternational(FVector SpawnLocation, FVector TargetLocation);
+
+public:
 	APlayerController* pc;
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* SpectatorCam;

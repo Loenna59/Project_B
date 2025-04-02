@@ -30,31 +30,30 @@ void USpectatorUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void USpectatorUI::Banana_Clicked()
 {
-	// 코인이 3개이상일때만 실행
-	if (coinCount >= 3)
+	// 코인이 2개이상일때만 실행
+	if (coinCount >= 2)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Banana_Clicked"));
 		// 관전자의 스폰 아이템은 바나나
 		// 관전자 스폰 함수 실행
-		coinCount -= 3;
+		coinCount -= 2;
 	}
 }
 
 void USpectatorUI::Poo_Clicked()
 {
-	// 4개이상
-	if (coinCount >= 4)
+	if (coinCount >= 3)
 	{
-		coinCount -= 4;
+		coinCount -= 3;
 	}
 }
 
 void USpectatorUI::Bomb_Clicked()
 {
-	if (coinCount >= 5)
+	if (coinCount >= 4)
 	{
 
-		coinCount -= 5;
+		coinCount -= 4;
 	}
 }
 
@@ -65,13 +64,13 @@ void USpectatorUI::UpdateItemImages()
 
 void USpectatorUI::UpdateCoinProgress(float DeltaTime)
 {
-	// 진행률 업데이트 (최대 5개까지만)
+	// 진행률 업데이트 (최대 5개까지)
 	if (coinCount < 5)
 	{
 		float progressIncrement = DeltaTime / coinCreateTime;
 		coinPercent += progressIncrement;
         
-		// 퍼센트가 1.0이 되면 코인 카운트 증가
+		// 퍼센트가 1.0이 되면 코인 카운트 증가시키자
 		if (coinPercent >= 1.0f)
 		{
 			coinCount++;
@@ -79,12 +78,12 @@ void USpectatorUI::UpdateCoinProgress(float DeltaTime)
 		}
 	}
     
-	// 모든 코인 시각적 업데이트
+	// 코인 업데이트
 	for (int32 i = 0; i < CoinImages.Num(); i++)
 	{
 		if (CoinMaterials[i])
 		{
-			float percentToSet = 0.0f; // 기본 부분 표시
+			float percentToSet = 0.0f; // 기본 표시
             
 			if (i < coinCount)
 			{
@@ -94,6 +93,7 @@ void USpectatorUI::UpdateCoinProgress(float DeltaTime)
 			else if (i == coinCount)
 			{
 				// 현재 채워지고 있는 코인
+				// ... 이렇게 하는거래
 				percentToSet = FMath::Max(0.0f, coinPercent);
 			}
             

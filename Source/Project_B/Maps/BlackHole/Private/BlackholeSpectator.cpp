@@ -20,6 +20,7 @@ ABlackholeSpectator::ABlackholeSpectator()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	SpectatorCam = CreateDefaultSubobject<UCameraComponent>(TEXT("SpectatorCam"));
 	SpectatorCam->FieldOfView = 55.0f;
@@ -87,9 +88,7 @@ void ABlackholeSpectator::SpawnProjectile()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Spawning Projectile"));
 	
-	UE_LOG(LogTemp, Warning, TEXT("Spawning Projectile"));
-	
-	// 1마우스 클릭 위치를 3D 공간에서 좌표, 방향을 구하기
+	// 마우스 클릭 위치를 3D 공간에서 좌표, 방향을 구하기
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	FVector ClickLocation, ClickDirection;
 	PC->DeprojectMousePositionToWorld(ClickLocation, ClickDirection);
@@ -119,29 +118,55 @@ void ABlackholeSpectator::SpawnProjectile()
 	FVector TargetLocation = bIsHit ? HitResult.ImpactPoint : (ClickLocation + ClickDirection * 1000);
 	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
 
-	// Projectile 생성
-	FTransform SpawnTransform;
-	SpawnTransform.SetLocation(SpawnLocation);
-	SpawnTransform.SetRotation(LaunchDirection.Rotation().Quaternion());
-
-	ASpectatorItem* SpawnedProjectile = GetWorld()->SpawnActor<ASpectatorItem>(SepctatorItmeFactory, SpawnTransform);
-	if (SpawnedProjectile)
+	// 클라이언트 코인 차감 및 서버에 요청
+	if (SpectatorUI && SpectatorUI->coinCount >= 3)
 	{
-		// Projectile이 클릭한 위치에서 목표 지점을 향해 날아가도록 설정
-		UProjectileMovementComponent* ProjectileMovement = SpawnedProjectile->FindComponentByClass<UProjectileMovementComponent>();
-		if (ProjectileMovement)
+		SpectatorUI->coinCount -= 3;
+        
+		if (HasAuthority())
 		{
-			ProjectileMovement->Velocity = LaunchDirection * ProjectileMovement->InitialSpeed;
-			ProjectileMovement->Activate();
+			MulticastRPC_SpawnProjectile(SpawnLocation, TargetLocation);
 		}
-
-		// Projectile이 이상한 방향을 바라보지 않도록 회전 조정
-		FRotator NewRotation = LaunchDirection.Rotation();
-		NewRotation.Pitch = 0;  // 상하 회전 방지
-		NewRotation.Roll = 0;    // 옆으로 기울어지는 것 방지
-		SpawnedProjectile->SetActorRotation(NewRotation);
+		else
+		{
+			ServerRPC_SpawnProjectile(SpawnLocation, TargetLocation);
+		}
 	}
 }
+
+void ABlackholeSpectator::SpawnProjectileInternational(FVector SpawnLocation,
+	FVector TargetLocation)
+{
+	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
+    
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+
+	if (ASpectatorItem* SpawnedProjectile = GetWorld()->SpawnActor<ASpectatorItem>(
+		SepctatorItmeFactory, 
+		FTransform(LaunchDirection.Rotation(), SpawnLocation),
+		SpawnParams))
+	{
+		if (UProjectileMovementComponent* Movement = SpawnedProjectile->FindComponentByClass<UProjectileMovementComponent>())
+		{
+			Movement->Velocity = LaunchDirection * Movement->InitialSpeed;
+			Movement->Activate();
+		}
+	}
+}
+
+void ABlackholeSpectator::MulticastRPC_SpawnProjectile_Implementation(FVector SpawnLocation, FVector TargetLocation)
+{
+	SpawnProjectileInternational(SpawnLocation, TargetLocation);
+}
+
+void ABlackholeSpectator::ServerRPC_SpawnProjectile_Implementation(FVector SpawnLocation,
+                                                                   FVector TargetLocation)
+{
+	MulticastRPC_SpawnProjectile(SpawnLocation, TargetLocation);
+}
+
 
 void ABlackholeSpectator::CreateSpectatorUI()
 {
