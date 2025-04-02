@@ -37,7 +37,8 @@ public:
 	UFUNCTION()
 	void TogglePhysicalAnimationInternal(FName BoneName, bool bSimulate);
 
-	// void AddForceForwardVector();
+	UFUNCTION()
+	void OnRep_AddTorque();
 
 protected:
 	UPROPERTY()
@@ -53,6 +54,9 @@ protected:
 	class UPhysicalAnimationComponent* PhysicalAnimationComp = nullptr;
 
 public:
+	UPROPERTY(ReplicatedUsing = OnRep_AddTorque)
+	FVector ReplicatedTorque;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FName SimulateBoneName = TEXT("CharacterPelvis");
 
