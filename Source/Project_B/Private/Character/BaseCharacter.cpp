@@ -409,6 +409,7 @@ void ABaseCharacter::Multicast_OnPlayHitMontage_Implementation(bool bIsKnockdown
 		bIsKnockdown = true;
 		CurrentNormalHitCount = 0;
 		Unequip();
+		PickComp->ReleasePick();
 		LaunchCharacter(LaunchVelocity, true, true);
 
 		UGameplayStatics::SpawnSoundAttached(HitSound, RootComponent);
