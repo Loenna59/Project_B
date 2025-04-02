@@ -23,6 +23,9 @@ protected:
 
 	int32 LocateIndex = -1;
 
+	UPROPERTY()
+	FVector PrevLocation;
+
 public:
 	UPROPERTY(EditAnywhere)
 	int32 MaxCapacity = 10;

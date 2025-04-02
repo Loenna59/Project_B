@@ -1,7 +1,6 @@
 #include "Character/BaseCharacterAttackComponent.h"
 
 #include "EnhancedInputComponent.h"
-#include "KismetTraceUtils.h"
 #include "Character/BaseCharacter.h"
 #include "Character/BaseCharacterAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -61,9 +60,6 @@ void UBaseCharacterAttackComponent::GetLifetimeReplicatedProps(TArray<class FLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UBaseCharacterAttackComponent, ArmDirection);
-	DOREPLIFETIME(UBaseCharacterAttackComponent, PunchAnimMontage);
-	DOREPLIFETIME(UBaseCharacterAttackComponent, HeadButtAnimMontage);
-	DOREPLIFETIME(UBaseCharacterAttackComponent, KickAnimMontage);
 	DOREPLIFETIME(UBaseCharacterAttackComponent, AlreadyHitActorsDuringAttack);
 	DOREPLIFETIME(UBaseCharacterAttackComponent, bIsAttacking);
 }
@@ -318,13 +314,16 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 		// );
 	}
 
+	FVector Direction = (Location - PrevLocation).GetSafeNormal();
+	PrevLocation = Location;
+
 	if (bHit)
 	{
-		Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResults, Damage);
+		Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResults, Direction, Damage);
 	}
 }
 
-void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(EAttackType Type, bool bHit, const TArray<FHitResult>& HitResults, float Damage)
+void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(EAttackType Type, bool bHit, const TArray<FHitResult>& HitResults, FVector Direction, float Damage)
 {
 	if (bHit)
 	{
@@ -340,7 +339,7 @@ void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(E
 		
 			if (ABaseCharacter* Other = Cast<ABaseCharacter>(HitActor))
 			{
-				Other->OnHit(Type, HitResult.Normal.GetSafeNormal(), Damage);
+				Other->OnHit(Type, Direction, Damage);
 			}
 		}
 	}

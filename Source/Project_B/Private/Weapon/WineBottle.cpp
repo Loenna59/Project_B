@@ -71,6 +71,8 @@ void AWineBottle::OnAttackTraceChannel()
 		// );
 	}
 
+	FVector Direction = (Location - PrevLocation).GetSafeNormal();
+
 	if (bHit)
 	{
 		for (FHitResult Result : HitResult)
@@ -85,8 +87,7 @@ void AWineBottle::OnAttackTraceChannel()
 			
 			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
 			{
-				LOG_SCREEN("%s", *GetVelocity().ToString());
-				Character->OnHit(EAttackType::BOTTLE, Result.Normal.GetSafeNormal(), 0);
+				Character->OnHit(EAttackType::BOTTLE, Direction, 0);
 				DecreaseCapacity();
 				break;
 			}

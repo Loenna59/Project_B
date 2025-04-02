@@ -53,17 +53,19 @@ protected:
 	UPROPERTY(Replicated)
 	TArray<AActor*> AlreadyHitActorsDuringAttack;
 
+	FVector PrevLocation;
+
 public:
-	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
+	UPROPERTY(EditAnywhere, Category=Attack)
 	class UAnimMontage* PunchAnimMontage;
 
-	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
+	UPROPERTY(EditAnywhere, Category=Attack)
 	class UAnimMontage* HeadButtAnimMontage;
 	
-	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
+	UPROPERTY(EditAnywhere, Category=Attack)
 	class UAnimMontage* KickAnimMontage;
 
-	UPROPERTY(EditAnywhere, Replicated, Category=Attack)
+	UPROPERTY(EditAnywhere, Category=Attack)
 	class UAnimMontage* WeaponAttackAnimMontage;
 
 	UPROPERTY(Replicated)
@@ -129,7 +131,7 @@ public:
 	void Server_OnHitTraceChannel(EAttackType Type, FName BoneName, float Radius, float Damage);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnHitTraceChannel(EAttackType Type, bool bHit, const TArray<FHitResult>& HitResults, float Damage);
+	void Multicast_OnHitTraceChannel(EAttackType Type, bool bHit, const TArray<FHitResult>& HitResults, FVector Direction, float Damage);
 
 	UFUNCTION()
 	void PlayWeaponAttackAnimMontage(FString SelectionName);

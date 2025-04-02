@@ -335,7 +335,7 @@ void ABaseCharacter::Server_OnPlayHitMontage_Implementation(EAttackType Type, FV
 	//
 	// LOG_SCREEN("Hit");
 	
-	float Power = 1000.f;
+	float Power = 1500.f;
 	FVector LaunchVelocity = NormalPoint * Power + FVector(0, 0, 100.f);
 
 	FVector WorldHitDir = LaunchVelocity.GetSafeNormal();
@@ -461,7 +461,7 @@ void ABaseCharacter::Client_SetEnableInput_Implementation(bool bEnable)
 
 bool ABaseCharacter::CheckAndStopKnockdown()
 {
-	if (AnimInstance->Montage_IsPlaying(KnockdownMontage))
+	if (AnimInstance && AnimInstance->Montage_IsPlaying(KnockdownMontage))
 	{
 		Server_CheckAndStopKnockdown();
 
