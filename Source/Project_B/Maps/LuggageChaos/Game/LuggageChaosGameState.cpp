@@ -204,7 +204,21 @@ void ALuggageChaosGameState::InitSpawnPoint()
 
 void ALuggageChaosGameState::GameStart()
 {
+	//TODO: 레벨 스트리밍 테스트 
+	// ULevelStreaming* curLevel = GetWorld()->GetStreamingLevels()[0];
+	// ULevelStreaming* nextLevel = GetWorld()->GetStreamingLevels()[1];
+	// if (nextLevel && curLevel)
+	// {
+	// 	nextLevel->SetShouldBeVisible(true);
+	// 	curLevel->SetShouldBeVisible(false);
+	// }
+	// else
+	// {
+	// 	LOG_ERROR(this,TEXT("레벨 없음"));
+	// }
+	
 	Net_GameStart();
+	
 	GetWorld()->GetTimerManager().SetTimer(GameTimerHandle, this, &ALuggageChaosGameState::TimeOut,GameTime,false);
 }
 
@@ -284,7 +298,6 @@ void ALuggageChaosGameState::ChangeLevelPodium()
 {
 	LOG_SCREEN("레벨 전환");
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Podium01?listen"));
-	
 }
 
 void ALuggageChaosGameState::TimeOut()
