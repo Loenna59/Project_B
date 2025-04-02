@@ -271,6 +271,19 @@ void ABlackholeGameState::GameEnd()
 void ABlackholeGameState::MulticastRPC_GameEnd_Implementation()
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5);
+
+	// 위젯 띄우기
+	if (GameEndWidget)
+	{
+		if (WinnerTeam == PlayersInfo[MyKey].Team)
+		{
+			GameEndWidget->ShowVictory();
+		}
+		else
+		{
+			GameEndWidget->ShowDefeat();
+		}
+	}
 }
 
 void ABlackholeGameState::ChangeLevelPodium()
@@ -371,7 +384,11 @@ void ABlackholeGameState::ConvertToSpectator(APlayerController* PlayerController
 		{
 			UGameplayStatics::FinishSpawningActor(Spectator, Target->GetActorTransform());
 			PlayerController->Possess(Spectator);
-			Spectator->CreateSpectatorUI();
+			if (PlayerController->IsLocalController()) // UI는 로컬에서만 생성
+			{
+				Spectator->CreateSpectatorUI();
+			}
+			
 			// 커서 보이게 하자
 			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 			UE_LOG(LogTemp, Warning, TEXT("Spectator Possessed"));
