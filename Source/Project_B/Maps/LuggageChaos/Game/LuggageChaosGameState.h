@@ -170,7 +170,6 @@ protected:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Net_OnPlayerRespawn(APlayerController* pc, ABaseCharacter* player);
-
 	void Respawn();
 
 	TMap<FString,FPlayerInfo> DummyPlayersInfo();

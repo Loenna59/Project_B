@@ -495,13 +495,13 @@ void ALuggageChaosGameState::Net_OnPlayerRespawn_Implementation(APlayerControlle
 
 	player->SetActorHiddenInGame(false);
 	player->SetActorEnableCollision(true);
+	player->Rebirth();
 	
 	if (pc == nullptr)
 	{
 		return;
 	}
 	
-	player->Rebirth();
 	
 	if (pc->IsLocalController())
 	{
