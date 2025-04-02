@@ -9,7 +9,6 @@
 AWeaponSpawnManager::AWeaponSpawnManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	bAlwaysRelevant = true;
 	bReplicates = true;
 
 	ConstructorHelpers::FClassFinder<AHammer> temp_hammer(TEXT("/Game/Blueprints/BP_Hammer.BP_Hammer_C"));

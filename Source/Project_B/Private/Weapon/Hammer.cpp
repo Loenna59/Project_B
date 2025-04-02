@@ -81,6 +81,8 @@ void AHammer::OnAttackTraceChannel()
 		// );
 	}
 
+	FVector Direction = (Location - PrevLocation).GetSafeNormal();
+
 	if (bHit)
 	{
 		for (FHitResult Result : HitResult)
@@ -95,12 +97,14 @@ void AHammer::OnAttackTraceChannel()
 			
 			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
 			{
-				Character->OnHit(EAttackType::HAMMER, Result.Normal.GetSafeNormal(), 0);
+				Character->OnHit(EAttackType::HAMMER, Direction, 0);
 				DecreaseCapacity();
 				break;
 			}
 		}
 	}
+
+	PrevLocation = Location;
 }
 
 void AHammer::SetVisible(bool bVisible, int32 SpawnPointIndex)
