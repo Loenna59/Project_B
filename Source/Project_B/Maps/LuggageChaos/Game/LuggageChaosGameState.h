@@ -159,14 +159,17 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_OnPlayerDeath(APlayerController* pc);
 	UFUNCTION(NetMulticast, Reliable)
-	void Net_OnPlayerDeath(APlayerController* pc);
+	void Net_OnPlayerDeath(ABaseCharacter* player, APlayerController* pc);
 
 	void AddDeadPlayer(APlayerController* pc);
 	
 	void DeathEffects(APlayerController* pc);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void Net_OnPlayerRespawn(APlayerController* pc);
+	void Net_OnPlayerSpectate(ABaseCharacter* player, APlayerController* pc);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Net_OnPlayerRespawn(APlayerController* pc, ABaseCharacter* player);
 
 	void Respawn();
 
