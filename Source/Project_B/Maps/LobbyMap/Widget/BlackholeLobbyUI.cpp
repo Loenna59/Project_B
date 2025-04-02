@@ -17,6 +17,12 @@ void UBlackholeLobbyUI::NativeConstruct()
 
 void UBlackholeLobbyUI::UpdateImage()
 {
+	if (!gi)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameInstance is not valid in UpdateImage"));
+		return;
+	}
+	
 	// 이미지 배열 저장
 	TArray<UImage*> DefaultImages = { red01_on, blue01_on, yellow01_on, green01_on, red02_on, blue02_on, yellow02_on, green02_on };
 	

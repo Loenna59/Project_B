@@ -35,6 +35,10 @@ public:
 	UPROPERTY()
 	ULuggageLobbyUI* LuggageLobbyWidget;
 
+	// 위젯 동기화
+	UPROPERTY()
+	int32 CurrentMapID;
+
 	// 플레이어가 들어올 때마다 정보를 보내줄 것이다
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_UpdatePlayerTeam(const FString& PlayerKey, const FPlayerInfo& PlayerInfo);

@@ -24,6 +24,15 @@ void USessionItemUI::Btn_JoinSession_Clicked()
 {
 	UBanimalsGameInstance* gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	gi->JoinOtherSession(roomIdx);
+
+	if (Text_SessionName->GetText().ToString().Contains(TEXT("Black")))
+	{
+		gi->SetCurrentMapInfo(0);
+	}
+	else if (Text_SessionName->GetText().ToString().Contains(TEXT("Lugg")))
+	{
+		gi->SetCurrentMapInfo(1);
+	}
 }
 
 void USessionItemUI::SetInfo(int32 idx, FString info)

@@ -32,35 +32,44 @@ void ALobbyGameState::BeginPlay()
 	// 게임 인스턴스
 	gi = Cast<UBanimalsGameInstance>(GetWorld()->GetGameInstance());
 	UE_LOG(LogTemp, Warning, TEXT("게임스테이트 실행"));
+
+	if (gi)
+	{
+		CurrentMapID = gi->CurrentMapID;
+	}
 	
-	if (gi->CurrentMapID == 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("블랙홀 변수 확인"));
-		if (BlackholeLobbyWidgetClass) // 위젯 클래스가 설정되었는지 확인
+	//if (HasAuthority())
+	//{
+		
+		if (gi->CurrentMapID == 0)
 		{
-			// 위젯 생성
-			BlackholeLobbyWidget = CreateWidget<UBlackholeLobbyUI>(GetWorld(), BlackholeLobbyWidgetClass);
-
-			if (BlackholeLobbyWidget)
+			UE_LOG(LogTemp, Warning, TEXT("블랙홀 변수 확인"));
+			if (BlackholeLobbyWidgetClass) // 위젯 클래스가 설정되었는지 확인
 			{
-				BlackholeLobbyWidget->AddToViewport(); // UI 화면에 추가
-				UE_LOG(LogTemp, Warning, TEXT("블랙홀 UI add"));
+				// 위젯 생성
+				BlackholeLobbyWidget = CreateWidget<UBlackholeLobbyUI>(GetWorld(), BlackholeLobbyWidgetClass);
+
+				if (BlackholeLobbyWidget)
+				{
+					BlackholeLobbyWidget->AddToViewport(); // UI 화면에 추가
+					UE_LOG(LogTemp, Warning, TEXT("블랙홀 UI add"));
+				}
 			}
 		}
-	}
-	if (gi->CurrentMapID == 1)
-	{
-		if (LuggageLobbyWidgetClass) // 위젯 클래스가 설정되었는지 확인
+		if (gi->CurrentMapID == 1)
 		{
-			// 위젯 생성
-			LuggageLobbyWidget = CreateWidget<ULuggageLobbyUI>(GetWorld(), LuggageLobbyWidgetClass);
-
-			if (LuggageLobbyWidget)
+			if (LuggageLobbyWidgetClass) // 위젯 클래스가 설정되었는지 확인
 			{
-				LuggageLobbyWidget->AddToViewport(); // UI 화면에 추가
+				// 위젯 생성
+				LuggageLobbyWidget = CreateWidget<ULuggageLobbyUI>(GetWorld(), LuggageLobbyWidgetClass);
+
+				if (LuggageLobbyWidget)
+				{
+					LuggageLobbyWidget->AddToViewport(); // UI 화면에 추가
+				}
 			}
 		}
-	}
+	//}
 }
 
 void ALobbyGameState::MulticastRPC_UpdatePlayerTeam_Implementation(const FString& PlayerKey,
@@ -76,16 +85,12 @@ void ALobbyGameState::MulticastRPC_UpdatePlayerTeam_Implementation(const FString
 			UE_LOG(LogTemp, Warning, TEXT("%s, %d"), *it.Key, it.Value.Team);
 		}
 	}
-
-	// 현재는 서버가 불필요하게 여러번 실행
-	// ==> 나중에 위로 옮기던가 하기
-	// 블랙홀 맵이면
-	if (gi->CurrentMapID == 0)
+	
+	if (BlackholeLobbyWidget)
 	{
 		BlackholeLobbyWidget->UpdateImage();
 	}
-	// 러기지 맵이면
-	if (gi->CurrentMapID == 1)
+	if (LuggageLobbyWidget)
 	{
 		LuggageLobbyWidget->UpdateImage();
 	}
