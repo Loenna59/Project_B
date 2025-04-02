@@ -59,6 +59,9 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void ResetLuggage(ALuggage* lug, FVector loc);
+
 private:
 	/**팀별 스폰포인트를 초기화*/
 	void InitTeamSpawnPoints();
@@ -70,9 +73,6 @@ private:
 	void ActiveGoldLuggage();
 	
 	void DeactiveLuggage(ALuggage* lug, ETeamType team);
-	
-	UFUNCTION(BlueprintCallable)
-	void ResetLuggage(ALuggage* lug, FVector loc);
 
 	ALuggage* SpawnLuggage(FVector pos);
 	ALuggage* SpawnGoldLuggage();
