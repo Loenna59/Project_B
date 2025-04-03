@@ -212,14 +212,14 @@ void ALuggageChaosGameState::Net_GameStart_Implementation()
 	for (APlayerState* ps: PlayerArray)
 	{
 		const FUniqueNetIdRepl& NetIdRepl = ps->GetUniqueId();
-
-		if (NetIdRepl.IsValid() == false)
+		
+		FString key;
+		if (NetIdRepl.IsValid())
 		{
-			return;
-			
+			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+			key = NetId->ToString();
+			LOG_PRINT(TEXT("접속한 플레이어 키: %s"), *key);
 		}
-		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-		FString key = NetId->ToString();
 		
 		if (FPlayerInfo* Info = PlayersInfo.Find(key))
 		{
