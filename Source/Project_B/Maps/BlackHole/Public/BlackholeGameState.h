@@ -123,6 +123,13 @@ public:
 	// 무기 소환
 	UPROPERTY(Replicated)
 	class AWeaponSpawnManager* WeaponSpawnManager;
+
+	// 스킨 설정 로직
+	void ApplySkin(FString PlayerKey, ETeamType Team);
+	UFUNCTION(netmulticast, reliable)
+	void Multicast_ApplyPlayerSkin(ABaseCharacter* player, CharacterColor Color);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ApplyPlayerSkin();
 };
 
 

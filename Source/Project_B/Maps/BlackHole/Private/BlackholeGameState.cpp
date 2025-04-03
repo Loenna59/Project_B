@@ -133,23 +133,18 @@ void ABlackholeGameState::InitPlayerInfo()
 			MyKey = NetId->ToString();
 			ABlackholePlayerState* ps = Cast<ABlackholePlayerState>(GetWorld()->GetFirstPlayerController()->PlayerState);
 			ABaseCharacter* player = Cast<ABaseCharacter>(ps->GetPlayerController()->GetPawn());
-			if (PlayersInfo[MyKey].Team == ETeamType::Red)
+			if (HasAuthority())  // 서버에서 실행될 때만 처리
 			{
-				player->SetSkin(CharacterColor::Red);
+				PlayersInfo = gi->GetPlayerInfo();
+				for (auto& it : PlayersInfo)
+				{
+					ApplySkin(it.Key, it.Value.Team);
+				}
 			}
-			if (PlayersInfo[MyKey].Team == ETeamType::Blue)
+			else
 			{
-				player->SetSkin(CharacterColor::Blue);
+				ServerRPC_ApplyPlayerSkin();
 			}
-			if (PlayersInfo[MyKey].Team == ETeamType::Yellow)
-			{
-				player->SetSkin(CharacterColor::Yellow);
-			}
-			if (PlayersInfo[MyKey].Team == ETeamType::Green)
-			{
-				player->SetSkin(CharacterColor::Green);
-			}
-			UE_LOG(LogTemp, Error, TEXT("나의 키: %s"), *MyKey);
 		}
 	},1.5f, false);
 }
@@ -323,6 +318,54 @@ void ABlackholeGameState::MulticastRPC_GameEnd_Implementation()
 void ABlackholeGameState::ChangeLevelPodium()
 {
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/Podium/LV_Podium01?listen"));
+}
+
+void ABlackholeGameState::ApplySkin(FString PlayerKey, ETeamType Team)
+{
+	ABlackholePlayerState* ps = Cast<ABlackholePlayerState>(GetWorld()->GetFirstPlayerController()->PlayerState);
+	ABaseCharacter* player = Cast<ABaseCharacter>(ps->GetPlayerController()->GetPawn());
+
+	if (!player) return;
+
+	CharacterColor Color;
+	switch (Team)
+	{
+	case ETeamType::Red:
+		Color = CharacterColor::Red;
+		break;
+	case ETeamType::Blue:
+		Color = CharacterColor::Blue;
+		break;
+	case ETeamType::Yellow:
+		Color = CharacterColor::Yellow;
+		break;
+	case ETeamType::Green:
+		Color = CharacterColor::Green;
+		break;
+	}
+
+	// 서버에서 실행되면, 모든 클라이언트에게 동기화
+	if (HasAuthority())
+	{
+		Multicast_ApplyPlayerSkin(player, Color);
+	}
+}
+
+void ABlackholeGameState::ServerRPC_ApplyPlayerSkin_Implementation()
+{
+	PlayersInfo = gi->GetPlayerInfo();
+	for (auto& it : PlayersInfo)
+	{
+		ApplySkin(it.Key, it.Value.Team);
+	}
+}
+
+void ABlackholeGameState::Multicast_ApplyPlayerSkin_Implementation(ABaseCharacter* player, CharacterColor Color)
+{
+	if (player)
+	{
+		player->SetSkin(Color);
+	}
 }
 
 void ABlackholeGameState::Multicast_DetermineTeamWinner_Implementation(ETeamType WinningTeam)
