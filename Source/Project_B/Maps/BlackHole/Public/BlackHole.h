@@ -26,10 +26,10 @@ public:
 
 	// 스폰되었니? 변수
 	// 변수가 자동으로 동기화?
-	UPROPERTY(Replicated=OnRep_IsActive)
+	UPROPERTY()
 	bool bIsActive = false;
-	UFUNCTION()
-	void OnRep_IsActive();
+	/*UFUNCTION()
+	void OnRep_IsActive();*/
 
 	// 생성되기 10초전부터 블랙홀의 scale 바꿔주자 (커지면서 생성되게)
 	UPROPERTY()

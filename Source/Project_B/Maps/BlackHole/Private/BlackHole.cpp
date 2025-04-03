@@ -81,10 +81,10 @@ void ABlackHole::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(ABlackHole, bIsActive);
+	// DOREPLIFETIME(ABlackHole, bIsActive);
 }
 
-void ABlackHole::OnRep_IsActive()
+/*void ABlackHole::OnRep_IsActive()
 {
 	// 블랙홀의 가시성을 클라이언트에서도 동기화
 	Sphere->SetVisibility(bIsActive);
@@ -93,7 +93,7 @@ void ABlackHole::OnRep_IsActive()
 	{
 		ActivateBlackhole();
 	}
-}
+}*/
 
 void ABlackHole::ActivateBlackhole()
 {
