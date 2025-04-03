@@ -15,7 +15,7 @@ ALuggageManager::ALuggageManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
-	OnReturnPooledObject.AddDynamic(this,&ALuggageManager::DeactiveLuggage);
+	OnReturnPooledObject.AddDynamic(this, &ALuggageManager::DeactiveLuggage);
 	
 	ConstructorHelpers::FClassFinder<ALuggage>luggageN(TEXT("'/Game/Maps/LuggageChaos/Luggage/BP_LuggageN.BP_LuggageN_C'"));
 	if (luggageN.Succeeded())

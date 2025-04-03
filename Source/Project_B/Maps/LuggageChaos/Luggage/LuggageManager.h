@@ -71,7 +71,8 @@ private:
 	void ActiveLuggage(ALuggage* lug, FVector dir);
 	
 	void ActiveGoldLuggage();
-	
+
+	UFUNCTION()
 	void DeactiveLuggage(ALuggage* lug, ETeamType team);
 
 	ALuggage* SpawnLuggage(FVector pos);
