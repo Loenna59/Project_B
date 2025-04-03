@@ -164,17 +164,6 @@ void ALuggageChaosGameState::InitUI(APlayerController* pc)
 	{
 		GameEndWidget->AddToViewport();
 	}
-
-	//TODO: 테스트
-	if (isAddScoreBlue)
-	{
-		AddScore(ETeamType::Blue, 4);
-	}
-	if (isAddScoreRed)
-	{
-		AddScore(ETeamType::Red, 4);
-	}
-	
 }
 
 void ALuggageChaosGameState::InitSpawnPoint()
