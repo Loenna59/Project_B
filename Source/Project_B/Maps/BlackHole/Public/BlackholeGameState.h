@@ -59,15 +59,22 @@ public:
 	
 	// 블랙홀 관련 내용
 	ADestroyZone* Rotator = nullptr; // 회전체
+	UPROPERTY(Replicated)
 	ABlackHole* Blackhole = nullptr; // 블랙홀
 	void SpawnBlackhole();
 	void DestroyBlackhole();
+
+	UFUNCTION(NetMulticast, reliable)
+	void Multicast_OnBlackholeSpawned();
+	UFUNCTION(NetMulticast, reliable)
+	void Multicast_OnBlackholeDestryed();
 	
 	// 블랙홀 타이머 (게임시작->30초후, 페이즈완전히 종료 30초후)
 	FTimerHandle BlackholeSpawnHandle;
 	FTimerHandle BlackholeDestroyHandle;
 	
 	// 블랙홀 소환 횟수
+	UPROPERTY(Replicated)
 	int32 BlackholeSpawnCount = 0;
 
 	
@@ -109,11 +116,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ABlackholeSpectator> SpectatorPawnClass;
 	void ConvertToSpectator(APlayerController* PlayerController);
-
-
+	
 	// 레벨 전환
 	void ChangeLevelPodium();
-
 	
 	// 무기 소환
 	UPROPERTY(Replicated)

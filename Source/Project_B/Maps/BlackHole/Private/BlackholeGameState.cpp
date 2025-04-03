@@ -62,6 +62,8 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABlackholeGameState, GameStartTime);
+	DOREPLIFETIME(ABlackholeGameState, Blackhole);
+	DOREPLIFETIME(ABlackholeGameState, BlackholeSpawnCount);
 	DOREPLIFETIME(ABlackholeGameState, AlivePlayers);
 	DOREPLIFETIME(ABlackholeGameState, DeadPlayers);
 	DOREPLIFETIME(ABlackholeGameState, WinnerKeys);
@@ -70,8 +72,6 @@ void ABlackholeGameState::GetLifetimeReplicatedProps(
 
 void ABlackholeGameState::GameReady()
 {
-	InitPlayerInfo();
-	
 	if (HasAuthority())
 	{
 		FTimerHandle OnStartTimerHandle;
@@ -80,6 +80,7 @@ void ABlackholeGameState::GameReady()
 
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	InitUI(pc);
+	InitPlayerInfo();
 }
 
 void ABlackholeGameState::InitUI(APlayerController* pc)
@@ -104,7 +105,7 @@ void ABlackholeGameState::StartGame()
 		// 게임 시간
 		GameStartTime = GetWorld()->GetTimeSeconds();
 		// TODO: 게임 시작 30초후 첫번째 블랙홀을 보이게 한다	
-		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 25.0f, false);
 	}
     
 	// 모든 플레이어를 살아있는 상태로 초기화
@@ -130,9 +131,27 @@ void ABlackholeGameState::InitPlayerInfo()
 		{
 			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 			MyKey = NetId->ToString();
+			ABlackholePlayerState* ps = Cast<ABlackholePlayerState>(GetWorld()->GetFirstPlayerController()->PlayerState);
+			ABaseCharacter* player = Cast<ABaseCharacter>(ps->GetPlayerController()->GetPawn());
+			if (PlayersInfo[MyKey].Team == ETeamType::Red)
+			{
+				player->SetSkin(CharacterColor::Red);
+			}
+			if (PlayersInfo[MyKey].Team == ETeamType::Blue)
+			{
+				player->SetSkin(CharacterColor::Blue);
+			}
+			if (PlayersInfo[MyKey].Team == ETeamType::Yellow)
+			{
+				player->SetSkin(CharacterColor::Yellow);
+			}
+			if (PlayersInfo[MyKey].Team == ETeamType::Green)
+			{
+				player->SetSkin(CharacterColor::Green);
+			}
 			UE_LOG(LogTemp, Error, TEXT("나의 키: %s"), *MyKey);
 		}
-	},0.8f, false);
+	},1.5f, false);
 }
 
 
@@ -154,8 +173,10 @@ void ABlackholeGameState::SpawnBlackhole()
 	// 4페이즈까지만 있다
 	if(BlackholeSpawnCount >=4) return;
 
+	Multicast_OnBlackholeSpawned();
+
 	// 10초 후 블랙홀 소멸
-	GetWorld()->GetTimerManager().SetTimer(BlackholeDestroyHandle, this, &ABlackholeGameState::DestroyBlackhole, 15.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(BlackholeDestroyHandle, this, &ABlackholeGameState::DestroyBlackhole, 11.0f, false);
 }
 
 void ABlackholeGameState::DestroyBlackhole()
@@ -166,11 +187,27 @@ void ABlackholeGameState::DestroyBlackhole()
 	BlackholeSpawnCount++;
 	Rotator->Rotate(false);
 
+	Multicast_OnBlackholeDestryed();
+	
 	// 재소환 예약
 	if (BlackholeSpawnCount < 4)
 	{
-		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 30.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(BlackholeSpawnHandle, this, &ABlackholeGameState::SpawnBlackhole, 25.0f, false);
 	}
+}
+
+void ABlackholeGameState::Multicast_OnBlackholeDestryed_Implementation()
+{
+	if (!Blackhole) return;
+	Blackhole->bIsActive = false;
+	Rotator->Rotate(false);
+}
+
+void ABlackholeGameState::Multicast_OnBlackholeSpawned_Implementation()
+{
+	if (!Blackhole) return;
+	Blackhole->bIsActive = true;
+	Rotator->Rotate(true);
 }
 
 void ABlackholeGameState::CheckGameEndConditions()
