@@ -212,14 +212,22 @@ void ALuggageChaosGameState::Net_GameStart_Implementation()
 	for (APlayerState* ps: PlayerArray)
 	{
 		const FUniqueNetIdRepl& NetIdRepl = ps->GetUniqueId();
-		
+
+		if (NetIdRepl.IsValid() == false)
+		{
+			return;
+			
+		}
 		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 		FString key = NetId->ToString();
 		
 		if (FPlayerInfo* Info = PlayersInfo.Find(key))
 		{
 			ABaseCharacter* ch = Cast<ABaseCharacter>(ps->GetPlayerController()->GetPawn());
-			
+			if (ch == nullptr)
+			{
+				return;
+			}
 			if (Info->Team == ETeamType::Blue)
 			{
 				ch->SetSkin(CharacterColor::Blue);
