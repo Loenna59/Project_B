@@ -50,7 +50,7 @@ void AWeaponSpawnManager::BeginPlay()
 		CacheWineBottles.Add(Bottle);
 	}
 
-	LOG_SCREEN("[WeaponSpawnManager] 무기 생성 시작!");
+	//LOG_SCREEN("[WeaponSpawnManager] 무기 생성 시작!");
 	InitSpawn();
 }
 
@@ -86,7 +86,7 @@ void AWeaponSpawnManager::Disappear(EAttackType Type, int32 SpawnPointIndex)
 		break;
 	}
 
-	LOG_SCREEN("%d", SpawnPointIndex);
+	//LOG_SCREEN("%d", SpawnPointIndex);
 
 	Respawn(Type, SpawnPointIndex);
 }

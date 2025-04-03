@@ -7,5 +7,5 @@
 
 void ABanimalsGameState::InitLevel()
 {
-	LOG_SCREEN("레벨 로드돼썩");
+	//LOG_SCREEN("레벨 로드돼썩");
 }

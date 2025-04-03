@@ -33,7 +33,7 @@ void APodiumCamera::SetPodiumCamera()
 
 void APodiumCamera::Shoot()
 {
-	LOG_SCREEN("찰칵");
+	//LOG_SCREEN("찰칵");
 	
 	CaptureComponent->TextureTarget = UKismetRenderingLibrary::CreateRenderTarget2D(
 		GetWorld(),         
