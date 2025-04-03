@@ -208,36 +208,6 @@ void ALuggageChaosGameState::Net_GameStart_Implementation()
 	{
 		BgmComponent = UGameplayStatics::SpawnSound2D(GetWorld(), BGM);
 	}
-	
-	for (APlayerState* ps: PlayerArray)
-	{
-		const FUniqueNetIdRepl& NetIdRepl = ps->GetUniqueId();
-		
-		FString key;
-		if (NetIdRepl.IsValid())
-		{
-			TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-			key = NetId->ToString();
-			LOG_PRINT(TEXT("접속한 플레이어 키: %s"), *key);
-		}
-		
-		if (FPlayerInfo* Info = PlayersInfo.Find(key))
-		{
-			ABaseCharacter* ch = Cast<ABaseCharacter>(ps->GetPlayerController()->GetPawn());
-			if (ch == nullptr)
-			{
-				return;
-			}
-			if (Info->Team == ETeamType::Blue)
-			{
-				ch->SetSkin(CharacterColor::Blue);
-			}
-			else
-			{
-				ch->SetSkin(CharacterColor::Red);	
-			}
-		}
-	}
 }
 
 void ALuggageChaosGameState::AddScore(ETeamType team, const uint8 point)
