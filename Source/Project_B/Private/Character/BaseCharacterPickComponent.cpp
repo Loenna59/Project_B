@@ -79,7 +79,7 @@ void UBaseCharacterPickComponent::UpdateGrabState(EGrabState State, bool bIsGrab
 		
 		GrabState |= State;
 		
-		LOG_SCREEN("Grab %s", *EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(GrabState)).ToString());
+		//LOG_SCREEN("Grab %s", *EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(GrabState)).ToString());
 	}
 	else
 	{
@@ -90,7 +90,7 @@ void UBaseCharacterPickComponent::UpdateGrabState(EGrabState State, bool bIsGrab
 		
 		GrabState &= ~State;
 		
-		LOG_SCREEN("Release %s", *EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(GrabState)).ToString());
+		//LOG_SCREEN("Release %s", *EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(GrabState)).ToString());
 	}
 
 	GetWorld()->GetTimerManager().ClearTimer(ValidTimerHandle);
@@ -115,7 +115,7 @@ void UBaseCharacterPickComponent::ValidateGrabState()
 		BlockGrabState = ~GrabState & EGrabState::Both;
 
 		const UEnum* EnumPtr = StaticEnum<EGrabState>();
-		LOG_SCREEN("Set Block %s", *EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(BlockGrabState)).ToString());
+		//LOG_SCREEN("Set Block %s", *EnumPtr->GetDisplayNameTextByValue(static_cast<uint8>(BlockGrabState)).ToString());
 
 		OffPhysics.Broadcast(BlockGrabState);
 		return;

@@ -164,17 +164,6 @@ void ALuggageChaosGameState::InitUI(APlayerController* pc)
 	{
 		GameEndWidget->AddToViewport();
 	}
-
-	//TODO: 테스트
-	if (isAddScoreBlue)
-	{
-		AddScore(ETeamType::Blue, 4);
-	}
-	if (isAddScoreRed)
-	{
-		AddScore(ETeamType::Red, 4);
-	}
-	
 }
 
 void ALuggageChaosGameState::InitSpawnPoint()
@@ -223,14 +212,22 @@ void ALuggageChaosGameState::Net_GameStart_Implementation()
 	for (APlayerState* ps: PlayerArray)
 	{
 		const FUniqueNetIdRepl& NetIdRepl = ps->GetUniqueId();
-		
+
+		if (NetIdRepl.IsValid() == false)
+		{
+			return;
+			
+		}
 		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 		FString key = NetId->ToString();
 		
 		if (FPlayerInfo* Info = PlayersInfo.Find(key))
 		{
 			ABaseCharacter* ch = Cast<ABaseCharacter>(ps->GetPlayerController()->GetPawn());
-			
+			if (ch == nullptr)
+			{
+				return;
+			}
 			if (Info->Team == ETeamType::Blue)
 			{
 				ch->SetSkin(CharacterColor::Blue);
