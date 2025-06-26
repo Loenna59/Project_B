@@ -8,10 +8,17 @@
 UBaseCharacterPhysicsAnimComponent::UBaseCharacterPhysicsAnimComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	bWantsInitializeComponent = true;
 	
 	SetIsReplicatedByDefault(true);
 }
 
+void UBaseCharacterPhysicsAnimComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
+	SetNetAddressable();
+}
 
 void UBaseCharacterPhysicsAnimComponent::BeginPlay()
 {
@@ -35,7 +42,6 @@ void UBaseCharacterPhysicsAnimComponent::GetLifetimeReplicatedProps(
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UBaseCharacterPhysicsAnimComponent, SimulateBoneName);
-	DOREPLIFETIME(UBaseCharacterPhysicsAnimComponent, ReplicatedTorque);
 }
 
 void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -51,22 +57,19 @@ void UBaseCharacterPhysicsAnimComponent::TickComponent(float DeltaTime, ELevelTi
 	if (Mesh && Mesh->IsSimulatingPhysics())
 	{
 		// 지정한 본의 up벡터 가져오기
-		FVector CurrentUpVector = Mesh->GetBoneQuaternion(SimulateBoneName).Vector();
-	
-		// 회전을 보정하는 토크 적용 (외적)
-		ReplicatedTorque = FVector::CrossProduct(CurrentUpVector, FVector::UpVector) * 500000.f;
-		
+		FVector CurrentUpVector = Mesh->GetBoneQuaternion(SimulateBoneName).GetUpVector();
+
+		// 회전을 보정하는 토크 계산
+		FVector TorqueToApply = FVector::CrossProduct(CurrentUpVector, FVector::UpVector) * 500000.f;
+
+		// 서버의 메시에 직접 토크를 적용.
+		Mesh->AddTorqueInRadians(TorqueToApply, SimulateBoneName, true);
 	}
 }
 
 void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimation(bool toggle)
 {
 	if (!Character)
-	{
-		return;
-	}
-
-	if (!Character->IsLocallyControlled())
 	{
 		return;
 	}
@@ -82,10 +85,7 @@ void UBaseCharacterPhysicsAnimComponent::Server_TogglePhysicalAnimation_Implemen
 void UBaseCharacterPhysicsAnimComponent::Multicast_TogglePhysicalAnimation_Implementation(FName BoneName,
 	bool bSimulate)
 {
-	if (!Character || Character->IsLocallyControlled() || Character->HasAuthority())
-	{
-		TogglePhysicalAnimationInternal(BoneName, bSimulate);
-	}
+	TogglePhysicalAnimationInternal(BoneName, bSimulate);
 }
 
 void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimationInternal(FName BoneName, bool bSimulate)
@@ -103,14 +103,6 @@ void UBaseCharacterPhysicsAnimComponent::TogglePhysicalAnimationInternal(FName B
 	}
 	
 	Mesh->SetAllBodiesBelowSimulatePhysics(BoneName, false, false);
-}
-
-void UBaseCharacterPhysicsAnimComponent::OnRep_AddTorque()
-{
-	if (Character && !Character->HasAuthority())
-	{
-		Mesh->AddTorqueInRadians(ReplicatedTorque, SimulateBoneName, true);
-	}
 }
 
 

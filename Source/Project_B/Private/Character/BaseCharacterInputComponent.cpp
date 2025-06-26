@@ -5,7 +5,17 @@
 
 UBaseCharacterInputComponent::UBaseCharacterInputComponent()
 {
+	bWantsInitializeComponent = true;
 	PrimaryComponentTick.bCanEverTick = false;
+
+	SetIsReplicatedByDefault(true);
+}
+
+void UBaseCharacterInputComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
+	SetNetAddressable();
 }
 
 void UBaseCharacterInputComponent::BeginPlay()

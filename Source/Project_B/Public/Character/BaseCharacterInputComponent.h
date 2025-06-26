@@ -15,6 +15,8 @@ public:
 	UBaseCharacterInputComponent();
 
 protected:
+	virtual void InitializeComponent() override;
+	
 	virtual void BeginPlay() override;
 
 	UPROPERTY()

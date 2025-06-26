@@ -13,11 +13,11 @@ class PROJECT_B_API UBaseCharacterPhysicsAnimComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UBaseCharacterPhysicsAnimComponent();
 
 protected:
-	// Called when the game starts
+	virtual void InitializeComponent() override;
+	
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -37,9 +37,6 @@ public:
 	UFUNCTION()
 	void TogglePhysicalAnimationInternal(FName BoneName, bool bSimulate);
 
-	UFUNCTION()
-	void OnRep_AddTorque();
-
 protected:
 	UPROPERTY()
 	class ABaseCharacter* Character = nullptr;
@@ -54,9 +51,6 @@ protected:
 	class UPhysicalAnimationComponent* PhysicalAnimationComp = nullptr;
 
 public:
-	UPROPERTY(ReplicatedUsing = OnRep_AddTorque)
-	FVector ReplicatedTorque;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FName SimulateBoneName = TEXT("CharacterPelvis");
 

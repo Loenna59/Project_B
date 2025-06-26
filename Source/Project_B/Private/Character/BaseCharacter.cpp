@@ -38,6 +38,9 @@ ABaseCharacter::ABaseCharacter()
 
 	GetMesh()->SetRelativeLocation(FVector(0, 0, -102.f));
 	GetMesh()->SetRelativeRotation(FRotator(0, -90.f, 0));
+	// 이것을 켜면 서버의 물리 상태가 캐릭터를 조종하는 클라이언트(AutonomousProxy)에게 복제된다.
+	GetMesh()->bReplicatePhysicsToAutonomousProxy = true;
+	GetMesh()->SetIsReplicated(true);
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->SetupAttachment(RootComponent);
@@ -51,41 +54,15 @@ ABaseCharacter::ABaseCharacter()
 	CameraComp->SetFieldOfView(90.f);
 	CameraComp->bUsePawnControlRotation = false;
 
-	// VoiceComp = CreateDefaultSubobject<UAudioComponent>(TEXT("VoiceComp"));
-	// VoiceComp->SetupAttachment(RootComponent);
-	// VoiceComp->bAutoActivate = false;
-
 	MoveComp = CreateDefaultSubobject<UBaseCharacterMoveComponent>(TEXT("MoveComp"));
-	MoveComp->SetIsReplicated(true);
-	MoveComp->SetNetAddressable();
-	
 	AttackComp = CreateDefaultSubobject<UBaseCharacterAttackComponent>(TEXT("AttackComp"));
-	AttackComp->SetIsReplicated(true);
-	AttackComp->SetNetAddressable();
 
 	PickComp = CreateDefaultSubobject<UBaseCharacterPickComponent>(TEXT("PickComp"));
-	PickComp->SetIsReplicated(true);
-	PickComp->SetNetAddressable();
-	
 	PhysicalAnimationComp = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("PhysicalAnimComp"));
-	PhysicalAnimationComp->SetIsReplicated(true);
-	PhysicalAnimationComp->SetNetAddressable();
-	
 	HeadPhysicsAnimComp = CreateDefaultSubobject<UHeadPhysicsAnimComponent>(TEXT("HeadPhysicsAnimComp"));
-	HeadPhysicsAnimComp->SetIsReplicated(true);
-	HeadPhysicsAnimComp->SetNetAddressable();
-	
 	LeftArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("LeftArmPhysicsAnimComp"));
-	LeftArmPhysicsAnimComp->SetIsReplicated(true);
-	LeftArmPhysicsAnimComp->SetNetAddressable();
-	
 	RightArmPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterArmComponent>(TEXT("RightArmPhysicsAnimComp"));
-	RightArmPhysicsAnimComp->SetIsReplicated(true);
-	RightArmPhysicsAnimComp->SetNetAddressable();
-
 	RightFootPhysicsAnimComp = CreateDefaultSubobject<UBaseCharacterPhysicsAnimComponent>(TEXT("RightFootPhysicsAnimComp"));
-	RightFootPhysicsAnimComp->SetIsReplicated(true);
-	RightFootPhysicsAnimComp->SetNetAddressable();
 	
 	GravityComp = CreateDefaultSubobject<UGravityComponent>(TEXT("GravityComp"));
 	GravityComp->SetIsReplicated(true);

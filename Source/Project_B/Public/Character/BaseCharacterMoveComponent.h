@@ -16,9 +16,9 @@ class PROJECT_B_API UBaseCharacterMoveComponent : public UBaseCharacterInputComp
 public:
 	UBaseCharacterMoveComponent();
 
+protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-protected:
 	UPROPERTY()
 	class UInputAction* MoveInputAction = nullptr;
 
