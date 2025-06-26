@@ -1,10 +1,8 @@
 ﻿#include "Weapon/Hammer.h"
 
-#include "KismetTraceUtils.h"
 #include "Character/BaseCharacter.h"
 #include "Components/CapsuleComponent.h"
-#include "Project_B/Utilities/LogMacro.h"
-#include "Project_B/Utilities/TraceChannelHelper.h"
+#include "Project_B/Utilities/UTraceChannelHelper.h"
 
 AHammer::AHammer()
 {
@@ -49,62 +47,53 @@ void AHammer::OnAttackTraceChannel()
 
 	FVector Location = HitPoint->GetComponentLocation();
 
-	TArray<FHitResult> HitResult;
-	FCollisionQueryParams CollisionParams;
+	TWeakObjectPtr WeakThis = this;
 
-	CollisionParams.AddIgnoredActor(this);
-	CollisionParams.AddIgnoredActor(GetOwner());
-	
-	bool bHit = GetWorld()->SweepMultiByChannel(
-		HitResult,
+	UTraceChannelHelper::SphereMultiByChannel
+	(
+		GetWorld(),
 		Location,
 		Location,
-		FQuat::Identity,
+		FRotator::ZeroRotator,
 		ECC_Camera,
-		FCollisionShape::MakeSphere(50.f),
-		CollisionParams
-	);
-
-	if (bDrawDebug)
-	{
-		// DrawDebugSphereTraceMulti(
-		// 	GetWorld(),
-		// 	Location,
-		// 	Location,
-		// 	50.f,
-		// 	EDrawDebugTrace::ForDuration,
-		// 	bHit,
-		// 	HitResult,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
-	}
-
-	FVector Direction = (Location - PrevLocation).GetSafeNormal();
-
-	if (bHit)
-	{
-		for (FHitResult Result : HitResult)
+		50.f,
+		TArray<AActor*>{this, GetOwner()},
+		true,
+		[WeakThis](bool bHit, TArray<FHitResult> HitResults)
 		{
-			AActor* HitActor = Result.GetActor();
-			if (AlreadyHitActorsDuringAttack.Contains(HitActor))
+			if (!WeakThis.IsValid())
 			{
-				continue;
+				return;
 			}
-
-			AlreadyHitActorsDuringAttack.Add(HitActor);
 			
-			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
-			{
-				Character->OnHit(EAttackType::HAMMER, Direction, 0);
-				DecreaseCapacity();
-				break;
-			}
-		}
-	}
+			FVector Location = WeakThis->HitPoint->GetComponentLocation();
+			FVector Direction = (Location - WeakThis->PrevLocation).GetSafeNormal();
 
-	PrevLocation = Location;
+			if (bHit)
+			{
+				for (FHitResult Result : HitResults)
+				{
+					AActor* HitActor = Result.GetActor();
+					if (WeakThis->AlreadyHitActorsDuringAttack.Contains(HitActor))
+					{
+						continue;
+					}
+		
+					WeakThis->AlreadyHitActorsDuringAttack.Add(HitActor);
+					
+					if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
+					{
+						Character->OnHit(EAttackType::HAMMER, Direction, 0);
+						WeakThis->DecreaseCapacity();
+						break;
+					}
+				}
+			}
+		
+			WeakThis->PrevLocation = Location;
+		}
+	);
+	
 }
 
 void AHammer::SetVisible(bool bVisible, int32 SpawnPointIndex)

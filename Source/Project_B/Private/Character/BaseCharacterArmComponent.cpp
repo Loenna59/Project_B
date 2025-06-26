@@ -7,7 +7,7 @@
 #include "Character/BaseCharacterAnimInstance.h"
 #include "Character/BaseCharacterPickComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
-#include "Project_B/Utilities/TraceChannelHelper.h"
+#include "Project_B/Utilities/UTraceChannelHelper.h"
 #include "Weapon/Weapon.h"
 
 UBaseCharacterArmComponent::UBaseCharacterArmComponent()
@@ -75,11 +75,11 @@ void UBaseCharacterArmComponent::Grabbing()
 	
 	AnimInstance->bIsGrabbing[GrabState] = true;
 	
-	TWeakObjectPtr<UBaseCharacterArmComponent> ThisWeak = this;
+	TWeakObjectPtr ThisWeak = this;
 	
 	FVector Location = Mesh->GetSocketLocation(SocketName);
 	
-	TraceChannelHelper::SphereMultiByChannel
+	UTraceChannelHelper::SphereMultiByChannel
 	(
 		GetWorld(),
 		Character,

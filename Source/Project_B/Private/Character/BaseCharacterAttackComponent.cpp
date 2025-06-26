@@ -5,6 +5,7 @@
 #include "Character/BaseCharacterAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Project_B/Utilities/UTraceChannelHelper.h"
 #include "Weapon/Weapon.h"
 
 UBaseCharacterAttackComponent::UBaseCharacterAttackComponent()
@@ -282,45 +283,37 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 {
 	FVector Location = Character->GetMesh()->GetBoneLocation(BoneName);
 
-	TArray<FHitResult> HitResults;
-	FCollisionQueryParams CollisionParams;
+	TWeakObjectPtr WeakThis = this;
 
-	CollisionParams.AddIgnoredActor(Character);
-	CollisionParams.AddIgnoredComponent(Character->GetMesh());
-	
-	bool bHit = GetWorld()->SweepMultiByChannel(
-		HitResults,
+	UTraceChannelHelper::SphereMultiByChannel
+	(
+		GetWorld(),
+		Character,
 		Location,
 		Location,
-		FQuat::Identity,
+		FRotator::ZeroRotator,
 		ECC_Camera,
-		FCollisionShape::MakeSphere(Radius),
-		CollisionParams
+		Radius,
+		true,
+		true,
+		[WeakThis, Type, BoneName, Damage](bool bHit, TArray<FHitResult> HitResults)
+		{
+			if (!WeakThis.IsValid())
+			{
+				return;
+			}
+			
+			FVector Location = WeakThis->Character->GetMesh()->GetBoneLocation(BoneName);
+			
+			FVector Direction = (WeakThis->PrevLocation - Location).GetSafeNormal();
+			WeakThis->PrevLocation = Location;
+		
+			if (bHit)
+			{
+				WeakThis->Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResults, Direction, Damage);
+			}
+		}
 	);
-
-	if (DrawDebug)
-	{
-		// DrawDebugSphereTraceMulti(
-		// 	GetWorld(),
-		// 	Location,
-		// 	Location,
-		// 	Radius,
-		// 	EDrawDebugTrace::ForDuration,
-		// 	bHit,
-		// 	HitResults,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
-	}
-
-	FVector Direction = (PrevLocation - Location).GetSafeNormal();
-	PrevLocation = Location;
-
-	if (bHit)
-	{
-		Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResults, Direction, Damage);
-	}
 }
 
 void UBaseCharacterAttackComponent::Multicast_OnHitTraceChannel_Implementation(EAttackType Type, bool bHit, const TArray<FHitResult>& HitResults, FVector Direction, float Damage)

@@ -1,19 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "TraceChannelHelper.h"
+#include "UTraceChannelHelper.h"
 
 #include "KismetTraceUtils.h"
 
-TraceChannelHelper::TraceChannelHelper()
+UTraceChannelHelper::UTraceChannelHelper()
 {
 }
 
-TraceChannelHelper::~TraceChannelHelper()
-{
-}
-
-void TraceChannelHelper::LineSingleByChannel(
+void UTraceChannelHelper::LineSingleByChannel(
 	const UWorld* World,
 	AActor* Actor,
 	const FVector& Start,
@@ -42,23 +35,23 @@ void TraceChannelHelper::LineSingleByChannel(
 
 	if (DrawDebug)
 	{
-		// DrawDebugLineTraceSingle(
-		// 	World,
-		// 	Start,
-		// 	End,
-		// 	EDrawDebugTrace::ForDuration,
-		// 	bHit,
-		// 	HitResult,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
+		DrawDebugLineTraceSingle(
+			World,
+			Start,
+			End,
+			EDrawDebugTrace::ForDuration,
+			bHit,
+			HitResult,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
 	}
 
 	Callback(bHit, HitResult);
 }
 
-void TraceChannelHelper::SphereSingleByChannel(
+void UTraceChannelHelper::SphereSingleByChannel(
 	const UWorld* World,
 	AActor* Actor,
 	const FVector& Start,
@@ -91,24 +84,24 @@ void TraceChannelHelper::SphereSingleByChannel(
 
 	if (DrawDebug)
 	{
-		// DrawDebugSphereTraceSingle(
-		// 	World,
-		// 	Start,
-		// 	End,
-		// 	Radius,
-		// 	EDrawDebugTrace::ForDuration,
-		// 	bHit,
-		// 	HitResult,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
+		DrawDebugSphereTraceSingle(
+			World,
+			Start,
+			End,
+			Radius,
+			EDrawDebugTrace::ForDuration,
+			bHit,
+			HitResult,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
 	}
 
 	Callback(bHit, HitResult);
 }
 
-void TraceChannelHelper::BoxSingleByChannel(
+void UTraceChannelHelper::BoxSingleByChannel(
 	const UWorld* World,
 	AActor* Actor,
 	const FVector& Start,
@@ -140,25 +133,25 @@ void TraceChannelHelper::BoxSingleByChannel(
 
 	if (DrawDebug)
 	{
-		// DrawDebugBoxTraceSingle(
-		// 	World,
-		// 	Start,
-		// 	End,
-		// 	HalfSize,
-		// 	Rotator,
-		// 	EDrawDebugTrace::ForDuration,
-		// 	bHit,
-		// 	HitResult,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
+		DrawDebugBoxTraceSingle(
+			World,
+			Start,
+			End,
+			HalfSize,
+			Rotator,
+			EDrawDebugTrace::ForDuration,
+			bHit,
+			HitResult,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
 	}
 
 	Callback(bHit, HitResult);
 }
 
-void TraceChannelHelper::LineMultiByChannel(
+void UTraceChannelHelper::LineMultiByChannel(
 	const UWorld* World,
 	AActor* Actor,
 	const FVector& Start,
@@ -188,23 +181,23 @@ void TraceChannelHelper::LineMultiByChannel(
 
 	if (DrawDebug)
 	{
-		// DrawDebugLineTraceMulti(
-		// 	World,
-		// 	Start,
-		// 	End,
-		// 	EDrawDebugTrace::ForDuration,
-		// 	bHit,
-		// 	HitResults,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
+		DrawDebugLineTraceMulti(
+			World,
+			Start,
+			End,
+			EDrawDebugTrace::ForDuration,
+			bHit,
+			HitResults,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
 	}
 
 	Callback(bHit, HitResults);
 }
 
-void TraceChannelHelper::BoxMultiByChannel(
+void UTraceChannelHelper::BoxMultiByChannel(
 	const UWorld* World,
 	AActor* Actor,
 	const FVector& Start,
@@ -222,7 +215,7 @@ void TraceChannelHelper::BoxMultiByChannel(
 	FCollisionQueryParams Params;
 	if (IgnoreSelf)
 	{
-		Params.AddIgnoredSourceObject(Actor);
+		Params.AddIgnoredActor(Actor);
 	}
 	
 	bool bHit = World->SweepMultiByChannel(
@@ -237,25 +230,25 @@ void TraceChannelHelper::BoxMultiByChannel(
 
 	if (DrawDebug)
 	{
-		// DrawDebugBoxTraceMulti(
-		// 	World,
-		// 	Start,
-		// 	End,
-		// 	HalfSize,
-		// 	Rotator,
-		// 	EDrawDebugTrace::ForDuration,
-		// 	bHit,
-		// 	HitResults,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
+		DrawDebugBoxTraceMulti(
+			World,
+			Start,
+			End,
+			HalfSize,
+			Rotator,
+			EDrawDebugTrace::ForDuration,
+			bHit,
+			HitResults,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
 	}
 
 	Callback(bHit, HitResults);
 }
 
-void TraceChannelHelper::SphereMultiByChannel(
+void UTraceChannelHelper::SphereMultiByChannel(
 	const UWorld* World,
 	AActor* Actor,
 	const FVector& Start,
@@ -273,7 +266,7 @@ void TraceChannelHelper::SphereMultiByChannel(
 	FCollisionQueryParams Params;
 	if (IgnoreSelf)
 	{
-		Params.AddIgnoredSourceObject(Actor);
+		Params.AddIgnoredActor(Actor);
 	}
 	
 	bool bHit = World->SweepMultiByChannel(
@@ -288,18 +281,71 @@ void TraceChannelHelper::SphereMultiByChannel(
 
 	if (DrawDebug)
 	{
-		// DrawDebugSphereTraceMulti(
-		// 	World,
-		// 	Start,
-		// 	End,
-		// 	Radius,
-		// 	EDrawDebugTrace::ForOneFrame,
-		// 	bHit,
-		// 	HitResults,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
+		DrawDebugSphereTraceMulti(
+			World,
+			Start,
+			End,
+			Radius,
+			EDrawDebugTrace::ForOneFrame,
+			bHit,
+			HitResults,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
+	}
+
+	Callback(bHit, HitResults);
+}
+
+void UTraceChannelHelper::SphereMultiByChannel(
+	const UWorld* World,
+	const FVector& Start,
+	const FVector& End,
+	const FRotator& Rotator,
+	ECollisionChannel CollisionChannel,
+	float Radius,
+	TArray<AActor*> IgnoreActors,
+	bool DrawDebug,
+	TFunction<void(bool, TArray<struct FHitResult>)> Callback
+)
+{
+	TArray<FHitResult> HitResults;
+	
+	FCollisionQueryParams Params;
+
+	if (!IgnoreActors.IsEmpty())
+	{
+		for (AActor* Actor : IgnoreActors)
+		{
+			Params.AddIgnoredActor(Actor);
+		}
+	}
+	
+	bool bHit = World->SweepMultiByChannel(
+		HitResults,
+		Start,
+		End,
+		Rotator.Quaternion(),
+		CollisionChannel, 
+		FCollisionShape::MakeSphere(Radius),
+		Params
+	);
+
+	if (DrawDebug)
+	{
+		DrawDebugSphereTraceMulti(
+			World,
+			Start,
+			End,
+			Radius,
+			EDrawDebugTrace::ForOneFrame,
+			bHit,
+			HitResults,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
 	}
 
 	Callback(bHit, HitResults);

@@ -1,12 +1,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UTraceChannelHelper.generated.h"
 
-class PROJECT_B_API TraceChannelHelper
+// Callback으로 사용할 Delegate 정의
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSingleTraceCompleted, bool, bHit, const FHitResult&, HitResult);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnMultiTraceCompleted, bool, bHit, const TArray<FHitResult>&, HitResult);
+
+UCLASS()
+class PROJECT_B_API UTraceChannelHelper : public UBlueprintFunctionLibrary
 {
+	GENERATED_BODY()
 public:
-	TraceChannelHelper();
-	~TraceChannelHelper();
+	UTraceChannelHelper();
 
 	static void LineSingleByChannel(
 		const UWorld* World,
@@ -78,6 +84,18 @@ public:
 		ECollisionChannel CollisionChannel,
 		const FVector& HalfSize,
 		bool IgnoreSelf,
+		bool DrawDebug,
+		TFunction<void(bool, TArray<struct FHitResult>)> Callback
+	);
+
+	static void SphereMultiByChannel(
+		const UWorld* World,
+		const FVector& Start,
+		const FVector& End,
+		const FRotator& Rotator,
+		ECollisionChannel CollisionChannel,
+		float Radius,
+		TArray<AActor*> IgnoreActors,
 		bool DrawDebug,
 		TFunction<void(bool, TArray<struct FHitResult>)> Callback
 	);

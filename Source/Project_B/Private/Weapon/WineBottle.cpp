@@ -1,8 +1,7 @@
 #include "Weapon/WineBottle.h"
 
-#include "KismetTraceUtils.h"
 #include "Character/BaseCharacter.h"
-#include "Project_B/Utilities/LogMacro.h"
+#include "Project_B/Utilities/UTraceChannelHelper.h"
 
 AWineBottle::AWineBottle()
 {
@@ -39,60 +38,52 @@ void AWineBottle::OnAttackTraceChannel()
 
 	FVector Location = GetActorLocation();
 
-	TArray<FHitResult> HitResult;
-	FCollisionQueryParams CollisionParams;
+	TWeakObjectPtr WeakThis = this;
 
-	CollisionParams.AddIgnoredActor(this);
-	CollisionParams.AddIgnoredActor(GetOwner());
-	
-	bool bHit = GetWorld()->SweepMultiByChannel(
-		HitResult,
+	UTraceChannelHelper::SphereMultiByChannel
+	(
+		GetWorld(),
 		Location,
 		Location,
-		FQuat::Identity,
+		FRotator::ZeroRotator,
 		ECC_Camera,
-		FCollisionShape::MakeSphere(25.f),
-		CollisionParams
-	);
-
-	if (bDrawDebug)
-	{
-		// DrawDebugSphereTraceMulti(
-		// 	GetWorld(),
-		// 	Location,
-		// 	Location,
-		// 	25.f,
-		// 	EDrawDebugTrace::ForDuration,
-		// 	bHit,
-		// 	HitResult,
-		// 	FColor::Yellow,
-		// 	FColor::Green,
-		// 	1.f
-		// );
-	}
-
-	FVector Direction = (Location - PrevLocation).GetSafeNormal();
-
-	if (bHit)
-	{
-		for (FHitResult Result : HitResult)
+		25.f,
+		TArray<AActor*>{ this, GetOwner() },
+		true,
+		[WeakThis](bool bHit, TArray<FHitResult> HitResults)
 		{
-			AActor* HitActor = Result.GetActor();
-			if (AlreadyHitActorsDuringAttack.Contains(HitActor))
+			if (!WeakThis.IsValid())
 			{
-				continue;
+				return;
 			}
 
-			AlreadyHitActorsDuringAttack.Add(HitActor);
+			FVector Location = WeakThis->GetActorLocation();
 			
-			if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
+			FVector Direction = (Location - WeakThis->PrevLocation).GetSafeNormal();
+
+			if (bHit)
 			{
-				Character->OnHit(EAttackType::BOTTLE, Direction, 0);
-				DecreaseCapacity();
-				break;
+				for (FHitResult Result : HitResults)
+				{
+					AActor* HitActor = Result.GetActor();
+					if (WeakThis->AlreadyHitActorsDuringAttack.Contains(HitActor))
+					{
+						continue;
+					}
+		
+					WeakThis->AlreadyHitActorsDuringAttack.Add(HitActor);
+					
+					if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
+					{
+						Character->OnHit(EAttackType::BOTTLE, Direction, 0);
+						WeakThis->DecreaseCapacity();
+						break;
+					}
+				}
 			}
 		}
-	}
+	);
+	
 }
 
 void AWineBottle::SetVisible(bool bVisible, int32 SpawnPointIndex)
