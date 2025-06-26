@@ -296,23 +296,26 @@ void UBaseCharacterAttackComponent::Server_OnHitTraceChannel_Implementation(EAtt
 		Radius,
 		true,
 		true,
+		FOnMultiTraceCompleted::CreateLambda
+		(
 		[WeakThis, Type, BoneName, Damage](bool bHit, TArray<FHitResult> HitResults)
-		{
-			if (!WeakThis.IsValid())
 			{
-				return;
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+					
+				FVector Location = WeakThis->Character->GetMesh()->GetBoneLocation(BoneName);
+					
+				FVector Direction = (WeakThis->PrevLocation - Location).GetSafeNormal();
+				WeakThis->PrevLocation = Location;
+				
+				if (bHit)
+				{
+					WeakThis->Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResults, Direction, Damage);
+				}
 			}
-			
-			FVector Location = WeakThis->Character->GetMesh()->GetBoneLocation(BoneName);
-			
-			FVector Direction = (WeakThis->PrevLocation - Location).GetSafeNormal();
-			WeakThis->PrevLocation = Location;
-		
-			if (bHit)
-			{
-				WeakThis->Multicast_OnHitTraceChannel_Implementation(Type, bHit, HitResults, Direction, Damage);
-			}
-		}
+		)
 	);
 }
 

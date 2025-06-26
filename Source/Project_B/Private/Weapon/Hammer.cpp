@@ -59,39 +59,42 @@ void AHammer::OnAttackTraceChannel()
 		50.f,
 		TArray<AActor*>{this, GetOwner()},
 		true,
-		[WeakThis](bool bHit, TArray<FHitResult> HitResults)
-		{
-			if (!WeakThis.IsValid())
+		FOnMultiTraceCompleted::CreateLambda
+		(
+			[WeakThis](bool bHit, TArray<FHitResult> HitResults)
 			{
-				return;
-			}
-			
-			FVector Location = WeakThis->HitPoint->GetComponentLocation();
-			FVector Direction = (Location - WeakThis->PrevLocation).GetSafeNormal();
-
-			if (bHit)
-			{
-				for (FHitResult Result : HitResults)
+				if (!WeakThis.IsValid())
 				{
-					AActor* HitActor = Result.GetActor();
-					if (WeakThis->AlreadyHitActorsDuringAttack.Contains(HitActor))
+					return;
+				}
+				
+				FVector Location = WeakThis->HitPoint->GetComponentLocation();
+				FVector Direction = (Location - WeakThis->PrevLocation).GetSafeNormal();
+	
+				if (bHit)
+				{
+					for (FHitResult Result : HitResults)
 					{
-						continue;
-					}
-		
-					WeakThis->AlreadyHitActorsDuringAttack.Add(HitActor);
-					
-					if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
-					{
-						Character->OnHit(EAttackType::HAMMER, Direction, 0);
-						WeakThis->DecreaseCapacity();
-						break;
+						AActor* HitActor = Result.GetActor();
+						if (WeakThis->AlreadyHitActorsDuringAttack.Contains(HitActor))
+						{
+							continue;
+						}
+			
+						WeakThis->AlreadyHitActorsDuringAttack.Add(HitActor);
+						
+						if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
+						{
+							Character->OnHit(EAttackType::HAMMER, Direction, 0);
+							WeakThis->DecreaseCapacity();
+							break;
+						}
 					}
 				}
+			
+				WeakThis->PrevLocation = Location;
 			}
-		
-			WeakThis->PrevLocation = Location;
-		}
+		)
 	);
 	
 }

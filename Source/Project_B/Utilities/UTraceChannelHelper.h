@@ -4,29 +4,30 @@
 #include "UTraceChannelHelper.generated.h"
 
 // Callback으로 사용할 Delegate 정의
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSingleTraceCompleted, bool, bHit, const FHitResult&, HitResult);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnMultiTraceCompleted, bool, bHit, const TArray<FHitResult>&, HitResult);
+DECLARE_DELEGATE_TwoParams(FOnSingleTraceCompleted, bool, const FHitResult&);
+DECLARE_DELEGATE_TwoParams(FOnMultiTraceCompleted, bool, const TArray<FHitResult>&);
 
 UCLASS()
-class PROJECT_B_API UTraceChannelHelper : public UBlueprintFunctionLibrary
+class PROJECT_B_API UTraceChannelHelper : public UObject
 {
 	GENERATED_BODY()
+	
 public:
 	UTraceChannelHelper();
-
+	
 	static void LineSingleByChannel(
-		const UWorld* World,
+		UObject* WorldContextObject,
 		AActor* Actor,
 		const FVector& Start,
 		const FVector& End,
 		ECollisionChannel CollisionChannel,
 		bool IgnoreSelf,
 		bool DrawDebug,
-		TFunction<void(bool, FHitResult)> Callback
+		FOnSingleTraceCompleted OnCompleted
 	);
-
+	
 	static void SphereSingleByChannel(
-		const UWorld* World,
+		UObject* WorldContextObject,
 		AActor* Actor,
 		const FVector& Start,
 		const FVector& End,
@@ -35,11 +36,11 @@ public:
 		float Radius,
 		bool IgnoreSelf,
 		bool DrawDebug,
-		TFunction<void(bool, struct FHitResult)> Callback
+		FOnSingleTraceCompleted OnCompleted
 	);
-
+	
 	static void BoxSingleByChannel(
-		const UWorld* World,
+		UObject* WorldContextObject,
 		AActor* Actor,
 		const FVector& Start,
 		const FVector& End,
@@ -48,22 +49,22 @@ public:
 		const FVector& HalfSize,
 		bool IgnoreSelf,
 		bool DrawDebug,
-		TFunction<void(bool, FHitResult)> Callback
+		FOnSingleTraceCompleted OnCompleted
 	);
-
+	
 	static void LineMultiByChannel(
-		const UWorld* World,
+		UObject* WorldContextObject,
 		AActor* Actor,
 		const FVector& Start,
 		const FVector& End,
 		ECollisionChannel CollisionChannel,
 		bool IgnoreSelf,
 		bool DrawDebug,
-		TFunction<void(bool, TArray<struct FHitResult>)> Callback
+		FOnMultiTraceCompleted OnCompleted
 	);
-
+	
 	static void SphereMultiByChannel(
-		const UWorld* World,
+		UObject* WorldContextObject,
 		AActor* Actor,
 		const FVector& Start,
 		const FVector& End,
@@ -72,11 +73,11 @@ public:
 		float Radius,
 		bool IgnoreSelf,
 		bool DrawDebug,
-		TFunction<void(bool, TArray<struct FHitResult>)> Callback
+		FOnMultiTraceCompleted OnCompleted
 	);
 	
 	static void BoxMultiByChannel(
-		const UWorld* World,
+		UObject* WorldContextObject,
 		AActor* Actor,
 		const FVector& Start,
 		const FVector& End,
@@ -85,11 +86,11 @@ public:
 		const FVector& HalfSize,
 		bool IgnoreSelf,
 		bool DrawDebug,
-		TFunction<void(bool, TArray<struct FHitResult>)> Callback
+		FOnMultiTraceCompleted OnCompleted
 	);
 
 	static void SphereMultiByChannel(
-		const UWorld* World,
+		UObject* WorldContextObject,
 		const FVector& Start,
 		const FVector& End,
 		const FRotator& Rotator,
@@ -97,6 +98,6 @@ public:
 		float Radius,
 		TArray<AActor*> IgnoreActors,
 		bool DrawDebug,
-		TFunction<void(bool, TArray<struct FHitResult>)> Callback
+		FOnMultiTraceCompleted OnCompleted
 	);
 };

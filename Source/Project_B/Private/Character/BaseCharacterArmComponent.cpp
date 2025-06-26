@@ -90,13 +90,16 @@ void UBaseCharacterArmComponent::Grabbing()
 		Radius,
 		true,
 		true,
+		FOnMultiTraceCompleted::CreateLambda
+		(
 		[ThisWeak] (bool bHit, TArray<FHitResult> HitResults)
-		{
-			if (ThisWeak.IsValid())
 			{
-				ThisWeak->DetectNearby(bHit, HitResults);
+				if (ThisWeak.IsValid())
+				{
+					ThisWeak->DetectNearby(bHit, HitResults);
+				}
 			}
-		}
+		)
 	);
 	
 }

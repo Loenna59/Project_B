@@ -50,38 +50,41 @@ void AWineBottle::OnAttackTraceChannel()
 		25.f,
 		TArray<AActor*>{ this, GetOwner() },
 		true,
-		[WeakThis](bool bHit, TArray<FHitResult> HitResults)
-		{
-			if (!WeakThis.IsValid())
+		FOnMultiTraceCompleted::CreateLambda
+		(
+			[WeakThis](bool bHit, TArray<FHitResult> HitResults)
 			{
-				return;
-			}
-
-			FVector Location = WeakThis->GetActorLocation();
-			
-			FVector Direction = (Location - WeakThis->PrevLocation).GetSafeNormal();
-
-			if (bHit)
-			{
-				for (FHitResult Result : HitResults)
+				if (!WeakThis.IsValid())
 				{
-					AActor* HitActor = Result.GetActor();
-					if (WeakThis->AlreadyHitActorsDuringAttack.Contains(HitActor))
-					{
-						continue;
-					}
+					return;
+				}
 		
-					WeakThis->AlreadyHitActorsDuringAttack.Add(HitActor);
+				FVector Location = WeakThis->GetActorLocation();
 					
-					if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
+				FVector Direction = (Location - WeakThis->PrevLocation).GetSafeNormal();
+		
+				if (bHit)
+				{
+					for (FHitResult Result : HitResults)
 					{
-						Character->OnHit(EAttackType::BOTTLE, Direction, 0);
-						WeakThis->DecreaseCapacity();
-						break;
+						AActor* HitActor = Result.GetActor();
+						if (WeakThis->AlreadyHitActorsDuringAttack.Contains(HitActor))
+						{
+							continue;
+						}
+				
+						WeakThis->AlreadyHitActorsDuringAttack.Add(HitActor);
+							
+						if (ABaseCharacter* Character = Cast<ABaseCharacter>(Result.GetActor()))
+						{
+							Character->OnHit(EAttackType::BOTTLE, Direction, 0);
+							WeakThis->DecreaseCapacity();
+							break;
+						}
 					}
 				}
 			}
-		}
+		)
 	);
 	
 }

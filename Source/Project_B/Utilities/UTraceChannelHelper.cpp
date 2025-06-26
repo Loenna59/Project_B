@@ -1,22 +1,34 @@
 #include "UTraceChannelHelper.h"
 
 #include "KismetTraceUtils.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UTraceChannelHelper::UTraceChannelHelper()
 {
 }
 
-void UTraceChannelHelper::LineSingleByChannel(
-	const UWorld* World,
+void UTraceChannelHelper::LineSingleByChannel
+(
+	UObject* WorldContextObject,
 	AActor* Actor,
 	const FVector& Start,
 	const FVector& End,
 	ECollisionChannel CollisionChannel,
 	bool IgnoreSelf,
 	bool DrawDebug,
-	TFunction<void(bool, FHitResult)> Callback
+	FOnSingleTraceCompleted OnCompleted
 )
 {
+	const UWorld* World = GEngine->GetWorldFromContextObject
+	(
+		WorldContextObject, EGetWorldErrorMode::LogAndReturnNull
+	);
+
+	if (!World)
+	{
+		return;
+	}
+	
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 
@@ -48,11 +60,15 @@ void UTraceChannelHelper::LineSingleByChannel(
 		);
 	}
 
-	Callback(bHit, HitResult);
+	if (OnCompleted.IsBound())
+	{
+		OnCompleted.Execute(bHit, HitResult);
+	}
 }
 
-void UTraceChannelHelper::SphereSingleByChannel(
-	const UWorld* World,
+void UTraceChannelHelper::SphereSingleByChannel
+(
+	UObject* WorldContextObject,
 	AActor* Actor,
 	const FVector& Start,
 	const FVector& End,
@@ -61,9 +77,19 @@ void UTraceChannelHelper::SphereSingleByChannel(
 	float Radius,
 	bool IgnoreSelf,
 	bool DrawDebug,
-	TFunction<void(bool, FHitResult)> Callback
+	FOnSingleTraceCompleted OnCompleted
 )
 {
+	const UWorld* World = GEngine->GetWorldFromContextObject
+	(
+		WorldContextObject, EGetWorldErrorMode::LogAndReturnNull
+	);
+
+	if (!World)
+	{
+		return;
+	}
+	
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 
@@ -98,11 +124,15 @@ void UTraceChannelHelper::SphereSingleByChannel(
 		);
 	}
 
-	Callback(bHit, HitResult);
+	if (OnCompleted.IsBound())
+	{
+		OnCompleted.Execute(bHit, HitResult);
+	}
 }
 
-void UTraceChannelHelper::BoxSingleByChannel(
-	const UWorld* World,
+void UTraceChannelHelper::BoxSingleByChannel
+(
+	UObject* WorldContextObject,
 	AActor* Actor,
 	const FVector& Start,
 	const FVector& End,
@@ -111,8 +141,19 @@ void UTraceChannelHelper::BoxSingleByChannel(
 	const FVector& HalfSize,
 	bool IgnoreSelf,
 	bool DrawDebug,
-	TFunction<void(bool, FHitResult)> Callback)
+	FOnSingleTraceCompleted OnCompleted
+)
 {
+	const UWorld* World = GEngine->GetWorldFromContextObject
+	(
+		WorldContextObject, EGetWorldErrorMode::LogAndReturnNull
+	);
+
+	if (!World)
+	{
+		return;
+	}
+
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 
@@ -148,20 +189,34 @@ void UTraceChannelHelper::BoxSingleByChannel(
 		);
 	}
 
-	Callback(bHit, HitResult);
+	if (OnCompleted.IsBound())
+	{
+		OnCompleted.Execute(bHit, HitResult);
+	}
 }
 
-void UTraceChannelHelper::LineMultiByChannel(
-	const UWorld* World,
+void UTraceChannelHelper::LineMultiByChannel
+(
+	UObject* WorldContextObject,
 	AActor* Actor,
 	const FVector& Start,
 	const FVector& End,
 	ECollisionChannel CollisionChannel,
 	bool IgnoreSelf,
 	bool DrawDebug,
-	TFunction<void(bool, TArray<struct FHitResult>)> Callback
+	FOnMultiTraceCompleted OnCompleted
 )
 {
+	const UWorld* World = GEngine->GetWorldFromContextObject
+	(
+		WorldContextObject, EGetWorldErrorMode::LogAndReturnNull
+	);
+
+	if (!World)
+	{
+		return;
+	}
+
 	TArray<FHitResult> HitResults;
 	
 	FCollisionQueryParams CollisionParams;
@@ -194,11 +249,78 @@ void UTraceChannelHelper::LineMultiByChannel(
 		);
 	}
 
-	Callback(bHit, HitResults);
+	if (OnCompleted.IsBound())
+	{
+		OnCompleted.Execute(bHit, HitResults);
+	}
+}
+
+void UTraceChannelHelper::SphereMultiByChannel
+(
+	UObject* WorldContextObject,
+	AActor* Actor,
+	const FVector& Start,
+	const FVector& End,
+	const FRotator& Rotator,
+	ECollisionChannel CollisionChannel,
+	float Radius,
+	bool IgnoreSelf,
+	bool DrawDebug,
+	FOnMultiTraceCompleted OnCompleted
+)
+{
+	const UWorld* World = GEngine->GetWorldFromContextObject
+	(
+		WorldContextObject, EGetWorldErrorMode::LogAndReturnNull
+	);
+
+	if (!World)
+	{
+		return;
+	}
+
+	TArray<FHitResult> HitResults;
+	
+	FCollisionQueryParams Params;
+	if (IgnoreSelf)
+	{
+		Params.AddIgnoredActor(Actor);
+	}
+	
+	bool bHit = World->SweepMultiByChannel(
+		HitResults,
+		Start,
+		End,
+		Rotator.Quaternion(),
+		CollisionChannel, // "Player"
+		FCollisionShape::MakeSphere(Radius),
+		Params
+	);
+
+	if (DrawDebug)
+	{
+		DrawDebugSphereTraceMulti(
+			World,
+			Start,
+			End,
+			Radius,
+			EDrawDebugTrace::ForOneFrame,
+			bHit,
+			HitResults,
+			FColor::Yellow,
+			FColor::Green,
+			1.f
+		);
+	}
+
+	if (OnCompleted.IsBound())
+	{
+		OnCompleted.Execute(bHit, HitResults);
+	}
 }
 
 void UTraceChannelHelper::BoxMultiByChannel(
-	const UWorld* World,
+	UObject* WorldContextObject,
 	AActor* Actor,
 	const FVector& Start,
 	const FVector& End,
@@ -207,9 +329,19 @@ void UTraceChannelHelper::BoxMultiByChannel(
 	const FVector& HalfSize,
 	bool IgnoreSelf,
 	bool DrawDebug,
-	TFunction<void(bool, TArray<struct FHitResult>)> Callback
+	FOnMultiTraceCompleted OnCompleted
 )
 {
+	const UWorld* World = GEngine->GetWorldFromContextObject
+	(
+		WorldContextObject, EGetWorldErrorMode::LogAndReturnNull
+	);
+
+	if (!World)
+	{
+		return;
+	}
+	
 	TArray<FHitResult> HitResults;
 	
 	FCollisionQueryParams Params;
@@ -245,61 +377,14 @@ void UTraceChannelHelper::BoxMultiByChannel(
 		);
 	}
 
-	Callback(bHit, HitResults);
+	if (OnCompleted.IsBound())
+	{
+		OnCompleted.Execute(bHit, HitResults);
+	}
 }
 
 void UTraceChannelHelper::SphereMultiByChannel(
-	const UWorld* World,
-	AActor* Actor,
-	const FVector& Start,
-	const FVector& End,
-	const FRotator& Rotator,
-	ECollisionChannel CollisionChannel,
-	float Radius,
-	bool IgnoreSelf,
-	bool DrawDebug,
-	TFunction<void(bool, TArray<struct FHitResult>)> Callback
-)
-{
-	TArray<FHitResult> HitResults;
-	
-	FCollisionQueryParams Params;
-	if (IgnoreSelf)
-	{
-		Params.AddIgnoredActor(Actor);
-	}
-	
-	bool bHit = World->SweepMultiByChannel(
-		HitResults,
-		Start,
-		End,
-		Rotator.Quaternion(),
-		CollisionChannel, // "Player"
-		FCollisionShape::MakeSphere(Radius),
-		Params
-	);
-
-	if (DrawDebug)
-	{
-		DrawDebugSphereTraceMulti(
-			World,
-			Start,
-			End,
-			Radius,
-			EDrawDebugTrace::ForOneFrame,
-			bHit,
-			HitResults,
-			FColor::Yellow,
-			FColor::Green,
-			1.f
-		);
-	}
-
-	Callback(bHit, HitResults);
-}
-
-void UTraceChannelHelper::SphereMultiByChannel(
-	const UWorld* World,
+	UObject* WorldContextObject,
 	const FVector& Start,
 	const FVector& End,
 	const FRotator& Rotator,
@@ -307,9 +392,19 @@ void UTraceChannelHelper::SphereMultiByChannel(
 	float Radius,
 	TArray<AActor*> IgnoreActors,
 	bool DrawDebug,
-	TFunction<void(bool, TArray<struct FHitResult>)> Callback
+	FOnMultiTraceCompleted OnCompleted
 )
 {
+	const UWorld* World = GEngine->GetWorldFromContextObject
+	(
+		WorldContextObject, EGetWorldErrorMode::LogAndReturnNull
+	);
+
+	if (!World)
+	{
+		return;
+	}
+	
 	TArray<FHitResult> HitResults;
 	
 	FCollisionQueryParams Params;
@@ -348,5 +443,8 @@ void UTraceChannelHelper::SphereMultiByChannel(
 		);
 	}
 
-	Callback(bHit, HitResults);
+	if (OnCompleted.IsBound())
+	{
+		OnCompleted.Execute(bHit, HitResults);
+	}
 }
